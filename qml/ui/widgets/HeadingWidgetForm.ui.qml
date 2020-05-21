@@ -245,12 +245,12 @@ BaseWidget {
                         // console.log("heading:  ",i);
                         if (i % 30 == 0) {
                             //big ticks
-                            ctx.rect(x, y, 3, 8);
+                            ctx.rect(x - 1.5, y, 3, 8);
                             ctx.fill();
                         }
                         else if (i % 15 == 0) {
                             //little ticks
-                            ctx.rect(x, y+3, 2,5);
+                            ctx.rect(x - 1, y+3, 2, 5);
                             ctx.fill();
                         }
                         else {
