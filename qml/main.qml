@@ -14,12 +14,13 @@ import "./ui/widgets"
 ApplicationWindow {
     id: applicationWindow
     visible: true
-    width: 800
-    height: 480
-    minimumHeight: 320
-    minimumWidth: 480
+    width: 1280
+    height: 800
+    minimumHeight: 480
+    minimumWidth: 720
     title: qsTr("Open.HD")
     color: EnableMainVideo ? "black" : "#00000000"
+    font.family: "Orbitron"
 
     visibility: UseFullscreen ? "FullScreen" : "AutomaticVisibility"
 
@@ -73,7 +74,7 @@ ApplicationWindow {
         property int main_video_port: 5600
         property int pip_video_port: 5601
         property int lte_video_port: 8000
-        property int battery_cells: 3
+        property int battery_cells: 4
 
         property int mavlink_sysid: default_mavlink_sysid()
 
@@ -83,11 +84,11 @@ ApplicationWindow {
         property bool enable_software_video_decoder: false
         property bool enable_rtp: true
         property bool enable_lte_video: false
-        property bool hide_watermark: false
+        property bool hide_watermark: true
 
-        property bool enable_speech: true
+        property bool enable_speech: false
         property bool enable_imperial: false
-        property bool enable_rc: false
+        property bool enable_rc: true
 
         property string color_shape: "white"
         property string color_text: "white"
@@ -96,7 +97,7 @@ ApplicationWindow {
         property string bar_behavior: "red"
 
         property double ground_power_opacity: 1
-        
+
         property int log_level: 3
 
         property bool show_downlink_rssi: true
@@ -223,21 +224,21 @@ ApplicationWindow {
     }
 
 
-    FrSkyTelemetry {
+    /*FrSkyTelemetry {
         id: frskyTelemetry
-    }
+    }*/
 
     //MSPTelemetry {
-    //    id: mspTelemetry
+    //   id: mspTelemetry
     //}
 
-    SmartportTelemetry {
+    /*SmartportTelemetry {
         id: smartportTelemetry
     }
 
     LTMTelemetry {
         id: ltmTelemetry
-    }
+    }*/
 
     VectorTelemetry {
         id: vectorTelemetry
