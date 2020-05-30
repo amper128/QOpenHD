@@ -87,7 +87,7 @@ BaseWidget {
         id: widgetInner
 
         anchors.fill: parent
-        Text {
+        Label {
             id: battery_percent
             y: 0
             width: 48
@@ -105,7 +105,7 @@ BaseWidget {
             font.pixelSize: 14
         }
 
-        Text {
+        Label {
             id: batteryGauge
             y: 8
             width: 36

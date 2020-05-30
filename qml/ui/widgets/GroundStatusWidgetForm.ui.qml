@@ -78,11 +78,11 @@ BaseWidget {
             elide: Text.ElideRight
         }
 
-        Text {
+        Label {
             id: cpuload_gnd
             x: 0
             y: 0
-            width: 36
+            width: 40
             height: 24
             color: settings.color_text
             opacity: settings.ground_status_opacity
@@ -96,11 +96,11 @@ BaseWidget {
             elide: Text.ElideRight
         }
 
-        Text {
+        Label {
             id: temp_gnd
             x: 0
             y: 0
-            width: 36
+            width: 40
             height: 24
             color: settings.color_text
             opacity: settings.ground_status_opacity

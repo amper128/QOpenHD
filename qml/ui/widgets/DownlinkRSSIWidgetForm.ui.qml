@@ -418,7 +418,7 @@ BaseWidget {
             horizontalAlignment: Text.AlignRight
         }
 
-        Text {
+        Label {
             id: primary_radio_dbm
             width: 32
             height: 24
@@ -435,9 +435,9 @@ BaseWidget {
             clip: false
         }
 
-        Text {
+        Label {
             id: downlink_rssi
-            width: 42
+            width: 48
             height: 48
             color: settings.color_text
 
@@ -454,7 +454,7 @@ BaseWidget {
             clip: true
         }
 
-        Text {
+        Label {
             id: extra_text
             visible: settings.downlink_rssi_show_lost_damaged ? true : false
             text: "D: " + Number(OpenHD.damaged_block_cnt).toLocaleString(Qt.locale(), 'f', 0) + qsTr(" (%L1%)").arg(OpenHD.damaged_block_percent);
@@ -469,7 +469,7 @@ BaseWidget {
             elide: Text.ElideRight
         }
 
-        Text {
+        Label {
             visible: settings.downlink_rssi_show_lost_damaged ? true : false
             text: "L: " + Number(OpenHD.lost_packet_cnt).toLocaleString(Qt.locale(), 'f', 0) + qsTr(" (%L1%)").arg(OpenHD.lost_packet_percent);
             color: settings.color_text
@@ -509,7 +509,7 @@ BaseWidget {
                     horizontalAlignment: Text.AlignRight
                 }
 
-                Text {
+                Label {
                     id: card0textlower
                     height: parent.height
                     color: settings.color_text
@@ -537,7 +537,7 @@ BaseWidget {
                     horizontalAlignment: Text.AlignRight
                 }
 
-                Text {
+                Label {
                     id: card1textlower
                     height: parent.height
                     color: settings.color_text
@@ -565,7 +565,7 @@ BaseWidget {
                     horizontalAlignment: Text.AlignRight
                 }
 
-                Text {
+                Label {
                     id: card2textlower
                     height: parent.height
                     color: settings.color_text
@@ -593,7 +593,7 @@ BaseWidget {
                     horizontalAlignment: Text.AlignRight
                 }
 
-                Text {
+                Label {
                     id: card3textlower
                     height: parent.height
                     color: settings.color_text
@@ -621,7 +621,7 @@ BaseWidget {
                     horizontalAlignment: Text.AlignRight
                 }
 
-                Text {
+                Label {
                     id: card4textlower
                     height: parent.height
                     color: settings.color_text
@@ -649,7 +649,7 @@ BaseWidget {
                     horizontalAlignment: Text.AlignRight
                 }
 
-                Text {
+                Label {
                     id: card5textlower
                     height: parent.height
                     color: settings.color_text

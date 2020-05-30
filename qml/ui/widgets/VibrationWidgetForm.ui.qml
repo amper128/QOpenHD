@@ -133,7 +133,7 @@ BaseWidget {
                     }
                 }
             }
-            Text {
+            Label {
                 id: x_text
 
                 color: settings.color_text
@@ -214,7 +214,7 @@ BaseWidget {
                     }
                 }
             }
-            Text {
+            Label {
                 id: y_text
 
                 color: settings.color_text
@@ -295,7 +295,7 @@ BaseWidget {
                     }
                 }
             }
-            Text {
+            Label {
                 id: z_text
 
                 color: settings.color_text
@@ -319,7 +319,7 @@ BaseWidget {
             anchors.bottom: parent.bottom
             anchors.bottomMargin: 60
 
-            Text {
+            Label {
                 id: sixty_text
 
                 color: settings.color_text
@@ -336,7 +336,7 @@ BaseWidget {
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
             }
-            Text {
+            Label {
                 id: thirty_text
 
                 color: settings.color_text

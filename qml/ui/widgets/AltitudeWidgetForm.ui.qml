@@ -282,7 +282,7 @@ BaseWidget {
             id: altPointer
             anchors.fill: parent
 
-            Text {
+            Label {
                 id: alt_text
                 color: settings.color_text
 

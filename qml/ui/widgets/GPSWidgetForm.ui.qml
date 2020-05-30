@@ -140,7 +140,7 @@ BaseWidget {
             font.pixelSize: 14
         }
 
-        Text {
+        Label {
             id: satellites_visible
             y: 0
             width: 24
@@ -157,7 +157,7 @@ BaseWidget {
             font.pixelSize: 16
         }
 
-        Text {
+        Label {
             id: gps_hdop
             width: 48
             height: 24

@@ -126,7 +126,7 @@ BaseWidget {
         anchors.fill: parent
         opacity: settings.air_battery_opacity
 
-        Text {
+        Label {
             id: battery_percent
             y: 0
             color: settings.color_text            
@@ -140,7 +140,7 @@ BaseWidget {
             horizontalAlignment: Text.AlignLeft
             font.pixelSize: 14
         }
-        Text {
+        Label {
             id: battery_amp_text
             visible: settings.air_battery_showall ? true : false
             text: Number(OpenHD.battery_current/100.0).toLocaleString(Qt.locale(), 'f', 1) + "A";
@@ -154,7 +154,7 @@ BaseWidget {
             horizontalAlignment: Text.AlignLeft
             font.pixelSize: 14
         }
-        Text {
+        Label {
             id: battery_volt_text
             visible: settings.air_battery_showall ? true : false
             text: Number(OpenHD.battery_voltage).toLocaleString(Qt.locale(), 'f', 1) + "V";

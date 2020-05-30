@@ -18,7 +18,7 @@ BaseWidget {
     widgetIdentifier: "bitrate_widget"
 
     defaultAlignment: 1
-    defaultXOffset: 224
+    defaultXOffset: 230
     defaultYOffset: 0
     defaultHCenter: false
     defaultVCenter: false
@@ -194,7 +194,7 @@ BaseWidget {
         anchors.fill: parent
         opacity: settings.bitrate_opacity
 
-        Text {
+        Label {
             id: kbitrate
             y: 0
             width: 84
@@ -229,7 +229,7 @@ BaseWidget {
             horizontalAlignment: Text.AlignRight
         }
 
-        Text {
+        Label {
             id: allDataText
             visible: settings.bitrate_showall ? true : false
             text: Number(OpenHD.injection_fail_cnt).toLocaleString(Qt.locale(), 'f', 0) + "/" + Number(OpenHD.skipped_packet_cnt).toLocaleString(Qt.locale(), 'f', 0)

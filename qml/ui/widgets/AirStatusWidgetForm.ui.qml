@@ -79,11 +79,11 @@ BaseWidget {
         }
 
 
-        Text {
+        Label {
             id: cpuload_air
             x: 0
             y: 0
-            width: 36
+            width: 40
             height: 24
             color: settings.color_text
             opacity: settings.air_status_opacity
@@ -96,11 +96,11 @@ BaseWidget {
             horizontalAlignment: Text.AlignRight
             elide: Text.ElideRight
         }
-        Text {
+        Label {
             id: temp_air
             x: 0
             y: 4
-            width: 36
+            width: 40
             height: 24
             color: settings.color_text
             opacity: settings.air_status_opacity

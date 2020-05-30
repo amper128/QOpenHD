@@ -71,7 +71,7 @@ BaseWidget {
             clip: true
             color: settings.color_shape
             opacity: settings.mah_opacity
-            text: "\uE162"
+            text: "\uF3FD"
             anchors.right: flight_mah_text.left
             anchors.rightMargin: 6
             verticalAlignment: Text.AlignVCenter
@@ -81,7 +81,7 @@ BaseWidget {
             horizontalAlignment: Text.AlignRight
         }
 
-        Text {
+        Label {
             id: flight_mah_text
             width: 68
             height: 24

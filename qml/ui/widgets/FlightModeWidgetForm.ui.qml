@@ -74,7 +74,7 @@ BaseWidget {
             font.pixelSize: 20
         }
 
-        Text {
+        Label {
             id: flight_mode_text
 
             height: 48

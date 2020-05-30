@@ -79,7 +79,7 @@ BaseWidget {
             horizontalAlignment: Text.AlignRight
         }
 
-        Text {
+        Label {
             id: flight_distance_text
             width: 68
             height: 24

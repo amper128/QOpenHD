@@ -131,7 +131,7 @@ BaseWidget {
                     color: settings.color_shape
                 }
 
-                tickmarkLabel:  Text {
+                tickmarkLabel:  Label {
                     rotation: 90
                     //font.pixelSize: Math.max(6, outerRadius * 0.1)
                     font.pixelSize: 9

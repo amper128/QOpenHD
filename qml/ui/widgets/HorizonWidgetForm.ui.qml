@@ -250,7 +250,7 @@ BaseWidget {
             anchors.top: upperLeft1.bottom
             color: settings.color_shape
         }
-        Text {
+        Label {
             id: upperLeft1Text
             visible: settings.show_horizon_ladder
             text: "10"
@@ -283,7 +283,7 @@ BaseWidget {
             anchors.top: upperRight1.bottom
             color: settings.color_shape
         }
-        Text {
+        Label {
             id: upperRight1Text
             visible: settings.show_horizon_ladder
             text: "10"
@@ -318,7 +318,7 @@ BaseWidget {
              anchors.top: upperLeft2.bottom
              color: settings.color_shape
          }
-         Text {
+         Label {
              id: upperLeft2Text
              visible: settings.show_horizon_ladder
              text: "20"
@@ -351,7 +351,7 @@ BaseWidget {
              anchors.top: upperRight2.bottom
              color: settings.color_shape
          }
-         Text {
+         Label {
              id: upperRight2Text
              visible: settings.show_horizon_ladder
              text: "20"
@@ -387,7 +387,7 @@ BaseWidget {
               anchors.top: upperLeft3.bottom
               color: settings.color_shape
           }
-          Text {
+          Label {
               id: upperLeft3Text
               visible: settings.show_horizon_ladder
               text: "30"
@@ -420,7 +420,7 @@ BaseWidget {
               anchors.top: upperRight3.bottom
               color: settings.color_shape
           }
-          Text {
+          Label {
               id: upperRight3Text
               visible: settings.show_horizon_ladder
               text: "30"
@@ -456,7 +456,7 @@ BaseWidget {
                anchors.top: upperLeft4.bottom
                color: settings.color_shape
            }
-           Text {
+           Label {
                id: upperLeft4Text
                visible: settings.show_horizon_ladder
                text: "40"
@@ -489,7 +489,7 @@ BaseWidget {
                anchors.top: upperRight4.bottom
                color: settings.color_shape
            }
-           Text {
+           Label {
                id: upperRight4Text
                visible: settings.show_horizon_ladder
                text: "40"
@@ -525,7 +525,7 @@ BaseWidget {
                 anchors.top: upperLeft5.bottom
                 color: settings.color_shape
             }
-            Text {
+            Label {
                 id: upperLeft5Text
                 visible: settings.show_horizon_ladder
                 text: "50"
@@ -558,7 +558,7 @@ BaseWidget {
                 anchors.top: upperRight5.bottom
                 color: settings.color_shape
             }
-            Text {
+            Label {
                 id: upperRight5Text
                 visible: settings.show_horizon_ladder
                 text: "50"
@@ -594,7 +594,7 @@ BaseWidget {
                  anchors.top: upperLeft6.bottom
                  color: settings.color_shape
              }
-             Text {
+             Label {
                  id: upperLeft6Text
                  visible: settings.show_horizon_ladder
                  text: "60"
@@ -627,7 +627,7 @@ BaseWidget {
                  anchors.top: upperRight6.bottom
                  color: settings.color_shape
              }
-             Text {
+             Label {
                  id: upperRight6Text
                  visible: settings.show_horizon_ladder
                  text: "60"
@@ -686,7 +686,7 @@ BaseWidget {
                   anchors.bottom: lowerLeft1.top
                   color: settings.color_shape
               }
-              Text {
+              Label {
                   id: lowerLeft1Text
                   visible: settings.show_horizon_ladder
                   text: "-10"
@@ -741,7 +741,7 @@ BaseWidget {
                   anchors.bottom: lowerRight1.bottom
                   color: settings.color_shape
               }
-              Text {
+              Label {
                   id: lowerRight1Text
                   visible: settings.show_horizon_ladder
                   text: "-10"
@@ -799,7 +799,7 @@ BaseWidget {
                    anchors.bottom: lowerLeft2.top
                    color: settings.color_shape
                }
-               Text {
+               Label {
                    id: lowerLeft2Text
                    visible: settings.show_horizon_ladder
                    text: "-20"
@@ -854,7 +854,7 @@ BaseWidget {
                    anchors.bottom: lowerRight2.bottom
                    color: settings.color_shape
                }
-               Text {
+               Label {
                    id: lowerRight2Text
                    visible: settings.show_horizon_ladder
                    text: "-20"
@@ -912,7 +912,7 @@ BaseWidget {
                     anchors.bottom: lowerLeft3.top
                     color: settings.color_shape
                 }
-                Text {
+                Label {
                     id: lowerLeft3Text
                     visible: settings.show_horizon_ladder
                     text: "-30"
@@ -967,7 +967,7 @@ BaseWidget {
                     anchors.bottom: lowerRight3.bottom
                     color: settings.color_shape
                 }
-                Text {
+                Label {
                     id: lowerRight3Text
                     visible: settings.show_horizon_ladder
                     text: "-30"
@@ -1025,7 +1025,7 @@ BaseWidget {
                      anchors.bottom: lowerLeft4.top
                      color: settings.color_shape
                  }
-                 Text {
+                 Label {
                      id: lowerLeft4Text
                      visible: settings.show_horizon_ladder
                      text: "-40"
@@ -1080,7 +1080,7 @@ BaseWidget {
                      anchors.bottom: lowerRight4.bottom
                      color: settings.color_shape
                  }
-                 Text {
+                 Label {
                      id: lowerRight4Text
                      visible: settings.show_horizon_ladder
                      text: "-40"
@@ -1138,7 +1138,7 @@ BaseWidget {
                       anchors.bottom: lowerLeft5.top
                       color: settings.color_shape
                   }
-                  Text {
+                  Label {
                       id: lowerLeft5Text
                       visible: settings.show_horizon_ladder
                       text: "-50"
@@ -1193,7 +1193,7 @@ BaseWidget {
                       anchors.bottom: lowerRight5.bottom
                       color: settings.color_shape
                   }
-                  Text {
+                  Label {
                       id: lowerRight5Text
                       visible: settings.show_horizon_ladder
                       text: "-50"
@@ -1251,7 +1251,7 @@ BaseWidget {
                        anchors.bottom: lowerLeft6.top
                        color: settings.color_shape
                    }
-                   Text {
+                   Label {
                        id: lowerLeft6Text
                        visible: settings.show_horizon_ladder
                        text: "-60"
@@ -1306,7 +1306,7 @@ BaseWidget {
                        anchors.bottom: lowerRight6.bottom
                        color: settings.color_shape
                    }
-                   Text {
+                   Label {
                        id: lowerRight6Text
                        visible: settings.show_horizon_ladder
                        text: "-60"

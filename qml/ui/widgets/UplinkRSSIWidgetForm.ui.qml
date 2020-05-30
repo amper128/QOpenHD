@@ -80,7 +80,7 @@ BaseWidget {
             horizontalAlignment: Text.AlignRight
         }
 
-        Text {
+        Label {
             id: uplink_dbm
             x: 568
             y: 0
@@ -101,11 +101,11 @@ BaseWidget {
             clip: false
         }
 
-        Text {
+        Label {
             id: uplink_rssi
             x: 820
             y: 0
-            width: 34
+            width: 40
             height: 24
             color: settings.color_text
             opacity: settings.uplink_rssi_opacity
@@ -122,7 +122,7 @@ BaseWidget {
             clip: false
         }
 
-        Text {
+        Label {
             id: uplink_lost_packet_cnt_rc
             x: 0
             y: 0
@@ -144,7 +144,7 @@ BaseWidget {
             visible: false
         }
 
-        Text {
+        Label {
             id: uplink_lost_packet_cnt_telemetry_up
             x: 0
             y: 0

@@ -158,7 +158,7 @@ BaseWidget {
                     GradientStop { position: 1.0; color: Material.color(Material.Grey ,Material.Shade500) }
                 }
             }
-            Text {
+            Label {
                 id:decimalText
                 text: "."
                 color: "white"
@@ -352,7 +352,7 @@ BaseWidget {
             border.width: .5
         }
 
-        Text {
+        Label {
             id: wind_text
             color: settings.color_text
 

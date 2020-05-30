@@ -60,7 +60,7 @@ BaseWidget {
 
         anchors.fill: parent
 
-        Text {
+        Label {
             id: flight_timer_text
             y: 0
             width: 64

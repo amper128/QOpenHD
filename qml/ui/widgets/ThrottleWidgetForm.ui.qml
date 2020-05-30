@@ -72,7 +72,7 @@ BaseWidget {
         id: widgetInner
         anchors.fill: parent
         opacity: settings.throttle_opacity
-        Text {
+        Label {
             id: throttle_percent
             y: 0
             width: 24
@@ -112,7 +112,7 @@ BaseWidget {
             }
         }
 
-        Text {
+        Label {
             id: throttle_description
             y: 0
             width: parent.width

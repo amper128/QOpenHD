@@ -215,7 +215,7 @@ BaseWidget {
                     //cant get a good approximation of glow via canvas
                     //ctx.strokeStyle = settings.color_glow;
                     //ctx.lineWidth = 1;
-                    ctx.font = "bold 11px sans-serif";
+                    ctx.font = "bold 11px Orbitron";
                     ctx.textAlign = "center";
 
 
@@ -319,7 +319,7 @@ BaseWidget {
         //-----------------------ladder end---------------
 
 
-        Text {
+        Label {
             id: hdg_text
             anchors.top: parent.top
             anchors.left: parent.left

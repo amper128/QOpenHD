@@ -250,7 +250,7 @@ BaseWidget {
                     //cant get a good approximation of glow via canvas
                     //ctx.strokeStyle = settings.color_glow;
                     //ctx.lineWidth = .5;
-                    ctx.font = "bold 11px sans-serif";
+                    ctx.font = "bold 11px Orbitron";
 
                     var speed_airspeed_gps = settings.speed_airspeed_gps;
                     var _airspeed = OpenHD.airspeed;
@@ -307,7 +307,7 @@ BaseWidget {
 
 
 
-        Text {
+        Label {
             anchors.fill: parent
             id: speed_text
             color: settings.color_text           

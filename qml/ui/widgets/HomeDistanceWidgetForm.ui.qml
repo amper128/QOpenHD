@@ -109,7 +109,7 @@ BaseWidget {
             horizontalAlignment: Text.AlignRight
         }
 
-        Text {
+        Label {
             id: home_distance_text
             width: 64
             height: 24
