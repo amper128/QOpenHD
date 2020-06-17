@@ -276,6 +276,7 @@ OpenHDAppleVideo *pipVideo = new OpenHDAppleVideo(OpenHDStreamTypePiP);
     //QObject::connect(telemetryThread, &QThread::started, openhdTelemetry, &OpenHDTelemetry::onStarted);
     //openhdTelemetry->moveToThread(telemetryThread);
     //telemetryThread->start();
+    QObject::connect(openhdTelemetry, &OpenHDTelemetry::groundStationIPUpdated, openHDRC, &OpenHDRC::setGroundIP, Qt::QueuedConnection);
     openhdTelemetry->onStarted();
 
     auto airGPIOMicroservice = new GPIOMicroservice(nullptr, MicroserviceTargetAir, MavlinkTypeTCP);

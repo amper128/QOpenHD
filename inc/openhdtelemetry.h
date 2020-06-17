@@ -22,6 +22,7 @@ public:
 
 signals:
     void last_heartbeat_changed(qint64 last_heartbeat);
+    void groundStationIPUpdated(QString address);
 
 public slots:
     void onStarted();
@@ -40,6 +41,8 @@ private:
     qint64 m_last_heartbeat = -1;
 
     qint64 last_heartbeat_timestamp = 0;
+
+    QHostAddress groundIP;
 };
 
 #endif

@@ -18,7 +18,7 @@ static OpenHDTelemetry* _instance = nullptr;
 
 OpenHDTelemetry* OpenHDTelemetry::instance() {
     if (_instance == nullptr) {
-        _instance = new OpenHDTelemetry();
+	_instance = new OpenHDTelemetry();
     }
     return _instance;
 }
@@ -48,14 +48,21 @@ void OpenHDTelemetry::processDatagrams() {
     QByteArray datagram;
     wifibroadcast_rx_status_forward_t telemetry;
 
-    while (telemetrySocket->hasPendingDatagrams()) {
-        datagram.resize(int(telemetrySocket->pendingDatagramSize()));
-        telemetrySocket->readDatagram(datagram.data(), datagram.size());
+    QHostAddress senderIP;
 
-        if (datagram.size() == 113) {
-            memcpy(&telemetry, datagram.constData(), datagram.size());
-            processOpenHDTelemetry(telemetry);
-        }
+    while (telemetrySocket->hasPendingDatagrams()) {
+	datagram.resize(int(telemetrySocket->pendingDatagramSize()));
+	telemetrySocket->readDatagram(datagram.data(), datagram.size(), &senderIP);
+
+	if (senderIP != groundIP) {
+		groundIP = senderIP;
+		emit groundStationIPUpdated(groundIP.toString());
+	}
+
+	if (datagram.size() == 113) {
+	    memcpy(&telemetry, datagram.constData(), datagram.size());
+	    processOpenHDTelemetry(telemetry);
+	}
     }
 }
 
@@ -74,38 +81,38 @@ void OpenHDTelemetry::processOpenHDTelemetry(wifibroadcast_rx_status_forward_t t
     int current_best = -127;
 
     for (uint wifi_adapter = 0; wifi_adapter < telemetry.wifi_adapter_cnt; wifi_adapter++) {
-        wifi_adapter_rx_status_forward_t adapter = telemetry.adapter[wifi_adapter];
+	wifi_adapter_rx_status_forward_t adapter = telemetry.adapter[wifi_adapter];
 
-        switch (wifi_adapter) {
-            case 0: {
-                OpenHD::instance()->setWifiAdapter0(adapter.received_packet_cnt, adapter.current_signal_dbm, adapter.signal_good);
-                break;
-            }
-            case 1: {
-                OpenHD::instance()->setWifiAdapter1(adapter.received_packet_cnt, adapter.current_signal_dbm, adapter.signal_good);
-                break;
-            }
-            case 2: {
-                OpenHD::instance()->setWifiAdapter2(adapter.received_packet_cnt, adapter.current_signal_dbm, adapter.signal_good);
-                break;
-            }
-            case 3: {
-                OpenHD::instance()->setWifiAdapter3(adapter.received_packet_cnt, adapter.current_signal_dbm, adapter.signal_good);
-                break;
-            }
-            case 4: {
-                OpenHD::instance()->setWifiAdapter4(adapter.received_packet_cnt, adapter.current_signal_dbm, adapter.signal_good);
-                break;
-            }
-            case 5: {
-                OpenHD::instance()->setWifiAdapter5(adapter.received_packet_cnt, adapter.current_signal_dbm, adapter.signal_good);
-                break;
-            }
-        }
+	switch (wifi_adapter) {
+	    case 0: {
+		OpenHD::instance()->setWifiAdapter0(adapter.received_packet_cnt, adapter.current_signal_dbm, adapter.signal_good);
+		break;
+	    }
+	    case 1: {
+		OpenHD::instance()->setWifiAdapter1(adapter.received_packet_cnt, adapter.current_signal_dbm, adapter.signal_good);
+		break;
+	    }
+	    case 2: {
+		OpenHD::instance()->setWifiAdapter2(adapter.received_packet_cnt, adapter.current_signal_dbm, adapter.signal_good);
+		break;
+	    }
+	    case 3: {
+		OpenHD::instance()->setWifiAdapter3(adapter.received_packet_cnt, adapter.current_signal_dbm, adapter.signal_good);
+		break;
+	    }
+	    case 4: {
+		OpenHD::instance()->setWifiAdapter4(adapter.received_packet_cnt, adapter.current_signal_dbm, adapter.signal_good);
+		break;
+	    }
+	    case 5: {
+		OpenHD::instance()->setWifiAdapter5(adapter.received_packet_cnt, adapter.current_signal_dbm, adapter.signal_good);
+		break;
+	    }
+	}
 
-        if (adapter.current_signal_dbm > current_best) {
-            current_best = adapter.current_signal_dbm;
-        }
+	if (adapter.current_signal_dbm > current_best) {
+	    current_best = adapter.current_signal_dbm;
+	}
     }
 
 
