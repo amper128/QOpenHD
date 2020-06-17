@@ -53,10 +53,10 @@
 #define VOT_CRC_Init 0xFFFF
 
 
-typedef struct {
+typedef struct __attribute__((packed)) {
     uint32_t StartCode;            //  0xB01EDEAD
     uint32_t TimestampMS;          // -not used- timestamp in milliseconds
-    signed long BaroAltitudecm;    // -fl baro_altitude- zero referenced (from home position) barometric altitude in cm
+    int32_t BaroAltitudecm;        // -fl baro_altitude- zero referenced (from home position) barometric altitude in cm
     uint16_t AirspeedKPHX10;       // -fl airspeed- KPH * 10, requires optional pitot sensor
     int16_t ClimbRateMSX100;       // -fl vario - meters/second * 100
     uint16_t RPM;                  // -not used- requires optional RPM sensor
@@ -76,12 +76,12 @@ typedef struct {
     uint16_t CompassDegrees;       // -u16 compassdegrees used- either magnetic compass reading (if compass enabled) or filtered GPS course over ground if not
     uint8_t RSSIPercent;           // -u8 rssi-
     uint8_t LQPercent;             // -u8 LQ-
-    signed long LatitudeX1E7;      // -dbl latitude- (degrees * 10,000,000 )
-    signed long LongitudeX1E7;     // -dbl longitude- (degrees * 10,000,000 )
+    int32_t /*signed long*/ LatitudeX1E7;      // -dbl latitude- (degrees * 10,000,000 )
+    int32_t /*signed long*/ LongitudeX1E7;     // -dbl longitude- (degrees * 10,000,000 )
     uint32_t DistanceFromHomeMX10; // -fl distance- horizontal GPS distance from home point, in meters X 10 (decimeters)
     uint16_t GroundspeedKPHX10;    // -fl speed- ( km/h * 10 )
     uint16_t CourseDegrees;        // -u16 coursedegrees- GPS course over ground, in degrees
-    signed long GPSAltitudecm;     // -fl altitude- ( GPS altitude, using WGS-84 ellipsoid, cm)
+    int32_t/*signed long*/ GPSAltitudecm;     // -fl altitude- ( GPS altitude, using WGS-84 ellipsoid, cm)
     uint8_t HDOPx10;               // -fl hdop- GPS HDOP * 10
     uint8_t SatsInUse;             // -u8 sats- satellites used for navigation
     uint8_t PresentFlightMode;     // -u8 uav_flightmode- present flight mode, as defined in VECTOR_FLIGHT_MODES
@@ -104,12 +104,16 @@ void VectorTelemetry::processVectorDatagrams() {
     QByteArray datagram;
 
     while (vectorSocket->hasPendingDatagrams()) {
-        datagram.resize(int(vectorSocket->pendingDatagramSize()));
-        vectorSocket->readDatagram(datagram.data(), datagram.size());
-        vot_read((uint8_t*)datagram.data(), datagram.length());
+	datagram.resize(int(vectorSocket->pendingDatagramSize()));
+	vectorSocket->readDatagram(datagram.data(), datagram.size());
+	vot_read((uint8_t*)datagram.data(), datagram.length());
     }
 }
 
+static union {
+   uint8_t SerialBuffer[sizeof(VOT_td_t)];
+   VOT_td_t td;  //unfortunately, this doesn't work because of the damn Endians..
+} v;
 
 void VectorTelemetry::processVectorMessage() {
     uint16_t dummy16;
@@ -117,39 +121,39 @@ void VectorTelemetry::processVectorMessage() {
 
     VOTReadIndex = 0;
 
-    dummy32 = (uint32_t)votread_u32(); // StartCode
-    dummy32 = (uint32_t)votread_u32(); // TimeStamp
-    auto rel_altitude = (float)(signed long) votbread_u32() / 100.0f; // BaroAltitudecm
+    dummy32 = v.td.StartCode; // StartCode
+    dummy32 = v.td.TimestampMS; // TimeStamp
+    auto rel_altitude = (float)v.td.BaroAltitudecm / 100.0f; // BaroAltitudecm
 
     OpenHD::instance()->set_alt_rel(rel_altitude);
 
-    auto airspeed  = (float)(uint16_t)votbread_u16() / 10.0f; // airspeed
+    auto airspeed  = (float)v.td.AirspeedKPHX10 / 10.0f; // airspeed
     OpenHD::instance()->set_airspeed(airspeed);
 
-    auto vario = (float)(uint16_t)votbread_u16() / 100.0f; // ClimbRateMSX100 -not used- meters/second * 100
-    auto rpm = (uint16_t)votbread_u16(); // RPM - requires optional RPM sensor
+    auto vario = (float)v.td.ClimbRateMSX100 / 100.0f; // ClimbRateMSX100 -not used- meters/second * 100
+    auto rpm = v.td.RPM; // RPM - requires optional RPM sensor
 
-    auto pitch = (int16_t)votbread_u16(); // PitchDegrees-pitch-
+    auto pitch = (float)v.td.PitchDegrees / 10.0f; // PitchDegrees-pitch-
     OpenHD::instance()->set_pitch(pitch);
 
-    auto roll = (int16_t)votbread_u16(); // RollDegrees-roll-
+    auto roll = (float)v.td.RollDegrees / 10.0f; // RollDegrees-roll-
     OpenHD::instance()->set_roll(roll);
 
-    auto heading = (float)(int16_t)votbread_u16(); // YawDegrees-heading-
+    auto heading = (float)v.td.YawDegrees / 10.0f; // YawDegrees-heading-
     OpenHD::instance()->set_hdg(heading);
 
-    auto x  = (int16_t)votbread_u16(); // AccelXCentiGrav-not used-
-    auto y  = (int16_t)votbread_u16(); // AccelZCentiGrav -not used-
-    auto z  = (int16_t)votbread_u16(); // AccelXCentiGrav-not used-
+    auto x  = v.td.AccelXCentiGrav; // AccelXCentiGrav-not used-
+    auto y  = v.td.AccelYCentiGrav; // AccelZCentiGrav -not used-
+    auto z  = v.td.AccelZCentiGrav; // AccelXCentiGrav-not used-
     OpenHD::instance()->set_vx(x);
     OpenHD::instance()->set_vy(y);
     OpenHD::instance()->set_vz(z);
 
-    auto battery_voltage = (float)(uint16_t)votbread_u16() / 100.0f; // PackVoltageX100 -voltage-
-    auto vtxvoltage      = (float)(uint16_t)votbread_u16() / 100.0f; // VideoTxVoltageX100-vtxvoltage-
-    auto camvoltage      = (float)(uint16_t)votbread_u16() / 100.0f; // CameraVoltageX100-camvoltage-
-    auto rxvoltage       = (float)(uint16_t)votbread_u16() / 100.0f; // RxVoltageX100-rxvoltage-
-    auto ampere          = (float)(uint16_t)votbread_u16() / 10.0f;  // PackCurrentX10-ampere-
+    auto battery_voltage = (float)v.td.PackVoltageX100 / 100.0f; // PackVoltageX100 -voltage-
+    auto vtxvoltage      = (float)v.td.VideoTxVoltageX100 / 100.0f; // VideoTxVoltageX100-vtxvoltage-
+    auto camvoltage      = (float)v.td.CameraVoltageX100 / 100.0f; // CameraVoltageX100-camvoltage-
+    auto rxvoltage       = (float)v.td.RxVoltageX100 / 100.0f; // RxVoltageX100-rxvoltage-
+    auto ampere          = (float)v.td.PackCurrentX10 / 10.0f;  // PackCurrentX10-ampere-
     OpenHD::instance()->set_battery_voltage(battery_voltage);
     OpenHD::instance()->set_battery_current(ampere);
 
@@ -165,34 +169,34 @@ void VectorTelemetry::processVectorMessage() {
     dummy16 = (uint16_t)votbread_u16(); // TempDegreesCX10-- degrees C * 10, from optional temperature sensor
     dummy16 = (uint16_t)votbread_u16(); // mAHConsumed-not used-
     dummy16 = (uint16_t)votbread_u16(); // CompassDegrees-not used- either magnetic compass reading (if compass enabled) or filtered GPS course over ground if not
-    auto rssi = (uint8_t)votread_u8();  // RSSIPercent-rssi-
+    auto rssi = v.td.RSSIPercent;  // RSSIPercent-rssi-
     auto lq   = (uint8_t)votread_u8();  // LQPercent-not used-
 
-    auto latitude = (double)(int32_t)votbread_u32() / 10000000; // -latitude- (degrees * 10,000,000 )
+    auto latitude = (double)v.td.LatitudeX1E7 / 10000000; // -latitude- (degrees * 10,000,000 )
     OpenHD::instance()->set_lat(latitude);
 
-    auto longitude = (double)(int32_t)votbread_u32() / 10000000; // -longitude- (degrees * 10,000,000 )
+    auto longitude = (double)v.td.LongitudeX1E7 / 10000000; // -longitude- (degrees * 10,000,000 )
     OpenHD::instance()->set_lon(longitude);
 
 
     // qopenhd doesn't use these because we calculate home when the drone is armed based on current location
-    auto distance = (float)(uint32_t)votbread_u32() / 10.0f; // DistanceFromHomeMX10 horizontal GPS distance from home point, in meters X 10 (decimeters)
+    auto distance = (float)v.td.DistanceFromHomeMX10 / 10.0f; // DistanceFromHomeMX10 horizontal GPS distance from home point, in meters X 10 (decimeters)
 
-    auto speed = (float)(uint16_t)votbread_u16() / 10.0f; // -speed- ( km/h * 10 )
+    auto speed = (float)v.td.GroundspeedKPHX10 / 10.0f; // -speed- ( km/h * 10 )
     OpenHD::instance()->set_speed(speed);
 
-    auto coursedegrees = (uint16_t)votbread_u16(); // CourseDegrees -not used- GPS course over ground, in degrees
-    auto gps_altitude = (float)(int32_t)votbread_u32() / 100.0f; // -altitude- ( GPS altitude, using WGS-84 ellipsoid, cm)
+    auto coursedegrees = v.td.CourseDegrees; // CourseDegrees -not used- GPS course over ground, in degrees
+    auto gps_altitude = (float)v.td.GPSAltitudecm / 100.0f; // -altitude- ( GPS altitude, using WGS-84 ellipsoid, cm)
     OpenHD::instance()->set_alt_msl(gps_altitude);
 
 
-    auto hdop = (float)(uint8_t)votread_u8(); // -HDOPx10- GPS HDOP * 10
-    auto sats = (uint8_t)votread_u8(); // -SatsInUse- satellites used for navigation
+    auto hdop = (float)v.td.HDOPx10 / 10.0; // -HDOPx10- GPS HDOP * 10
+    auto sats = v.td.SatsInUse; // -SatsInUse- satellites used for navigation
     OpenHD::instance()->set_gps_hdop(hdop);
     OpenHD::instance()->set_satellites_visible(sats);
 
 
-    auto _flightmode = (uint8_t)votread_u8(); // PresentFlightMode -uav_flightmode- present flight mode, as defined in VECTOR_FLIGHT_MODES
+    auto _flightmode = v.td.PresentFlightMode; // PresentFlightMode -uav_flightmode- present flight mode, as defined in VECTOR_FLIGHT_MODES
     QString flightmode = vot_mode_from_telemetry(_flightmode);
     OpenHD::instance()->set_flight_mode(flightmode);
 
@@ -207,14 +211,6 @@ void VectorTelemetry::set_last_heartbeat(QString last_heartbeat) {
     m_last_heartbeat = last_heartbeat;
     emit last_heartbeat_changed(m_last_heartbeat);
 }
-
-
-
-static union {
-   uint8_t SerialBuffer[sizeof(VOT_td_t)];
-   VOT_td_t td;  //unfortunately, this doesn't work because of the damn Endians..
-} v;
-
 
 uint8_t VectorTelemetry::votread_u8()  {
     return v.SerialBuffer[VOTReadIndex++];
@@ -253,10 +249,10 @@ uint32_t VectorTelemetry::votbread_u32() {
 
 uint16_t VectorTelemetry::CRC16Worker(uint16_t icrc, uint8_t r0) {
     union {
-        uint16_t crc16; // 16-bit CRC
-        struct {
-            uint8_t crcl, crch;
-        } s;
+	uint16_t crc16; // 16-bit CRC
+	struct {
+	    uint8_t crcl, crch;
+	} s;
     } u;
 
     uint8_t a1; // scratch byte
@@ -281,7 +277,7 @@ uint16_t VectorTelemetry::CalculateCRC(uint8_t * pPacket, uint8_t Size, uint16_t
     uint16_t CRC;
     CRC = InitCRC;
     for (i = 0; i < Size; i++) {
-        CRC = CRC16Worker(CRC, pPacket[i]);
+	CRC = CRC16Worker(CRC, pPacket[i]);
     }
     return CRC;
 }
@@ -289,42 +285,42 @@ uint16_t VectorTelemetry::CalculateCRC(uint8_t * pPacket, uint8_t Size, uint16_t
 
 void VectorTelemetry::vot_read(uint8_t *buf, uint8_t buflen) {
     int i;
-    uint8_t c;
     uint16_t cs;
 
     for (i = 0; i < buflen; ++i) {
-        uint8_t c = buf[i];
+	uint8_t c = buf[i];
 
-        if (c_state == IDLE) {
-            c_state = (c == VOT_SC1) ? HEADER_START1 : IDLE;
-            VOTReceiverIndex=0;
-        } else if (c_state == HEADER_START1) {
-            c_state = (c == VOT_SC2) ? HEADER_START2 : IDLE;
-        } else if (c_state == HEADER_START2) {
-            c_state = (c == VOT_SC3) ? HEADER_START3 : IDLE;
-        } else if (c_state == HEADER_START3) {
-            c_state = (c == VOT_SC4) ? HEADER_START4 : IDLE;
-        } else if (c_state == HEADER_START4) {
-            c_state = HEADER_MSGTYPE;
-        }
+	if (c_state == IDLE) {
+	    c_state = (c == VOT_SC1) ? HEADER_START1 : IDLE;
+	    VOTReceiverIndex=0;
+	} else if (c_state == HEADER_START1) {
+	    c_state = (c == VOT_SC2) ? HEADER_START2 : IDLE;
+	} else if (c_state == HEADER_START2) {
+	    c_state = (c == VOT_SC3) ? HEADER_START3 : IDLE;
+	} else if (c_state == HEADER_START3) {
+	    c_state = (c == VOT_SC4) ? HEADER_START4 : IDLE;
+	} else if (c_state == HEADER_START4) {
+	    c_state = HEADER_MSGTYPE;
+	}
 
-        if (c_state != IDLE) {
-            v.SerialBuffer[VOTReceiverIndex++] = c;
-            if (VOTReceiverIndex == VOTFrameLength) {
-                // received checksum word little endian
-                VOTRcvChecksum = CalculateCRC((uint8_t *)&v.SerialBuffer[0], 95, 0xFFFF);
-                cs = (uint16_t)(v.SerialBuffer[VOTFrameLength-1] << 8) + v.SerialBuffer[VOTFrameLength-2];
-                if (VOTRcvChecksum == cs) {
-                    processVectorMessage();
-                    c_state = IDLE;
-                } else  {
-                    // wrong checksum, drop packet
-                    c_state = IDLE;
-                }
-            } else {
+	if (c_state != IDLE) {
+	    v.SerialBuffer[VOTReceiverIndex++] = c;
+	    if (VOTReceiverIndex == VOTFrameLength) {
+		// received checksum word little endian
+		VOTRcvChecksum = CalculateCRC((uint8_t *)&v.SerialBuffer[0], 95, 0xFFFF);
+		cs = (uint16_t)(v.SerialBuffer[VOTFrameLength-1] << 8) + v.SerialBuffer[VOTFrameLength-2];
+		if (VOTRcvChecksum == cs) {
+		    processVectorMessage();
+		    c_state = IDLE;
+		    VOTReadIndex = 0;
+		} else  {
+		    // wrong checksum, drop packet
+		    c_state = IDLE;
+		}
+	    } else {
 
-            }
-        }
+	    }
+	}
     } //next i
     return;
 }
