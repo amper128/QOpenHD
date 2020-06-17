@@ -142,6 +142,7 @@ int main(int argc, char *argv[]) {
     QFontDatabase::addApplicationFont(":/osdicons.ttf");
 
     QFontDatabase::addApplicationFont(":/materialdesignicons-webfont.ttf");
+    QFontDatabase::addApplicationFont(":/Orbitron-Regular.ttf");
     qmlRegisterType<FrSkyTelemetry>("OpenHD", 1, 0, "FrSkyTelemetry");
     qmlRegisterType<MSPTelemetry>("OpenHD", 1, 0, "MSPTelemetry");
     qmlRegisterType<LTMTelemetry>("OpenHD", 1, 0, "LTMTelemetry");
