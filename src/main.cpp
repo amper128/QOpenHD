@@ -349,7 +349,7 @@ OpenHDAppleVideo *pipVideo = new OpenHDAppleVideo(OpenHDStreamTypePiP);
 #if defined(__ios__) || defined(__android__)
     engine.rootContext()->setContextProperty("UseFullscreen", QVariant(true));
 #else
-    engine.rootContext()->setContextProperty("UseFullscreen", QVariant(false));
+    engine.rootContext()->setContextProperty("UseFullscreen", QVariant(true));
 #endif
 
 #if defined(ENABLE_LINK)
