@@ -157,7 +157,7 @@ BaseWidget {
         Label {
             id: battery_volt_text
             visible: settings.air_battery_showall ? true : false
-            text: Number(OpenHD.battery_voltage).toLocaleString(Qt.locale(), 'f', 1) + "V";
+            text: Number(OpenHD.battery_voltage).toLocaleString(Qt.locale(), 'f', 2) + "V";
             color: settings.color_text
             anchors.top: battery_percent.bottom
             anchors.left: batteryGauge.right
