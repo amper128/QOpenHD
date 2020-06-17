@@ -302,6 +302,7 @@ Item {
                             ListElement { text: "Grey"; color: "grey" }
                             ListElement { text: "Lgt Grey"; color: "lightGrey" }
                             ListElement { text: "Drk Grey"; color: "darkGrey" }
+                            ListElement { text: "Light Blue"; color: "#FF8BDAD7" }
                         }
                         textRole: "text"
                         // @disable-check M223
@@ -356,6 +357,7 @@ Item {
                             ListElement { text: "Grey"; color: "grey" }
                             ListElement { text: "Lgt Grey"; color: "lightGrey" }
                             ListElement { text: "Drk Grey"; color: "darkGrey" }
+                            ListElement { text: "Light Blue"; color: "#FF8BDAD7" }
                         }
                         textRole: "text"
                         // @disable-check M223
@@ -410,6 +412,7 @@ Item {
                             ListElement { text: "Grey"; color: "grey" }
                             ListElement { text: "Lgt Grey"; color: "lightGrey" }
                             ListElement { text: "Drk Grey"; color: "darkGrey" }
+                            ListElement { text: "Light Blue"; color: "#FF8BDAD7" }
                         }
                         textRole: "text"
                         // @disable-check M223
