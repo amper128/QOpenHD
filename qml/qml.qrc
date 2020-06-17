@@ -4,6 +4,7 @@
         <file>qtquickcontrols2.conf</file>
         <file>materialdesignicons-webfont.ttf</file>
         <file>Font Awesome 5 Free-Solid-900.otf</file>
+        <file>Orbitron-Regular.ttf</file>
         <file>ic.png</file>
         <file>ui/LowerOverlayBar.qml</file>
         <file>ui/LowerOverlayBarForm.ui.qml</file>
