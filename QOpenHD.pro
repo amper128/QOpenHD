@@ -252,6 +252,7 @@ LinuxBuild {
     CONFIG += EnablePiP
     CONFIG += EnableGStreamer
     CONFIG += EnableLink
+    CONFIG += EnableRC
     #CONFIG += EnableCharts
 
     message("LinuxBuild - config")
