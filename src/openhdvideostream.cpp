@@ -765,7 +765,8 @@ void OpenHDVideoStream::_start() {
         if (m_enable_software_video_decoder) {
             qDebug() << "Forcing software decoder";
             s << "h264parse !";
-            s << "avdec_h264 !";
+            /*s << "avdec_h264 !";*/
+            s << "vaapih264dec !";
         } else {
             qDebug() << "Using hardware decoder, fallback to software if unavailable";
             s << "h264parse !";
