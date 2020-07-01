@@ -87,6 +87,7 @@
         <file>ui/PresetMap.qml</file>
         <file>ui/elements/ColoredCheckboxForm.ui.qml</file>
         <file>ui/elements/ColoredCheckbox.qml</file>
+        <file>MainVideoAndroid.qml</file>
         <file>ui/FrequencyItem.qml</file>
         <file>ui/elements/StatusChart.qml</file>
         <file>ui/elements/StatusChartForm.ui.qml</file>
@@ -94,6 +95,7 @@
         <file>ui/widgets/GPIOWidgetForm.ui.qml</file>
         <file>MainVideoRender.qml</file>
         <file>ui/widgets/VideoWidgetRenderForm.ui.qml</file>
+        <file>ui/widgets/VideoWidgetAndroidForm.ui.qml</file>
         <file>ic128.png</file>
         <file>ui/elements/MapComponent.qml</file>
         <file>homemarker.png</file>
@@ -113,5 +115,7 @@
         <file>ui/elements/StatusViewForm.ui.qml</file>
         <file>ui/widgets/WindWidgetForm.ui.qml</file>
         <file>ui/widgets/WindWidget.qml</file>
+        <file>ui/widgets/ExampleWidget.qml</file>
+        <file>ui/widgets/ExampleWidgetForm.ui.qml</file>
     </qresource>
 </RCC>

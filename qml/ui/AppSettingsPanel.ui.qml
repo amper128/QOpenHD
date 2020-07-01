@@ -104,7 +104,7 @@ Item {
 
                     //color: "#8cbfd7f3"
                     Text {
-                        text: "Enable Speech"
+                        text: qsTr("Enable Speech")
                         font.weight: Font.Bold
                         font.pixelSize: 13
                         anchors.leftMargin: 8
@@ -132,7 +132,7 @@ Item {
                     color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
 
                     Text {
-                        text: "Battery Cells"
+                        text: qsTr("Battery Cells")
                         font.weight: Font.Bold
                         font.pixelSize: 13
                         anchors.leftMargin: 8
@@ -166,7 +166,7 @@ Item {
                     color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
 
                     Text {
-                        text: "Imperial units"
+                        text: qsTr("Imperial units")
                         font.weight: Font.Bold
                         font.pixelSize: 13
                         anchors.leftMargin: 8
@@ -196,7 +196,7 @@ Item {
                     visible: EnableRC
 
                     Text {
-                        text: "Enable RC"
+                        text: qsTr("Enable RC")
                         font.weight: Font.Bold
                         font.pixelSize: 13
                         anchors.leftMargin: 8
@@ -225,7 +225,7 @@ Item {
                     color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
 
                     Text {
-                        text: "Mavlink SysID"
+                        text: qsTr("Mavlink SysID")
                         font.weight: Font.Bold
                         font.pixelSize: 13
                         anchors.leftMargin: 8
@@ -274,7 +274,7 @@ Item {
                     color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
 
                     Text {
-                        text: "Shape Color"
+                        text: qsTr("Shape Color")
                         font.weight: Font.Bold
                         font.pixelSize: 13
                         anchors.leftMargin: 8
@@ -329,7 +329,7 @@ Item {
                     color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
 
                     Text {
-                        text: "Glow Color"
+                        text: qsTr("Glow Color")
                         font.weight: Font.Bold
                         font.pixelSize: 13
                         anchors.leftMargin: 8
@@ -384,7 +384,7 @@ Item {
                     color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
 
                     Text {
-                        text: "Text Color"
+                        text: qsTr("Text Color")
                         font.weight: Font.Bold
                         font.pixelSize: 13
                         anchors.leftMargin: 8
@@ -439,7 +439,7 @@ Item {
                     color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
 
                     Text {
-                        text: "Top/bottom bars"
+                        text: qsTr("Top/bottom bars")
                         font.weight: Font.Bold
                         font.pixelSize: 13
                         anchors.leftMargin: 8
@@ -490,7 +490,7 @@ Item {
                     color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
 
                     Text {
-                        text: "Show Downlink RSSI"
+                        text: qsTr("Show Downlink RSSI")
                         font.weight: Font.Bold
                         font.pixelSize: 13
                         anchors.leftMargin: 8
@@ -519,7 +519,7 @@ Item {
                     color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
 
                     Text {
-                        text: "Show Uplink RSSI"
+                        text: qsTr("Show Uplink RSSI")
                         font.weight: Font.Bold
                         font.pixelSize: 13
                         anchors.leftMargin: 8
@@ -548,7 +548,7 @@ Item {
                     color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
 
                     Text {
-                        text: "Show Bitrate"
+                        text: qsTr("Show Bitrate")
                         font.weight: Font.Bold
                         font.pixelSize: 13
                         anchors.leftMargin: 8
@@ -577,7 +577,7 @@ Item {
                     color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
 
                     Text {
-                        text: "Show GPS"
+                        text: qsTr("Show GPS")
                         font.weight: Font.Bold
                         font.pixelSize: 13
                         anchors.leftMargin: 8
@@ -606,7 +606,7 @@ Item {
                     color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
 
                     Text {
-                        text: "Show Home Distance"
+                        text: qsTr("Show Home Distance")
                         font.weight: Font.Bold
                         font.pixelSize: 13
                         anchors.leftMargin: 8
@@ -635,7 +635,7 @@ Item {
                     color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
 
                     Text {
-                        text: "Show Flight Timer"
+                        text: qsTr("Show Flight Timer")
                         font.weight: Font.Bold
                         font.pixelSize: 13
                         anchors.leftMargin: 8
@@ -664,7 +664,7 @@ Item {
                     color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
 
                     Text {
-                        text: "Show Flight Mode"
+                        text: qsTr("Show Flight Mode")
                         font.weight: Font.Bold
                         font.pixelSize: 13
                         anchors.leftMargin: 8
@@ -693,7 +693,7 @@ Item {
                     color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
 
                     Text {
-                        text: "Show Ground Status"
+                        text: qsTr("Show Ground Status")
                         font.weight: Font.Bold
                         font.pixelSize: 13
                         anchors.leftMargin: 8
@@ -722,7 +722,7 @@ Item {
                     color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
 
                     Text {
-                        text: "Show Air Status"
+                        text: qsTr("Show Air Status")
                         font.weight: Font.Bold
                         font.pixelSize: 13
                         anchors.leftMargin: 8
@@ -751,7 +751,7 @@ Item {
                     color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
 
                     Text {
-                        text: "Show Air Battery"
+                        text: qsTr("Show Air Battery")
                         font.weight: Font.Bold
                         font.pixelSize: 13
                         anchors.leftMargin: 8
@@ -780,7 +780,7 @@ Item {
                     color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
 
                     Text {
-                        text: "Show mAh"
+                        text: qsTr("Show mAh")
                         font.weight: Font.Bold
                         font.pixelSize: 13
                         anchors.leftMargin: 8
@@ -809,7 +809,7 @@ Item {
                     color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
 
                     Text {
-                        text: "Show Total Flight Distance"
+                        text: qsTr("Show Total Flight Distance")
                         font.weight: Font.Bold
                         font.pixelSize: 13
                         anchors.leftMargin: 8
@@ -838,7 +838,7 @@ Item {
                     color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
 
                     Text {
-                        text: "Show log messages on-screen"
+                        text: qsTr("Show log messages on-screen")
                         font.weight: Font.Bold
                         font.pixelSize: 13
                         anchors.leftMargin: 8
@@ -867,7 +867,7 @@ Item {
                     color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
 
                     Text {
-                        text: "Show Horizon"
+                        text: qsTr("Show Horizon")
                         font.weight: Font.Bold
                         font.pixelSize: 13
                         anchors.leftMargin: 8
@@ -896,7 +896,7 @@ Item {
                     color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
 
                     Text {
-                        text: "Show Flight Path Vector"
+                        text: qsTr("Show Flight Path Vector")
                         font.weight: Font.Bold
                         font.pixelSize: 13
                         anchors.leftMargin: 8
@@ -925,7 +925,7 @@ Item {
                     color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
 
                     Text {
-                        text: "Show Altitude"
+                        text: qsTr("Show Altitude")
                         font.weight: Font.Bold
                         font.pixelSize: 13
                         anchors.leftMargin: 8
@@ -954,7 +954,7 @@ Item {
                     color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
 
                     Text {
-                        text: "Show Speed"
+                        text: qsTr("Show Speed")
                         font.weight: Font.Bold
                         font.pixelSize: 13
                         anchors.leftMargin: 8
@@ -983,7 +983,7 @@ Item {
                     color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
 
                     Text {
-                        text: "Show Heading"
+                        text: qsTr("Show Heading")
                         font.weight: Font.Bold
                         font.pixelSize: 13
                         anchors.leftMargin: 8
@@ -1012,7 +1012,7 @@ Item {
                     color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
 
                     Text {
-                        text: "Show Second Altitude"
+                        text: qsTr("Show Second Altitude")
                         font.weight: Font.Bold
                         font.pixelSize: 13
                         anchors.leftMargin: 8
@@ -1041,7 +1041,7 @@ Item {
                     color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
 
                     Text {
-                        text: "Show Home Arrow"
+                        text: qsTr("Show Home Arrow")
                         font.weight: Font.Bold
                         font.pixelSize: 13
                         anchors.leftMargin: 8
@@ -1070,7 +1070,7 @@ Item {
                     color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
 
                     Text {
-                        text: "Show Map"
+                        text: qsTr("Show Map")
                         font.weight: Font.Bold
                         font.pixelSize: 13
                         anchors.leftMargin: 8
@@ -1099,7 +1099,7 @@ Item {
                     color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
 
                     Text {
-                        text: "Show Throttle"
+                        text: qsTr("Show Throttle")
                         font.weight: Font.Bold
                         font.pixelSize: 13
                         anchors.leftMargin: 8
@@ -1128,7 +1128,7 @@ Item {
                     color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
 
                     Text {
-                        text: "Show Control Inputs"
+                        text: qsTr("Show Control Inputs")
                         font.weight: Font.Bold
                         font.pixelSize: 13
                         anchors.leftMargin: 8
@@ -1157,7 +1157,7 @@ Item {
                     color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
 
                     Text {
-                        text: "Show GPIO"
+                        text: qsTr("Show GPIO")
                         font.weight: Font.Bold
                         font.pixelSize: 13
                         anchors.leftMargin: 8
@@ -1186,7 +1186,7 @@ Item {
                     color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
 
                     Text {
-                        text: "Show Vibration"
+                        text: qsTr("Show Vibration")
                         font.weight: Font.Bold
                         font.pixelSize: 13
                         anchors.leftMargin: 8
@@ -1215,7 +1215,7 @@ Item {
                     color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
 
                     Text {
-                        text: "Show Vertical Speed"
+                        text: qsTr("Show Vertical Speed")
                         font.weight: Font.Bold
                         font.pixelSize: 13
                         anchors.leftMargin: 8
@@ -1243,7 +1243,7 @@ Item {
                     color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
 
                     Text {
-                        text: "Show Wind (Experimental)"
+                        text: qsTr("Show Wind (Experimental)")
                         font.weight: Font.Bold
                         font.pixelSize: 13
                         anchors.leftMargin: 8
@@ -1263,6 +1263,35 @@ Item {
                         anchors.verticalCenter: parent.verticalCenter
                         checked: settings.show_wind
                         onCheckedChanged: settings.show_wind = checked
+                    }
+                }
+
+                Rectangle {
+                    width: parent.width
+                    height: rowHeight
+                    color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
+
+                    Text {
+                        text: qsTr("Show example widget")
+                        font.weight: Font.Bold
+                        font.pixelSize: 13
+                        anchors.leftMargin: 8
+                        verticalAlignment: Text.AlignVCenter
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: 224
+                        height: elementHeight
+                        anchors.left: parent.left
+                    }
+
+                    Switch {
+                        width: 32
+                        height: elementHeight
+                        anchors.rightMargin: Qt.inputMethod.visible ? 96 : 36
+
+                        anchors.right: parent.right
+                        anchors.verticalCenter: parent.verticalCenter
+                        checked: settings.show_example_widget
+                        onCheckedChanged: settings.show_example_widget = checked
                     }
                 }
 
@@ -1289,7 +1318,7 @@ Item {
                     color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
 
                     Text {
-                        text: "Screen Scale"
+                        text: qsTr("Screen Scale")
                         font.weight: Font.Bold
                         font.pixelSize: 13
                         anchors.leftMargin: 8
@@ -1340,7 +1369,7 @@ Item {
                     visible: OpenHDPi.is_raspberry_pi
 
                     Text {
-                        text: "Brightness"
+                        text: qsTr("Brightness")
                         font.weight: Font.Bold
                         font.pixelSize: 13
                         anchors.leftMargin: 8
@@ -1393,9 +1422,10 @@ Item {
                     width: parent.width
                     height: rowHeight
                     color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
+                    visible: EnableGStreamer
 
                     Text {
-                        text: "Always use software video decoder"
+                        text: qsTr("Always use software video decoder")
                         font.weight: Font.Bold
                         font.pixelSize: 13
                         anchors.leftMargin: 8
@@ -1425,7 +1455,7 @@ Item {
                     visible: EnablePiP
 
                     Text {
-                        text: "Enable PiP"
+                        text: qsTr("Enable PiP")
                         font.weight: Font.Bold
                         font.pixelSize: 13
                         anchors.leftMargin: 8
@@ -1454,7 +1484,7 @@ Item {
                     color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
 
                     Text {
-                        text: "Enable LTE"
+                        text: qsTr("Enable LTE")
                         font.weight: Font.Bold
                         font.pixelSize: 13
                         anchors.leftMargin: 8
@@ -1484,7 +1514,7 @@ Item {
                     visible: EnableMainVideo
 
                     Text {
-                        text: "Hide warning watermark"
+                        text: qsTr("Hide warning watermark")
                         font.weight: Font.Bold
                         font.pixelSize: 13
                         anchors.leftMargin: 8

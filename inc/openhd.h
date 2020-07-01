@@ -42,8 +42,10 @@ public:
        the way QTimer and QML singletons/context properties work */
     void updateFlightTimer();
 
+    void findGcsPosition();
     void updateFlightDistance();
-    void updateFlightMah();
+    void updateAppMah();
+    void updateLateralSpeed();
     void updateWind();
 
     Q_PROPERTY(QString gstreamer_version READ get_gstreamer_version NOTIFY gstreamer_version_changed)
@@ -167,6 +169,9 @@ public:
     Q_PROPERTY(float vsi MEMBER m_vsi WRITE set_vsi NOTIFY vsi_changed)
     void set_vsi(float vsi);
 
+    Q_PROPERTY(double lateral_speed MEMBER m_lateral_speed WRITE set_lateral_speed NOTIFY lateral_speed_changed)
+    void set_lateral_speed(double lateral_speed);
+
     Q_PROPERTY(double wind_speed MEMBER m_wind_speed WRITE set_wind_speed NOTIFY wind_speed_changed)
     void set_wind_speed(double wind_speed);
 
@@ -254,6 +259,9 @@ public:
     Q_PROPERTY(double flight_mah MEMBER m_flight_mah WRITE set_flight_mah NOTIFY flight_mah_changed)
     void set_flight_mah(double flight_mah);
 
+    Q_PROPERTY(double app_mah MEMBER m_app_mah WRITE set_app_mah NOTIFY app_mah_changed)
+    void set_app_mah(double app_mah);
+
     Q_PROPERTY(qint64 last_openhd_heartbeat MEMBER m_last_openhd_heartbeat WRITE set_last_openhd_heartbeat NOTIFY last_openhd_heartbeat_changed)
     void set_last_openhd_heartbeat(qint64 last_openhd_heartbeat);
 
@@ -295,6 +303,32 @@ public:
 
     Q_PROPERTY(double ground_iout MEMBER m_ground_iout WRITE set_ground_iout NOTIFY ground_iout_changed)
     void set_ground_iout(double ground_iout);
+
+
+
+    Q_PROPERTY(int rcChannel1 MEMBER mRCChannel1 WRITE setRCChannel1 NOTIFY rcChannel1Changed)
+    void setRCChannel1(int rcChannel1);
+
+    Q_PROPERTY(int rcChannel2 MEMBER mRCChannel2 WRITE setRCChannel2 NOTIFY rcChannel2Changed)
+    void setRCChannel2(int rcChannel2);
+
+    Q_PROPERTY(int rcChannel3 MEMBER mRCChannel3 WRITE setRCChannel3 NOTIFY rcChannel3Changed)
+    void setRCChannel3(int rcChannel3);
+
+    Q_PROPERTY(int rcChannel4 MEMBER mRCChannel4 WRITE setRCChannel4 NOTIFY rcChannel4Changed)
+    void setRCChannel4(int rcChannel4);
+
+    Q_PROPERTY(int rcChannel5 MEMBER mRCChannel5 WRITE setRCChannel5 NOTIFY rcChannel5Changed)
+    void setRCChannel5(int rcChannel5);
+
+    Q_PROPERTY(int rcChannel6 MEMBER mRCChannel6 WRITE setRCChannel6 NOTIFY rcChannel6Changed)
+    void setRCChannel6(int rcChannel6);
+
+    Q_PROPERTY(int rcChannel7 MEMBER mRCChannel7 WRITE setRCChannel7 NOTIFY rcChannel7Changed)
+    void setRCChannel7(int rcChannel7);
+
+    Q_PROPERTY(int rcChannel8 MEMBER mRCChannel8 WRITE setRCChannel8 NOTIFY rcChannel8Changed)
+    void setRCChannel8(int rcChannel8);
 
 signals:
     // system
@@ -361,6 +395,8 @@ signals:
 
     void vsi_changed(float vsi);
 
+    void lateral_speed_changed(double lateral_speed);
+
     void wind_speed_changed(double wind_speed);
     void wind_direction_changed(double wind_direction);
 
@@ -395,6 +431,7 @@ signals:
     void flight_distance_changed(double flight_distance);
 
     void flight_mah_changed(int flight_mah);
+    void app_mah_changed(int app_mah);
 
     void last_openhd_heartbeat_changed(qint64 last_openhd_heartbeat);
 
@@ -417,6 +454,15 @@ signals:
     void ground_vout_changed(double ground_vout);
     void ground_vbat_changed(double ground_vbat);
     void ground_iout_changed(double ground_iout);
+
+    void rcChannel1Changed(int rcChanne1);
+    void rcChannel2Changed(int rcChanne2);
+    void rcChannel3Changed(int rcChanne3);
+    void rcChannel4Changed(int rcChanne4);
+    void rcChannel5Changed(int rcChanne5);
+    void rcChannel6Changed(int rcChanne6);
+    void rcChannel7Changed(int rcChanne7);
+    void rcChannel8Changed(int rcChanne8);
 
 private:
 #if defined(ENABLE_SPEECH)
@@ -441,8 +487,12 @@ private:
 
     bool m_armed = false;
     QString m_flight_mode = "Stabilize";
+
     double m_homelat = 0.0;
     double m_homelon = 0.0;
+    bool gcs_position_set = false;
+    int gps_quality_count = 0;
+
     double m_lat = 0.0;
     double m_lon = 0.0;
     double m_home_distance = 0.0;
@@ -474,6 +524,8 @@ private:
     float m_clipping_z = 0.0;
 
     float m_vsi = 0.0;
+
+    double m_lateral_speed = 0.0;
 
     double m_wind_direction = 0.0;
     double m_wind_speed = 0.0;
@@ -522,7 +574,8 @@ private:
     long total_dist= 0;
 
     int m_flight_mah = 0;
-    qint64 flightMahLastTime= 0;
+    int m_app_mah = 0;
+    qint64 mahLastTime= 0;
     double total_mah= 0;
 
     qint64 m_last_openhd_heartbeat = -1;
@@ -532,8 +585,8 @@ private:
     bool m_pip_video_running = false;
     bool m_lte_video_running = false;
 
-
-    QTime flightTimeStart;
+    QElapsedTimer totalTime;
+    QElapsedTimer flightTimeStart;
 
     QList<int> m_ground_gpio;
     QList<int> m_air_gpio;
@@ -547,6 +600,15 @@ private:
     double m_ground_vout = 0.0;
     double m_ground_vbat = 0.0;
     double m_ground_iout = 0.0;
+
+    int mRCChannel1 = 0;
+    int mRCChannel2 = 0;
+    int mRCChannel3 = 0;
+    int mRCChannel4 = 0;
+    int mRCChannel5 = 0;
+    int mRCChannel6 = 0;
+    int mRCChannel7 = 0;
+    int mRCChannel8 = 0;
 };
 
 

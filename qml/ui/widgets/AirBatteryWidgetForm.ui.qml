@@ -9,7 +9,7 @@ import OpenHD 1.0
 BaseWidget {
     id: airBatteryWidget
     width: 96
-    height: 48
+    height: 55
 
     visible: settings.show_air_battery
 
@@ -22,12 +22,14 @@ BaseWidget {
     defaultVCenter: false
 
     hasWidgetDetail: true
+    widgetDetailHeight: 190
+
     widgetDetailComponent: Column {
         Item {
             width: parent.width
             height: 32
             Text {
-                text: "Voltage:"
+                text: qsTr("Voltage:")
                 color: "white"
                 font.bold: true
                 height: parent.height
@@ -49,7 +51,7 @@ BaseWidget {
             width: parent.width
             height: 32
             Text {
-                text: "Current:"
+                text: qsTr("Current:")
                 color: "white"
                 font.bold: true
                 height: parent.height
@@ -72,7 +74,7 @@ BaseWidget {
             height: 32
             Text {
                 id: opacityTitle
-                text: "Transparency"
+                text: qsTr("Transparency")
                 color: "white"
                 height: parent.height
                 font.bold: true
@@ -101,7 +103,7 @@ BaseWidget {
             width: parent.width
             height: 32
             Text {
-                text: "Show all data"
+                text: qsTr("Show volts and amps")
                 color: "white"
                 height: parent.height
                 font.bold: true
@@ -112,10 +114,32 @@ BaseWidget {
             Switch {
                 width: 32
                 height: parent.height
-                anchors.rightMargin: 12
+                anchors.rightMargin: 6
                 anchors.right: parent.right
-                checked: settings.air_battery_showall
-                onCheckedChanged: settings.air_battery_showall = checked
+                checked: settings.air_battery_show_voltage_current
+                onCheckedChanged: settings.air_battery_show_voltage_current = checked
+            }
+        }
+        Item {
+            width: parent.width
+            height: 32
+            visible: settings.air_battery_show_voltage_current
+            Text {
+                text: qsTr("Show single cell voltage")
+                color: "white"
+                height: parent.height
+                font.bold: true
+                font.pixelSize: detailPanelFontPixels;
+                anchors.left: parent.left
+                verticalAlignment: Text.AlignVCenter
+            }
+            Switch {
+                width: 32
+                height: parent.height
+                anchors.rightMargin: 6
+                anchors.right: parent.right
+                checked: settings.air_battery_show_single_cell
+                onCheckedChanged: settings.air_battery_show_single_cell = checked
             }
         }
     }
@@ -142,7 +166,7 @@ BaseWidget {
         }
         Label {
             id: battery_amp_text
-            visible: settings.air_battery_showall ? true : false
+            visible: settings.air_battery_show_voltage_current
             text: Number(OpenHD.battery_current/100.0).toLocaleString(Qt.locale(), 'f', 1) + "A";
             color: settings.color_text
             anchors.bottom: battery_percent.top
@@ -156,8 +180,9 @@ BaseWidget {
         }
         Label {
             id: battery_volt_text
-            visible: settings.air_battery_showall ? true : false
-            text: Number(OpenHD.battery_voltage).toLocaleString(Qt.locale(), 'f', 2) + "V";
+            visible: settings.air_battery_show_voltage_current
+            text: settings.air_battery_show_single_cell ? Number((OpenHD.battery_voltage)/settings.battery_cells).toLocaleString(Qt.locale(), 'f', 2) + "V" :
+                                                          Number(OpenHD.battery_voltage).toLocaleString(Qt.locale(), 'f', 2) + "V";
             color: settings.color_text
             anchors.top: battery_percent.bottom
             anchors.left: batteryGauge.right

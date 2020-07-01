@@ -30,7 +30,7 @@ BaseWidget {
             height: 32
             Text {
                 id: opacityTitle
-                text: "Transparency"
+                text: qsTr("Transparency")
                 color: "white"
                 height: parent.height
                 font.bold: true
@@ -53,6 +53,27 @@ BaseWidget {
                 onValueChanged: {
                     settings.mah_opacity = mah_opacity_Slider.value
                 }
+            }
+        }
+        Item {
+            width: parent.width
+            height: 32
+            Text {
+                text: qsTr("Use telemetry data")
+                color: "white"
+                height: parent.height
+                font.bold: true
+                font.pixelSize: detailPanelFontPixels;
+                anchors.left: parent.left
+                verticalAlignment: Text.AlignVCenter
+            }
+            Switch {
+                width: 32
+                height: parent.height
+                anchors.rightMargin: 6
+                anchors.right: parent.right
+                checked: settings.flight_mah_use_telemetry
+                onCheckedChanged: settings.flight_mah_use_telemetry = checked
             }
         }
     }
@@ -90,7 +111,7 @@ BaseWidget {
             color: settings.color_text
             opacity: settings.mah_opacity
 
-            text: OpenHD.flight_mah+"mAh"
+            text: settings.air_battery_mah_source ? OpenHD.flight_mah+"mAh" : OpenHD.app_mah+"mAh"
             anchors.right: parent.right
             anchors.rightMargin: 0
             verticalAlignment: Text.AlignVCenter

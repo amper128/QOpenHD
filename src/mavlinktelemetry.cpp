@@ -126,7 +126,8 @@ void MavlinkTelemetry::onProcessMavlinkMessage(mavlink_message_t msg) {
             OpenHD::instance()->set_battery_voltage(battery_voltage);
 
             OpenHD::instance()->set_battery_current(sys_status.current_battery);
-            OpenHD::instance()->updateFlightMah();
+
+            OpenHD::instance()->updateAppMah();
 
             QSettings settings;
             auto battery_cells = settings.value("battery_cells", QVariant(3)).toInt();
@@ -230,10 +231,13 @@ void MavlinkTelemetry::onProcessMavlinkMessage(mavlink_message_t msg) {
             OpenHD::instance()->set_vy(global_position.vy/100.0);
             OpenHD::instance()->set_vz(global_position.vz/100.0);
 
+            OpenHD::instance()->findGcsPosition();
             OpenHD::instance()->calculate_home_distance();
             OpenHD::instance()->calculate_home_course();
 
             OpenHD::instance()->updateFlightDistance();
+
+            OpenHD::instance()->updateLateralSpeed();
 
             OpenHD::instance()->updateWind();
 
@@ -262,6 +266,16 @@ void MavlinkTelemetry::onProcessMavlinkMessage(mavlink_message_t msg) {
             OpenHD::instance()->set_control_roll(rc_channels.chan1_raw);
             OpenHD::instance()->set_control_throttle(rc_channels.chan3_raw);
             OpenHD::instance()->set_control_yaw(rc_channels.chan4_raw);
+
+            OpenHD::instance()->setRCChannel1(rc_channels.chan1_raw);
+            OpenHD::instance()->setRCChannel2(rc_channels.chan2_raw);
+            OpenHD::instance()->setRCChannel3(rc_channels.chan3_raw);
+            OpenHD::instance()->setRCChannel4(rc_channels.chan4_raw);
+            OpenHD::instance()->setRCChannel5(rc_channels.chan5_raw);
+            OpenHD::instance()->setRCChannel6(rc_channels.chan6_raw);
+            OpenHD::instance()->setRCChannel7(rc_channels.chan7_raw);
+            OpenHD::instance()->setRCChannel8(rc_channels.chan8_raw);
+
 
             /*qDebug() << "RC: " << rc_channels.chan1_raw
                                  << rc_channels.chan2_raw
@@ -321,6 +335,9 @@ void MavlinkTelemetry::onProcessMavlinkMessage(mavlink_message_t msg) {
         case MAVLINK_MSG_ID_BATTERY_STATUS: {
             mavlink_battery_status_t battery_status;
             mavlink_msg_battery_status_decode(&msg, &battery_status);
+
+            OpenHD::instance()->set_flight_mah(battery_status.current_consumed);
+
             int total_voltage = 0;
             for (int cell = 0; cell < 10; cell++) {
                 int cell_voltage  = battery_status.voltages[cell];
@@ -385,8 +402,7 @@ void MavlinkTelemetry::onProcessMavlinkMessage(mavlink_message_t msg) {
             mavlink_msg_home_position_decode(&msg, &home_position);
             OpenHD::instance()->set_homelat((double)home_position.latitude / 10000000.0);
             OpenHD::instance()->set_homelon((double)home_position.longitude / 10000000.0);
-
-            OpenHD::instance()->calculate_home_distance();
+            LocalMessage::instance()->showMessage("Home Position set by OpenHD", 2);
             break;
         }
         case MAVLINK_MSG_ID_STATUSTEXT: {
@@ -395,23 +411,18 @@ void MavlinkTelemetry::onProcessMavlinkMessage(mavlink_message_t msg) {
             int level = 0;
             switch (statustext.severity) {
                 case MAV_SEVERITY_EMERGENCY:
-                    qDebug() << "EMER:" << statustext.text;
                     level = 7;
                     break;
                 case MAV_SEVERITY_ALERT:
-                    qDebug() << "ALERT:" <<  statustext.text;
                     level = 6;
                     break;
                 case MAV_SEVERITY_CRITICAL:
-                    qDebug() << "CRIT:" <<  statustext.text;
                     level = 5;
                     break;
                 case MAV_SEVERITY_ERROR:
-                    qDebug() << "ERROR:" <<  statustext.text;
                     level = 4;
                     break;
                 case MAV_SEVERITY_WARNING:
-                    qDebug() << "WARN:" <<  statustext.text;
                     level = 3;
                     break;
                 case MAV_SEVERITY_NOTICE:

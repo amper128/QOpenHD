@@ -124,29 +124,55 @@ void OpenHD::updateFlightTimer() {
     }
 }
 
-void OpenHD::updateFlightDistance() {
-    auto elapsed = flightTimeStart.elapsed();
-    auto time = elapsed / 3600;
-    auto time_diff = time - flightDistanceLastTime;
-    flightDistanceLastTime = time;
-
-    auto added_distance =  m_speed * time_diff;
-    total_dist = total_dist + added_distance;
-
-    set_flight_distance( total_dist);
+void OpenHD::findGcsPosition() {
+    if (gcs_position_set==false){
+        //only attempt to set gcs home position if hdop<3m and unarmed
+        if (m_gps_hdop<3 && m_armed==false){
+            //get 20 good gps readings before setting
+            if (++gps_quality_count == 20) {
+                set_homelat(m_lat);
+                set_homelon(m_lon);
+                gcs_position_set=true;
+                LocalMessage::instance()->showMessage("Home Position set by OpenHD", 2);
+            }
+        }
+    }
 }
 
-void OpenHD::updateFlightMah() {
-    auto elapsed = flightTimeStart.elapsed();
+void OpenHD::updateFlightDistance() {
+    if (m_gps_hdop > 20 || m_lat == 0.0){
+        //do not pollute distance if we have bad data
+        return;
+    }
+    if (m_armed==true){
+        auto elapsed = flightTimeStart.elapsed();
+        auto time = elapsed / 3600;
+        auto time_diff = time - flightDistanceLastTime;
+        flightDistanceLastTime = time;
+
+        auto added_distance =  m_speed * time_diff;
+        qDebug() << "added distance" << added_distance;
+        total_dist = total_dist + added_distance;
+
+        qDebug() << "total distance" << total_dist;
+        set_flight_distance( total_dist);
+    }
+}
+
+void OpenHD::updateAppMah() {
+    if (!totalTime.isValid()){
+        totalTime.start();
+    }
+    auto elapsed = totalTime.elapsed();
     auto time = elapsed / 3600;
-    auto time_diff = time - flightMahLastTime;
-    flightMahLastTime = time;
+    auto time_diff = time - mahLastTime;
+    mahLastTime = time;
 
     //m_battery_current is 1 decimals to the right
     auto added_mah=(m_battery_current/100) * time_diff;
     total_mah = total_mah + added_mah;
 
-    set_flight_mah( total_mah );
+    set_app_mah( total_mah );
 }
 
 void OpenHD::set_boot_time(int boot_time) {
@@ -218,7 +244,7 @@ void OpenHD::set_armed(bool armed) {
         flightTimeStart.start();
 
         if(armed==true && m_homelat == 0.0 && m_homelon == 0.0){
-            LocalMessage::instance()->showMessage("No Home Position in OpenHD", 3);
+            LocalMessage::instance()->showMessage("No Home Position in OpenHD", 4);
         }
     }
 
@@ -239,11 +265,13 @@ void OpenHD::set_flight_mode(QString flight_mode) {
 
 void OpenHD::set_homelat(double homelat) {
     m_homelat = homelat;
+    gcs_position_set = true;
     emit homelat_changed(m_homelat);
 }
 
 void OpenHD::set_homelon(double homelon) {
     m_homelon = homelon;
+    gcs_position_set = true;
     emit homelon_changed(m_homelon);
 }
 
@@ -396,6 +424,11 @@ void OpenHD::set_vsi(float vsi) {
      emit vsi_changed(m_vsi);
 }
 
+void OpenHD::set_lateral_speed(double lateral_speed) {
+    m_lateral_speed= lateral_speed;
+     emit lateral_speed_changed(m_lateral_speed);
+}
+
 void OpenHD::set_wind_speed(double wind_speed) {
     m_wind_speed= wind_speed;
      emit wind_speed_changed(m_wind_speed);
@@ -546,6 +579,11 @@ void OpenHD::set_flight_mah(double flight_mah) {
     emit flight_mah_changed(m_flight_mah);
 }
 
+void OpenHD::set_app_mah(double app_mah) {
+    m_app_mah = app_mah;
+    emit app_mah_changed(m_app_mah);
+}
+
 void OpenHD::set_last_openhd_heartbeat(qint64 last_openhd_heartbeat) {
     m_last_openhd_heartbeat = last_openhd_heartbeat;
     emit last_openhd_heartbeat_changed(m_last_openhd_heartbeat);
@@ -611,7 +649,48 @@ void OpenHD::set_ground_iout(double ground_iout) {
     emit ground_iout_changed(m_ground_iout);
 }
 
-void OpenHD::updateWind() {
+void OpenHD::updateLateralSpeed(){
+
+    auto resultant_magnitude = sqrt(m_vx * m_vx + m_vy * m_vy);
+
+    //direction of motion vector in radians then converted to degree
+    auto resultant_angle = atan2(m_vy , m_vx)*(180/M_PI);
+
+    //converted from degrees to a compass heading
+    if (resultant_angle < 0.0){
+        resultant_angle += 360;
+    }
+
+    //Compare the motion heading to the vehicle heading
+    auto left = m_hdg - resultant_angle;
+    auto right = resultant_angle - m_hdg;
+    if (left < 0) left += 360;
+    if (right < 0) right += 360;
+    auto heading_diff = left < right ? -left : right;
+
+    double vehicle_vx=0.0;
+
+
+    if (heading_diff > 0 && heading_diff <= 90){
+        //console.log("we are moving forward and or right");
+        vehicle_vx=(heading_diff/90)*resultant_magnitude;
+    }
+    else if (heading_diff > 90 && heading_diff <= 180){
+        //console.log("we are moving backwards and or right");
+        vehicle_vx=((heading_diff*-1)+180)/90*resultant_magnitude;
+    }
+    else if (heading_diff > -180 && heading_diff <= -90){
+        //console.log("we are moving backwards and or left");
+        vehicle_vx=((heading_diff+180)/90)*-1*resultant_magnitude;
+    }
+    else{
+        //console.log("we are moving forward and or left");
+        vehicle_vx=(heading_diff/90)*resultant_magnitude;
+    }
+    set_lateral_speed(vehicle_vx);
+}
+
+void OpenHD::updateWind(){
 
     if (m_vsi < 1 && m_vsi > -1){
         // we are level, so a 2d vector is possible
@@ -779,5 +858,46 @@ void OpenHD::updateWind() {
 
         }
     }
+}
+
+
+void OpenHD::setRCChannel1(int rcChannel1) {
+    mRCChannel1 = rcChannel1;
+    emit rcChannel1Changed(mRCChannel1);
+}
+
+void OpenHD::setRCChannel2(int rcChannel2) {
+    mRCChannel2 = rcChannel2;
+    emit rcChannel2Changed(mRCChannel2);
+}
+
+void OpenHD::setRCChannel3(int rcChannel3) {
+    mRCChannel3 = rcChannel3;
+    emit rcChannel3Changed(mRCChannel3);
+}
+
+void OpenHD::setRCChannel4(int rcChannel4) {
+    mRCChannel4 = rcChannel4;
+    emit rcChannel4Changed(mRCChannel4);
+}
+
+void OpenHD::setRCChannel5(int rcChannel5) {
+    mRCChannel5 = rcChannel5;
+    emit rcChannel5Changed(mRCChannel5);
+}
+
+void OpenHD::setRCChannel6(int rcChannel6) {
+    mRCChannel6 = rcChannel6;
+    emit rcChannel6Changed(mRCChannel6);
+}
+
+void OpenHD::setRCChannel7(int rcChannel7) {
+    mRCChannel7 = rcChannel7;
+    emit rcChannel7Changed(mRCChannel7);
+}
+
+void OpenHD::setRCChannel8(int rcChannel8) {
+    mRCChannel8 = rcChannel8;
+    emit rcChannel8Changed(mRCChannel8);
 }
 
