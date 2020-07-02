@@ -16,7 +16,7 @@ static OpenHD* _instance = nullptr;
 
 OpenHD* OpenHD::instance() {
     if (_instance == nullptr) {
-        _instance = new OpenHD();
+	_instance = new OpenHD();
     }
     return _instance;
 }
@@ -255,7 +255,7 @@ void OpenHD::set_armed(bool armed) {
 void OpenHD::set_flight_mode(QString flight_mode) {
 #if defined(ENABLE_SPEECH)
     if (m_flight_mode != flight_mode) {
-        m_speech->say(tr("%1 flight mode").arg(flight_mode));
+	m_speech->say(tr("%1 flight mode").arg(flight_mode));
     }
 #endif
     m_flight_mode = flight_mode;
@@ -647,6 +647,11 @@ void OpenHD::set_ground_vout(double ground_vout) {
 void OpenHD::set_ground_bat_percent(int percent) {
     m_ground_bat_percent = percent;
     emit ground_bat_percent_changed(m_ground_bat_percent);
+}
+
+void OpenHD::set_ground_bat_gauge(QString battery_gauge) {
+    m_ground_bat_gauge = battery_gauge;
+    emit ground_bat_gauge_changed(m_ground_bat_gauge);
 }
 
 void OpenHD::set_ground_vbat(double ground_vbat) {

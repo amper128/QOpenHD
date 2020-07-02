@@ -313,6 +313,10 @@ public:
     Q_PROPERTY(double ground_bat_percent MEMBER m_ground_bat_percent WRITE set_ground_bat_percent NOTIFY ground_bat_percent_changed)
     void set_ground_bat_percent(int percent);
 
+    /* % battery glyph */
+    Q_PROPERTY(QString ground_bat_gauge MEMBER m_ground_bat_gauge WRITE set_ground_bat_gauge NOTIFY ground_bat_gauge_changed)
+    void set_ground_bat_gauge(QString battery_gauge);
+
     /*Q_PROPERTY(double ground_iout MEMBER m_ground_iout WRITE set_ground_iout NOTIFY ground_iout_changed)
     void set_ground_iout(double ground_iout);*/
 
@@ -469,6 +473,7 @@ signals:
     //void ground_vout_changed(double ground_vout);
     void ground_vbat_changed(double ground_vbat);
     void ground_bat_percent_changed(int percent);
+    void ground_bat_gauge_changed(QString battery_gauge);
     //void ground_iout_changed(double ground_iout);
 
     void rcChannel1Changed(int rcChanne1);
@@ -619,6 +624,7 @@ private:
     double m_ground_vbat = 0.0;
     /*double m_ground_iout = 0.0;*/
     int m_ground_bat_percent = 0;
+    QString m_ground_bat_gauge = "\uf091";
     bool m_ground_charging = false;
 
     int mRCChannel1 = 0;

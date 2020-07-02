@@ -12,6 +12,7 @@
 
 #include "openhdpi.h"
 #include "openhd.h"
+#include "util.h"
 
 
 static OpenHDTelemetry* _instance = nullptr;
@@ -150,6 +151,8 @@ void OpenHDTelemetry::processOpenHDTelemetry(wifibroadcast_rx_status_forward_t t
     OpenHD::instance()->set_ground_vbat(telemetry.vbat_gnd_mv);
     OpenHD::instance()->set_ground_charging(telemetry.is_charging);
     OpenHD::instance()->set_ground_bat_percent(telemetry.vbat_capacity);
+    QString battery_gauge_glyph = battery_gauge_glyph_from_percentage((telemetry.vbat_capacity / 5) * 5);
+    OpenHD::instance()->set_ground_bat_gauge(battery_gauge_glyph);
 
     OpenHD::instance()->set_temp_gnd(telemetry.temp_gnd);
     OpenHD::instance()->set_cpuload_air(telemetry.cpuload_air);

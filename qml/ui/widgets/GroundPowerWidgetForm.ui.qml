@@ -95,7 +95,7 @@ BaseWidget {
             height: 24
             color: settings.color_text
             opacity: settings.ground_power_opacity
-            text: OpenHD.ground_bat_percent
+            text: OpenHD.ground_bat_percent + "%"
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: batteryGauge.right
             anchors.leftMargin: 0
@@ -116,10 +116,11 @@ BaseWidget {
                 // todo: expose battery_voltage_to_percent to QML instead of using cell levels here
                 var bat_percent = OpenHD.ground_bat_percent;
                 // 20% warning, 15% critical
-                return bat_percent < 20 ? (bat_percent < 15 ? "#ff0000" : "#fbfd15") : "#ffffff"
+                //return bat_percent < 20 ? (bat_percent < 15 ? "#ff0000" : "#fbfd15") : "#ffffff"
+                return bat_percent < 20 ? (bat_percent < 15 ? "#ff0000" : "#fbfd15") : settings.color_text
             }
             opacity: settings.ground_power_opacity
-            text: OpenHD.ground_bat_percent
+            text: OpenHD.ground_bat_gauge
             anchors.left: parent.left
             anchors.leftMargin: 12
             fontSizeMode: Text.VerticalFit
