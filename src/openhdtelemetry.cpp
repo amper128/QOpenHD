@@ -59,7 +59,7 @@ void OpenHDTelemetry::processDatagrams() {
 		emit groundStationIPUpdated(groundIP.toString());
 	}
 
-	if (datagram.size() == 113) {
+	if (datagram.size() == sizeof(wifibroadcast_rx_status_forward_t)) {
 	    memcpy(&telemetry, datagram.constData(), datagram.size());
 	    processOpenHDTelemetry(telemetry);
 	}
