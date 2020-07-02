@@ -69,6 +69,10 @@ Item {
         id: uplink
     }
 
+    RcRSSIWidget {
+        id: rcRSSIWidget
+    }
+
     HorizonWidget {
         id: horizonWidget
     }
