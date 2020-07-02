@@ -629,7 +629,7 @@ void OpenHD::set_air_gpio_busy(bool air_gpio_busy){
     emit air_gpio_busy_changed(air_gpio_busy);
 }
 
-void OpenHD::set_ground_vin(double ground_vin) {
+/*void OpenHD::set_ground_vin(double ground_vin) {
     m_ground_vin = ground_vin;
     emit ground_vin_changed(m_ground_vin);
 }
@@ -637,6 +637,11 @@ void OpenHD::set_ground_vin(double ground_vin) {
 void OpenHD::set_ground_vout(double ground_vout) {
     m_ground_vout = ground_vout;
     emit ground_vout_changed(m_ground_vout);
+}*/
+
+void OpenHD::set_ground_bat_percent(int percent) {
+    m_ground_bat_percent = percent;
+    emit ground_bat_percent_changed(m_ground_bat_percent);
 }
 
 void OpenHD::set_ground_vbat(double ground_vbat) {
@@ -644,10 +649,21 @@ void OpenHD::set_ground_vbat(double ground_vbat) {
     emit ground_vbat_changed(m_ground_vbat);
 }
 
-void OpenHD::set_ground_iout(double ground_iout) {
+void OpenHD::set_ground_charging(bool charging) {
+    m_ground_charging = charging;
+    emit ground_charging_changed(m_ground_charging);
+}
+
+void ground_chbat_changed(bool charging);
+//void ground_vin_changed(double ground_vin);
+//void ground_vout_changed(double ground_vout);
+void ground_vbat_changed(double ground_vbat);
+void ground_bat_percent_changed(int percent);
+
+/*void OpenHD::set_ground_iout(double ground_iout) {
     m_ground_iout = ground_iout;
     emit ground_iout_changed(m_ground_iout);
-}
+}*/
 
 void OpenHD::updateLateralSpeed(){
 

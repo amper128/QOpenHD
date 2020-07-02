@@ -50,6 +50,9 @@ typedef struct {
     uint8_t temp_gnd; // CPU temperature Ground Pi
     uint8_t cpuload_air; // CPU load Air Pi
     uint8_t temp_air; // CPU temperature Air Pi
+    uint8_t vbat_capacity; // Ground battery percentage
+    uint8_t is_charging; // Ground battery is charging?
+    uint16_t vbat_gnd_mv; // Ground VBat
     uint32_t wifi_adapter_cnt; // number of wifi adapters
     wifi_adapter_rx_status_forward_t adapter[6]; // same struct as in wifibroadcast lib.h
 }

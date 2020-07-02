@@ -95,10 +95,10 @@ void PowerMicroservice::onProcessMavlinkMessage(mavlink_message_t msg) {
             mavlink_openhd_ground_power_t ground_power;
             mavlink_msg_openhd_ground_power_decode(&msg, &ground_power);
 
-            OpenHD::instance()->set_ground_vin(ground_power.vin);
+            /*OpenHD::instance()->set_ground_vin(ground_power.vin);
             OpenHD::instance()->set_ground_vout(ground_power.vout);
             OpenHD::instance()->set_ground_vbat(ground_power.vbat);
-            OpenHD::instance()->set_ground_iout(ground_power.iout);
+            OpenHD::instance()->set_ground_iout(ground_power.iout);*/
 
             auto battery_cells = 1; //settings.value("battery_cells", QVariant(3)).toInt();
 

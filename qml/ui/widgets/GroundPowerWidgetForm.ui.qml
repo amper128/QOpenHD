@@ -11,7 +11,8 @@ BaseWidget {
     width: 96
     height: 48
 
-    //visible: settings.show_ground_power
+    // visible: settings.show_ground_power
+    visible: settings.show_air_battery
 
     widgetIdentifier: "ground_power_widget"
 
@@ -26,11 +27,11 @@ BaseWidget {
         Item {
             width: parent.width
             height: 32
-            visible: (OpenHDPower.vin !== -1);
-            Text { text: qsTr("Voltage in:");  color: "white"; height: parent.height; font.bold: true; font.pixelSize: detailPanelFontPixels; anchors.left: parent.left; verticalAlignment: Text.AlignVCenter }
-            Text { text: OpenHDPower.vin; color: "white"; height: parent.height; font.bold: true; font.pixelSize: detailPanelFontPixels; anchors.right: parent.right; verticalAlignment: Text.AlignVCenter }
+            visible: (OpenHD.ground_vbat !== -1);
+            Text { text: qsTr("Voltage:");  color: "white"; height: parent.height; font.bold: true; font.pixelSize: detailPanelFontPixels; anchors.left: parent.left; verticalAlignment: Text.AlignVCenter }
+            Text { text: OpenHD.ground_vbat; color: "white"; height: parent.height; font.bold: true; font.pixelSize: detailPanelFontPixels; anchors.right: parent.right; verticalAlignment: Text.AlignVCenter }
         }
-        Item {
+        /*Item {
             width: parent.width
             height: 32
             visible: (OpenHDPower.vout !== -1);
@@ -50,7 +51,7 @@ BaseWidget {
             visible: (OpenHDPower.vbat !== -1);
             Text { text: qsTr("Voltage bat:");  color: "white"; height: parent.height; font.bold: true; font.pixelSize: detailPanelFontPixels; anchors.left: parent.left; verticalAlignment: Text.AlignVCenter }
             Text { text: OpenHDPower.vbat; color: "white"; height: parent.height; font.bold: true; font.pixelSize: detailPanelFontPixels; anchors.right: parent.right; verticalAlignment: Text.AlignVCenter }
-        }
+        }*/
         Item {
             width: parent.width
             height: 32
@@ -94,7 +95,7 @@ BaseWidget {
             height: 24
             color: settings.color_text
             opacity: settings.ground_power_opacity
-            text: OpenHDPower.battery_percent
+            text: OpenHD.ground_bat_percent
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: batteryGauge.right
             anchors.leftMargin: 0
@@ -113,12 +114,12 @@ BaseWidget {
             // @disable-check M223
             color: {
                 // todo: expose battery_voltage_to_percent to QML instead of using cell levels here
-                var cellVoltage = OpenHDPower.vbat;
+                var bat_percent = OpenHD.ground_bat_percent;
                 // 20% warning, 15% critical
-                return cellVoltage < 3.15 ? (cellVoltage < 3.00 ? "#ff0000" : "#fbfd15") : "#ffffff"
+                return bat_percent < 20 ? (bat_percent < 15 ? "#ff0000" : "#fbfd15") : "#ffffff"
             }
             opacity: settings.ground_power_opacity
-            text: OpenHDPower.battery_gauge
+            text: OpenHD.ground_bat_percent
             anchors.left: parent.left
             anchors.leftMargin: 12
             fontSizeMode: Text.VerticalFit

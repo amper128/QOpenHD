@@ -147,6 +147,10 @@ void OpenHDTelemetry::processOpenHDTelemetry(wifibroadcast_rx_status_forward_t t
       set_homelon(tr("%1").arg((double)rssi.HomeLon));*/
     OpenHD::instance()->set_cpuload_gnd(telemetry.cpuload_gnd);
 
+    OpenHD::instance()->set_ground_vbat(telemetry.vbat_gnd_mv);
+    OpenHD::instance()->set_ground_charging(telemetry.is_charging);
+    OpenHD::instance()->set_ground_bat_percent(telemetry.vbat_capacity);
+
     OpenHD::instance()->set_temp_gnd(telemetry.temp_gnd);
     OpenHD::instance()->set_cpuload_air(telemetry.cpuload_air);
 

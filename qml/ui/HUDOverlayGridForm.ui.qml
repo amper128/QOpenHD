@@ -21,6 +21,10 @@ Item {
         id: air_battery
     }
 
+    GroundPowerWidget {
+        id: ground_battery
+    }
+
     FlightModeWidget {
         id: flight_mode
     }

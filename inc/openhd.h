@@ -292,17 +292,26 @@ public:
     Q_PROPERTY(bool air_gpio_busy MEMBER m_air_gpio_busy WRITE set_air_gpio_busy NOTIFY air_gpio_busy_changed)
     void set_air_gpio_busy(bool air_gpio_busy);
 
-    Q_PROPERTY(double ground_vin MEMBER m_ground_vin WRITE set_ground_vin NOTIFY ground_vin_changed)
-    void set_ground_vin(double ground_vin);
+    /*Q_PROPERTY(double ground_vin MEMBER m_ground_vin WRITE set_ground_vin NOTIFY ground_vin_changed)
+    void set_ground_vin(double ground_vin);*/
 
-    Q_PROPERTY(double ground_vout MEMBER m_ground_vout WRITE set_ground_vout NOTIFY ground_vout_changed)
-    void set_ground_vout(double ground_vout);
+    /*Q_PROPERTY(double ground_vout MEMBER m_ground_vout WRITE set_ground_vout NOTIFY ground_vout_changed)
+    void set_ground_vout(double ground_vout);*/
 
+    /* ground is charging? */
+    Q_PROPERTY(bool ground_charging MEMBER m_ground_charging WRITE set_ground_charging NOTIFY ground_charging_changed)
+    void set_ground_charging(bool charging);
+
+    /* battery voltage */
     Q_PROPERTY(double ground_vbat MEMBER m_ground_vbat WRITE set_ground_vbat NOTIFY ground_vbat_changed)
     void set_ground_vbat(double ground_vbat);
 
-    Q_PROPERTY(double ground_iout MEMBER m_ground_iout WRITE set_ground_iout NOTIFY ground_iout_changed)
-    void set_ground_iout(double ground_iout);
+    /* % battery */
+    Q_PROPERTY(double ground_bat_percent MEMBER m_ground_bat_percent WRITE set_ground_bat_percent NOTIFY ground_bat_percent_changed)
+    void set_ground_bat_percent(int percent);
+
+    /*Q_PROPERTY(double ground_iout MEMBER m_ground_iout WRITE set_ground_iout NOTIFY ground_iout_changed)
+    void set_ground_iout(double ground_iout);*/
 
 
 
@@ -450,10 +459,12 @@ signals:
     void ground_reboot();
     void ground_shutdown();
 
-    void ground_vin_changed(double ground_vin);
-    void ground_vout_changed(double ground_vout);
+    void ground_charging_changed(bool charging);
+    //void ground_vin_changed(double ground_vin);
+    //void ground_vout_changed(double ground_vout);
     void ground_vbat_changed(double ground_vbat);
-    void ground_iout_changed(double ground_iout);
+    void ground_bat_percent_changed(int percent);
+    //void ground_iout_changed(double ground_iout);
 
     void rcChannel1Changed(int rcChanne1);
     void rcChannel2Changed(int rcChanne2);
@@ -596,10 +607,12 @@ private:
 
     QTimer* timer = nullptr;
 
-    double m_ground_vin = 0.0;
-    double m_ground_vout = 0.0;
+    /*double m_ground_vin = 0.0;
+    double m_ground_vout = 0.0;*/
     double m_ground_vbat = 0.0;
-    double m_ground_iout = 0.0;
+    /*double m_ground_iout = 0.0;*/
+    int m_ground_bat_percent = 0;
+    bool m_ground_charging = false;
 
     int mRCChannel1 = 0;
     int mRCChannel2 = 0;
