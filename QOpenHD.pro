@@ -1,11 +1,7 @@
-!equals(QT_MAJOR_VERSION, 5) | !greaterThan(QT_MINOR_VERSION, 12) {
-    error("Unsupported Qt version, 5.12+ is required")
-}
-
 BASEDIR = $$IN_PWD
 
 LANGUAGE = C++
-CONFIG += c++11
+CONFIG += c++17
 CONFIG+=sdk_no_version_check
 TRANSLATIONS = translations/QOpenHD_en.ts translations/QOpenHD_de.ts translations/QOpenHD_ru.ts
 
@@ -18,6 +14,8 @@ include ($$PWD/lib/SortFilterProxyModel/SortFilterProxyModel.pri)
 
 
 CONFIG(debug, debug|release) {
+    DESTDIR = $${OUT_PWD}/debug
+
     CONFIG += debug
     DEFINES += QMLJSDEBUGGER
 } else:CONFIG(release, debug|release) {
@@ -31,9 +29,14 @@ CONFIG(debug, debug|release) {
             }
         }
     }
+    DESTDIR = $${OUT_PWD}/release
     DEFINES += QMLJSDEBUGGER
 }
 
+OBJECTS_DIR  = $${OUT_PWD}/obj
+MOC_DIR      = $${OUT_PWD}/moc
+UI_DIR       = $${OUT_PWD}/ui
+RCC_DIR      = $${OUT_PWD}/rcc
 
 QT += qml quick concurrent opengl gui
 QT += positioning location
@@ -319,7 +322,7 @@ AndroidBuild {
     CONFIG += EnableMainVideo
     CONFIG += EnablePiP
     CONFIG += EnableLink
-    CONFIG += EnableGStreamer
+    CONFIG += EnableVideoRender
     #CONFIG += EnableCharts
     EnableGStreamer {
         OTHER_FILES += \
@@ -390,7 +393,16 @@ EnableVideoRender {
 
     SOURCES += \
         src/openhdvideo.cpp \
-        src/openhdrender.cpp
+        src/openhdrender.cpp \
+        $$PWD/lib/h264/h264_bitstream_parser.cc \
+        $$PWD/lib/h264/h264_common.cc \
+        $$PWD/lib/h264/pps_parser.cc \
+        $$PWD/lib/h264/sps_parser.cc \
+        $$PWD/lib/h264/bit_buffer.cc \
+        $$PWD/lib/h264/checks.cc \
+        $$PWD/lib/h264/zero_memory.cc
+
+    INCLUDEPATH += $$PWD/lib/h264/
 }
 
 EnablePiP {

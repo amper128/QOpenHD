@@ -26,12 +26,6 @@ ApplicationWindow {
 
     property bool initialised: false
 
-    Component.onCompleted: {
-        if (!initialised) {
-            hudOverlayGrid.messageHUD.pushMessage("Initializing", 1)
-            initialised = true;
-        }
-    }
 
     /* this is not used but must stay right here, it forces qmlglsink to completely
        initialize the rendering system early. Without this, the next GstGLVideoItem
@@ -140,6 +134,9 @@ ApplicationWindow {
         property bool flight_mah_use_telemetry: true
         property double mah_opacity: 1
 
+        property bool show_fc_temp: true
+        property double fc_temp_opacity: 1
+
         property bool show_ground_status: true
         property double ground_status_opacity: 1
 
@@ -154,8 +151,18 @@ ApplicationWindow {
         property bool horizon_invert_roll: false
         property int horizon_size: 1
         property double horizon_opacity: 1
-        property int horizon_ladder_spacing: 10
+        property int horizon_ladder_spacing: 10        
         property bool show_horizon_ladder: true
+        property bool show_horizon_heading_ladder: true
+        property bool show_horizon_home: true
+
+        property bool heading_inav: false //shared between heading and horizon
+        property bool heading_ladder_text: true //shared between heading and horizon
+
+        property bool show_heading: true
+        property double heading_opacity: 1
+        property double heading_size: 1
+        property bool show_heading_ladder: true
 
         property bool show_fpv: true
         property bool fpv_dynamic: true
@@ -169,13 +176,6 @@ ApplicationWindow {
         property bool show_speed_ladder: true
         property int speed_range: 100
         property int speed_minimum: 0
-
-        property bool show_heading: true
-        property bool heading_inav: false
-        property double heading_opacity: 1
-        property double heading_size: 1
-        property bool show_heading_ladder: true
-        property bool heading_ladder_text: true //true:letters/false:numbers
 
         property bool show_altitude: true
         property bool altitude_rel_msl: false
@@ -231,6 +231,13 @@ ApplicationWindow {
         property double wind_tumbler_decimal: 5
         property double wind_tumbler_tens: 13
         property double wind_max_quad_speed: wind_tumbler_tens+(wind_tumbler_decimal*.1)
+
+        property bool show_roll: true
+        property bool roll_invert: false
+        property bool roll_show_arc: true
+        property bool roll_show_numbers: true
+        property bool roll_sky_pointer: false
+        property double roll_opacity: 1
 
         property bool show_example_widget: false
     }
@@ -297,6 +304,25 @@ ApplicationWindow {
             }
         }
     }
+
+    Connections {
+        target: GroundStatusMicroservice
+        function onStatusMessage(sysid, message, level, timestamp) {
+            if (level >= settings.log_level) {
+                hudOverlayGrid.messageHUD.pushMessage(message, level)
+            }
+        }
+    }
+
+    Connections {
+        target: AirStatusMicroservice
+        function onStatusMessage(sysid, message, level, timestamp) {
+            if (level >= settings.log_level) {
+                hudOverlayGrid.messageHUD.pushMessage(message, level)
+            }
+        }
+    }
+
 
     // UI areas
 

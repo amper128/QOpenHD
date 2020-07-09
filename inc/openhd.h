@@ -58,8 +58,11 @@ public:
     Q_PROPERTY(double home_distance MEMBER m_home_distance WRITE set_home_distance NOTIFY home_distance_changed)
     void set_home_distance(double home_distance);
 
-    Q_PROPERTY(double home_course MEMBER m_home_course WRITE set_home_course NOTIFY home_course_changed)
-    void set_home_course(double home_course);
+    Q_PROPERTY(int home_course MEMBER m_home_course WRITE set_home_course NOTIFY home_course_changed)
+    void set_home_course(int home_course);
+
+    Q_PROPERTY(int home_heading MEMBER m_home_heading WRITE set_home_heading NOTIFY home_heading_changed)
+    void set_home_heading(int home_heading);
 
     Q_PROPERTY(int boot_time MEMBER m_boot_time WRITE set_boot_time NOTIFY boot_time_changed)
     void set_boot_time(int boot_time);
@@ -186,6 +189,9 @@ public:
 
     Q_PROPERTY(int rc_rssi MEMBER m_rc_rssi WRITE set_rc_rssi NOTIFY rc_rssi_changed)
     void set_rc_rssi(int rc_rssi);
+
+    Q_PROPERTY(int fc_temp MEMBER m_fc_temp WRITE set_fc_temp NOTIFY fc_temp_changed)
+    void set_fc_temp(int fc_temp);
 
 
     // openhd
@@ -382,7 +388,8 @@ signals:
     void lat_changed(double lat);
     void lon_changed(double lon);
     void home_distance_changed(double home_distance);
-    void home_course_changed(double home_course);
+    void home_course_changed(int home_course);
+    void home_heading_changed(int home_heading);
     void battery_percent_changed(int battery_percent);
     void battery_voltage_changed(double battery_voltage);
     void battery_current_changed(double battery_current);
@@ -420,6 +427,8 @@ signals:
     void mav_wind_speed_changed(float mav_wind_speed);
 
     void rc_rssi_changed(int rc_rssi);
+
+    void fc_temp_changed (int fc_temp);
 
     // openhd
     void downlink_rssi_changed(int downlink_rssi);
@@ -507,7 +516,7 @@ private:
     double m_airspeed = 0;
 
     bool m_armed = false;
-    QString m_flight_mode = "Stabilize";
+    QString m_flight_mode = "------";
 
     double m_homelat = 0.0;
     double m_homelon = 0.0;
@@ -517,11 +526,14 @@ private:
     double m_lat = 0.0;
     double m_lon = 0.0;
     double m_home_distance = 0.0;
-    double m_home_course = 0.0;
+    int m_home_heading = 0; //this is actual global heading
+    int m_home_course = 0; //this is the relative course from nose
+
     int m_battery_percent = 0;
     double m_battery_current = 0.0;
     double m_battery_voltage = 0.0;
     QString m_battery_gauge = "\uf091";
+
     int m_satellites_visible = 0;
     double m_gps_hdop = 99.00;
 
@@ -570,6 +582,8 @@ private:
     double m_kbitrate = 0.0;
     double m_kbitrate_measured = 0.0;
     double m_kbitrate_set = 0.0;
+
+    int m_fc_temp = 0;
 
     int m_cpuload_gnd = 0;
 

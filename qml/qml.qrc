@@ -119,5 +119,9 @@
         <file>ui/widgets/RcRSSIWidget.qml</file>
         <file>ui/widgets/ExampleWidget.qml</file>
         <file>ui/widgets/ExampleWidgetForm.ui.qml</file>
+        <file>ui/widgets/FcTempWidgetForm.ui.qml</file>
+        <file>ui/widgets/FcTempWidget.qml</file>
+        <file>ui/widgets/RollWidgetForm.ui.qml</file>
+        <file>ui/widgets/RollWidget.qml</file>
     </qresource>
 </RCC>

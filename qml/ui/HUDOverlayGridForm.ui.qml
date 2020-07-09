@@ -53,6 +53,10 @@ Item {
         id: bitrate
     }
 
+    FcTempWidget {
+        id: fc_temp
+    }
+
     AirStatusWidget {
         id: air_status
     }
@@ -133,6 +137,10 @@ Item {
 
     WindWidget {
         id: windWidget
+    }
+
+    RollWidget {
+        id: rollWidget
     }
 
     ExampleWidget {
