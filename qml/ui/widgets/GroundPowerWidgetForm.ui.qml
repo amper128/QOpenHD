@@ -9,7 +9,7 @@ import OpenHD 1.0
 BaseWidget {
     id: groundPowerWidget
     width: 96
-    height: 48
+    height: 24
 
     // visible: settings.show_ground_power
     visible: settings.show_air_battery
@@ -90,8 +90,9 @@ BaseWidget {
         anchors.fill: parent
         Label {
             id: battery_percent
+            x: 0
             y: 0
-            width: 48
+            width: 40
             height: 24
             color: settings.color_text
             opacity: settings.ground_power_opacity
@@ -102,15 +103,15 @@ BaseWidget {
             clip: true
             verticalAlignment: Text.AlignVCenter
             elide: Text.ElideRight
-            horizontalAlignment: Text.AlignLeft
+            horizontalAlignment: Text.AlignRight
             font.pixelSize: 14
         }
 
         Label {
             id: batteryGauge
             y: 8
-            width: 36
-            height: 48
+            width: 24
+            height: 24
             // @disable-check M223
             color: {
                 // todo: expose battery_voltage_to_percent to QML instead of using cell levels here
@@ -130,7 +131,7 @@ BaseWidget {
             font.family: "Material Design Icons"
             verticalAlignment: Text.AlignVCenter
             horizontalAlignment: Text.AlignHCenter
-            font.pixelSize: 36
+            font.pixelSize: 14
         }
     }
 }
