@@ -154,8 +154,10 @@ void VectorTelemetry::processVectorMessage() {
     auto camvoltage      = (float)v.td.CameraVoltageX100 / 100.0f; // CameraVoltageX100-camvoltage-
     auto rxvoltage       = (float)v.td.RxVoltageX100 / 100.0f; // RxVoltageX100-rxvoltage-
     auto ampere          = (float)v.td.PackCurrentX10 / 10.0f;  // PackCurrentX10-ampere-
+    auto app_mah          = (float)v.td.mAHConsumed;  // PackCurrentX10-ampere-
     OpenHD::instance()->set_battery_voltage(battery_voltage);
     OpenHD::instance()->set_battery_current(ampere);
+    OpenHD::instance()->set_app_mah(app_mah);
 
 
     QSettings settings;
