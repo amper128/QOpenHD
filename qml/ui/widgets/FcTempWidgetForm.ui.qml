@@ -16,8 +16,8 @@ BaseWidget {
     widgetIdentifier: "fc_temp_widget"
 
     defaultAlignment: 1
-    defaultXOffset: 93
-    defaultYOffset: 0
+    defaultXOffset: 12
+    defaultYOffset: 32
     defaultHCenter: false
     defaultVCenter: false
 
@@ -55,16 +55,6 @@ BaseWidget {
         }
     }
 
-    Glow {
-        anchors.fill: widgetInner
-        visible: settings.show_fc_temp
-        radius: 3
-        samples: 17
-        color: settings.color_glow
-        opacity: settings.control_opacity
-        source: widgetInner
-    }
-
     Item {
         id: widgetInner
 
@@ -84,7 +74,8 @@ BaseWidget {
             verticalAlignment: Text.AlignTop
             wrapMode: Text.NoWrap
             elide: Text.ElideRight
-
+            style: Text.Outline
+            styleColor: settings.color_glow
         }
 
         Label {
@@ -100,7 +91,8 @@ BaseWidget {
             verticalAlignment: Text.AlignVCenter
             wrapMode: Text.NoWrap
             elide: Text.ElideRight
-
+            style: Text.Outline
+            styleColor: settings.color_glow
         }       
     }
 }

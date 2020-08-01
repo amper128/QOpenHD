@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QtQuick>
 
+#include "blackboxmodel.h"
 
 #if defined(ENABLE_SPEECH)
 #include <QtTextToSpeech/QTextToSpeech>
@@ -21,12 +22,19 @@ public:
     void calculate_home_distance();
     void calculate_home_course();
 
+    Q_INVOKABLE void pauseBlackBox(bool pause, int index);
+    void updateBlackBoxModel();
+
     void setWifiAdapter0(uint32_t received_packet_cnt, int8_t current_signal_dbm, int8_t signal_good);
     void setWifiAdapter1(uint32_t received_packet_cnt, int8_t current_signal_dbm, int8_t signal_good);
     void setWifiAdapter2(uint32_t received_packet_cnt, int8_t current_signal_dbm, int8_t signal_good);
     void setWifiAdapter3(uint32_t received_packet_cnt, int8_t current_signal_dbm, int8_t signal_good);
     void setWifiAdapter4(uint32_t received_packet_cnt, int8_t current_signal_dbm, int8_t signal_good);
     void setWifiAdapter5(uint32_t received_packet_cnt, int8_t current_signal_dbm, int8_t signal_good);
+
+    void setEngine(QQmlApplicationEngine *engine);
+
+    Q_INVOKABLE void switchToLanguage(const QString &language);
 
     Q_INVOKABLE void setGroundGPIO(int pin, bool state) {
         m_ground_gpio[pin] = state ? 1 : 0;
@@ -328,6 +336,13 @@ public:
 
 
 
+    Q_PROPERTY(double air_vout MEMBER m_air_vout WRITE set_air_vout NOTIFY air_vout_changed)
+    void set_air_vout(double air_vout);
+
+    Q_PROPERTY(double air_iout MEMBER m_air_iout WRITE set_air_iout NOTIFY air_iout_changed)
+    void set_air_iout(double air_iout);
+
+
     Q_PROPERTY(int rcChannel1 MEMBER mRCChannel1 WRITE setRCChannel1 NOTIFY rcChannel1Changed)
     void setRCChannel1(int rcChannel1);
 
@@ -485,6 +500,9 @@ signals:
     void ground_bat_gauge_changed(QString battery_gauge);
     //void ground_iout_changed(double ground_iout);
 
+    void air_vout_changed(double air_vout);
+    void air_iout_changed(double air_iout);
+
     void rcChannel1Changed(int rcChanne1);
     void rcChannel2Changed(int rcChanne2);
     void rcChannel3Changed(int rcChanne3);
@@ -494,12 +512,17 @@ signals:
     void rcChannel7Changed(int rcChanne7);
     void rcChannel8Changed(int rcChanne8);
 
+    void addBlackBoxObject(const BlackBox &blackbox);
+    void pauseTelemetry(bool pause);
+    void playBlackBoxObject(int index);
+
 private:
 #if defined(ENABLE_SPEECH)
     QTextToSpeech *m_speech;
 #endif
 
 
+public:
     // mavlink
     int m_boot_time = 0;
 
@@ -633,13 +656,17 @@ private:
 
     QTimer* timer = nullptr;
 
-    /*double m_ground_vin = 0.0;
-    double m_ground_vout = 0.0;*/
-    double m_ground_vbat = 0.0;
-    /*double m_ground_iout = 0.0;*/
+    double m_ground_vin = -1;
+    double m_ground_vout = -1;
+    double m_ground_vbat = -1;
+    double m_ground_iout = -1;
+
     int m_ground_bat_percent = 0;
     QString m_ground_bat_gauge = "\uf091";
     bool m_ground_charging = false;
+
+    double m_air_vout = -1;
+    double m_air_iout = -1;
 
     int mRCChannel1 = 0;
     int mRCChannel2 = 0;
@@ -649,6 +676,12 @@ private:
     int mRCChannel6 = 0;
     int mRCChannel7 = 0;
     int mRCChannel8 = 0;
+
+    bool m_pause_blackbox = false;
+
+    QTranslator m_translator;
+
+    QQmlApplicationEngine *m_engine = nullptr;
 };
 
 

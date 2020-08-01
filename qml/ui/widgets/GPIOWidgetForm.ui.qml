@@ -160,16 +160,6 @@ BaseWidget {
         }
     }
 
-    Glow {
-        anchors.fill: widgetInner
-        visible: settings.show_gpio
-        radius: 3
-        samples: 17
-        color: settings.color_glow
-        //no opacity setting
-        source: widgetInner
-    }
-
     Item {
         id: widgetInner
 
@@ -191,6 +181,8 @@ BaseWidget {
             verticalAlignment: Text.AlignVCenter
             horizontalAlignment: Text.AlignHCenter
             font.pixelSize: 36
+            style: Text.Outline
+            styleColor: settings.color_glow
         }
     }
 }

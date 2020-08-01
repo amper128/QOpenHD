@@ -59,15 +59,6 @@ BaseWidget {
         }
     }
 
-    Glow {
-        anchors.fill: widgetInner
-        radius: 3
-        samples: 17
-        color: settings.color_glow
-        opacity: settings.throttle_opacity
-        source: widgetInner
-    }
-
     Item {
         id: widgetInner
         anchors.fill: parent
@@ -85,6 +76,8 @@ BaseWidget {
             verticalAlignment: Text.AlignVCenter
             horizontalAlignment: Text.AlignHCenter
             font.pixelSize: 18
+            style: Text.Outline
+            styleColor: settings.color_glow
         }
 
         Shape {
@@ -125,6 +118,8 @@ BaseWidget {
             verticalAlignment: Text.AlignBottom
             horizontalAlignment: Text.AlignHCenter
             font.pixelSize: 14
+            style: Text.Outline
+            styleColor: settings.color_glow
         }
     }
 }

@@ -55,15 +55,6 @@ BaseWidget {
         }
     }
 
-    Glow {
-        anchors.fill: widgetInner
-        radius: 3
-        samples: 17
-        color: settings.color_glow
-        opacity: settings.vibration_opacity
-        source: widgetInner
-    }
-
     Item {
         id: widgetInner
         anchors.fill: parent
@@ -147,6 +138,8 @@ BaseWidget {
 
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
+                style: Text.Outline
+                styleColor: settings.color_glow
             }
         }
 
@@ -228,6 +221,8 @@ BaseWidget {
 
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
+                style: Text.Outline
+                styleColor: settings.color_glow
             }
         }
 
@@ -309,6 +304,8 @@ BaseWidget {
 
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
+                style: Text.Outline
+                styleColor: settings.color_glow
             }
         }
         Item {
@@ -335,6 +332,8 @@ BaseWidget {
 
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
+                style: Text.Outline
+                styleColor: settings.color_glow
             }
             Label {
                 id: thirty_text
@@ -352,6 +351,8 @@ BaseWidget {
 
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
+                style: Text.Outline
+                styleColor: settings.color_glow
             }
         }
     }

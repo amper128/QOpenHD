@@ -42,7 +42,8 @@ RTC_NORETURN void rtc_FatalMessage(const char* file, int line, const char* msg);
 
 #include <string>
 
-#include <string_view>
+
+
 #include "safe_compare.h"
 #include "inline.h"
 
@@ -166,10 +167,6 @@ inline Val<CheckArgType::kCharP, const char*> MakeVal(const char* x) {
 }
 inline Val<CheckArgType::kStdString, const std::string*> MakeVal(
     const std::string& x) {
-  return {&x};
-}
-inline Val<CheckArgType::kStringView, const std::string_view*> MakeVal(
-    const std::string_view& x) {
   return {&x};
 }
 

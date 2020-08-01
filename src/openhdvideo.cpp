@@ -6,6 +6,7 @@
 
 #include <QtConcurrent>
 #include <QtQuick>
+#include <QMutex>
 #include <QUdpSocket>
 
 #include "localmessage.h"
@@ -13,12 +14,123 @@
 #include "openhd.h"
 
 
-#include "h264bitstream/h264_stream.h"
-
 
 #include "h264_common.h"
 #include "sps_parser.h"
 #include "pps_parser.h"
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h>
+
+#include <unistd.h>
+#include <fcntl.h>
+
+
+OpenHDVideoReceiver::OpenHDVideoReceiver(OpenHDVideo *video, enum OpenHDStreamType stream_type): QObject(), m_stream_type(stream_type), m_video(video) {
+    qDebug() << "OpenHDVideoReceiver::OpenHDVideoReceiver()";
+}
+
+
+OpenHDVideoReceiver::~OpenHDVideoReceiver() {
+    qDebug() << "~OpenHDVideoReceiver()";
+}
+
+
+void OpenHDVideoReceiver::onStarted() {
+    qDebug() << "OpenHDVideoReceiver::onStarted()";
+
+    connect(this, &OpenHDVideoReceiver::start, this, &OpenHDVideoReceiver::onStart, Qt::BlockingQueuedConnection);
+    connect(this, &OpenHDVideoReceiver::stop, this, &OpenHDVideoReceiver::onStop, Qt::BlockingQueuedConnection);
+
+    QSettings settings;
+
+    if (m_stream_type == OpenHDStreamTypeMain) {
+        m_video_port = settings.value("main_video_port", 5600).toInt();
+    } else {
+        m_video_port = settings.value("pip_video_port", 5601).toInt();
+    }
+
+    onStart();
+}
+
+
+void OpenHDVideoReceiver::onStop() {
+#if defined(USE_RAW_SOCKET)
+
+#else
+
+#endif
+}
+
+
+void OpenHDVideoReceiver::onStart() {
+    QSettings settings;
+
+    if (m_stream_type == OpenHDStreamTypeMain) {
+        m_video_port = settings.value("main_video_port", 5600).toInt();
+    } else {
+        m_video_port = settings.value("pip_video_port", 5601).toInt();
+    }
+
+
+    struct sockaddr_in myaddr;
+    int recvlen;
+    int fd;
+    unsigned char buf[65535];
+
+
+    if ((fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0) {
+        perror("cannot create socket\n");
+        return;
+    }
+
+    memset((char *)&myaddr, 0, sizeof(myaddr));
+    myaddr.sin_family = AF_INET;
+    myaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    myaddr.sin_port = htons(m_video_port);
+
+    if (bind(fd, (struct sockaddr *)&myaddr, sizeof(myaddr)) < 0) {
+        perror("bind failed");
+        return;
+    }
+
+    int n = 1024 * 1024;
+
+    if (setsockopt(fd, SOL_SOCKET, SO_RCVBUF, &n, sizeof(n)) == -1) {
+        qDebug() << "Failed to set socket SO_RCVBUF";
+    }
+
+
+    //int flags = fcntl(fd, F_GETFL, 0);
+    //fcntl(fd, F_SETFL, flags | O_NONBLOCK);
+
+    int d;
+    socklen_t len = sizeof(d);
+
+    getsockopt(fd, SOL_SOCKET, SO_RCVBUF, &d, &len);
+
+    qDebug() << "real socket buffer size: " << d;
+
+    emit socketChanged(fd);
+
+    for (;;) {
+        recvlen = recvfrom(fd, buf, 65535, 0, NULL, NULL);
+
+        if (recvlen > 0) {
+            QByteArray datagram((char*)buf, recvlen);
+            QMutexLocker(&m_video->m_mutex);
+            m_video->onReceivedData(datagram);
+        }
+    }
+}
+
 
 OpenHDVideo::OpenHDVideo(enum OpenHDStreamType stream_type): QObject(), m_stream_type(stream_type) {
     qDebug() << "OpenHDVideo::OpenHDVideo()";
@@ -41,8 +153,6 @@ OpenHDVideo::~OpenHDVideo() {
 void OpenHDVideo::onStarted() {
     qDebug() << "OpenHDVideo::onStarted()";
 
-    m_socket = new QUdpSocket();
-
     QSettings settings;
 
     if (m_stream_type == OpenHDStreamTypeMain) {
@@ -50,19 +160,38 @@ void OpenHDVideo::onStarted() {
     } else {
         m_video_port = settings.value("pip_video_port", 5601).toInt();
     }
+
     m_enable_rtp = settings.value("enable_rtp", true).toBool();
 
     lastDataReceived = QDateTime::currentMSecsSinceEpoch();
-
-    m_socket->bind(QHostAddress::Any, m_video_port);
 
     timer = new QTimer(this);
     QObject::connect(timer, &QTimer::timeout, this, &OpenHDVideo::reconfigure);
     timer->start(1000);
 
-    connect(m_socket, &QUdpSocket::readyRead, this, &OpenHDVideo::processDatagrams);
+    m_receiver = new OpenHDVideoReceiver(this, m_stream_type);
+
+    if (m_stream_type == OpenHDStreamTypeMain) {
+        m_receiverThread.setObjectName("mainVideoRecv");
+    } else {
+        m_receiverThread.setObjectName("pipVideoRecv");
+    }
+
+    connect(m_receiver, &OpenHDVideoReceiver::socketChanged, this, &OpenHDVideo::onSocketChanged);
+
+    QObject::connect(&m_receiverThread, &QThread::started, m_receiver, &OpenHDVideoReceiver::onStarted);
+    m_receiver->moveToThread(&m_receiverThread);
+
+    m_receiverThread.start();
+    m_receiverThread.setPriority(QThread::TimeCriticalPriority);
+
+    emit setup();
 }
 
+
+void OpenHDVideo::onSocketChanged(int fd) {
+    m_socket = fd;
+}
 
 
 /*
@@ -72,7 +201,11 @@ void OpenHDVideo::onStarted() {
  * if necessary, such as hiding the PiP element when the stream has stopped.
  */
 void OpenHDVideo::reconfigure() {
-    bool restart = false;
+    if (m_background) {
+        return;
+    }
+
+    QMutexLocker locker(&m_mutex);
 
     auto currentTime = QDateTime::currentMSecsSinceEpoch();
 
@@ -92,23 +225,30 @@ void OpenHDVideo::reconfigure() {
 
     QSettings settings;
 
+    int port = 0;
+
     if (m_stream_type == OpenHDStreamTypeMain) {
-        m_video_port = settings.value("main_video_port", 5600).toInt();
+        port = settings.value("main_video_port", 5600).toInt();
     } else {
-        m_video_port = settings.value("pip_video_port", 5601).toInt();
+        port = settings.value("pip_video_port", 5601).toInt();
     }
-    if (m_video_port != m_socket->localPort()) {
-        restart = true;
+
+    if (m_video_port != port) {
+        m_restart = true;
     }
 
     auto enable_rtp = settings.value("enable_rtp", true).toBool();
     if (m_enable_rtp != enable_rtp) {
         m_enable_rtp = enable_rtp;
-        restart = true;
+        m_restart = true;
     }
 
-    if (restart) {
-        m_socket->close();
+    if (m_restart) {
+        m_restart = false;
+        //emit m_receiver->stop();
+        shutdown(m_socket, SHUT_RD);
+        m_receiverThread.quit();
+        m_receiverThread.wait();
         stop();
         tempBuffer.clear();
         rtpBuffer.clear();
@@ -118,11 +258,15 @@ void OpenHDVideo::reconfigure() {
         havePPS = false;
         sentIDR = false;
         isStart = true;
-        m_socket->bind(QHostAddress::Any, m_video_port);
+        isConfigured = false;
+        m_receiverThread.start();
+        m_receiverThread.setPriority(QThread::TimeCriticalPriority);
     }
 }
 
+
 void OpenHDVideo::startVideo() {
+    QMutexLocker locker(&m_mutex);
 #if defined(ENABLE_MAIN_VIDEO) || defined(ENABLE_PIP)
     firstRun = false;
     lastDataReceived = QDateTime::currentMSecsSinceEpoch();
@@ -134,39 +278,29 @@ void OpenHDVideo::startVideo() {
 
 
 void OpenHDVideo::stopVideo() {
+    QMutexLocker locker(&m_mutex);
 #if defined(ENABLE_MAIN_VIDEO) || defined(ENABLE_PIP)
     QFuture<void> future = QtConcurrent::run(this, &OpenHDVideo::stop);
 #endif
 }
 
 
-/*
- * Called by QUdpSocket signal readyRead()
- *
- */
-void OpenHDVideo::processDatagrams() {
-    QByteArray datagram;
 
-    while (m_socket->hasPendingDatagrams()) {
-        datagram.resize(int(m_socket->pendingDatagramSize()));
-        m_socket->readDatagram(datagram.data(), datagram.size());
-
-        if (m_enable_rtp || m_stream_type == OpenHDStreamTypePiP) {
-            parseRTP(datagram);
-        } else {
-            tempBuffer.append(datagram.data(), datagram.size());
-            findNAL();
-        }
+void OpenHDVideo::onReceivedData(QByteArray data) {
+    if (m_enable_rtp || m_stream_type == OpenHDStreamTypePiP) {
+        parseRTP(data);
+    } else {
+        tempBuffer.append(data);
+        findNAL();
     }
 }
-
 
 
 /*
  * Simple RTP parse, just enough to get the frame data
  *
  */
-void OpenHDVideo::parseRTP(QByteArray datagram) {
+void OpenHDVideo::parseRTP(QByteArray &datagram) {
     const uint8_t MINIMUM_HEADER_LENGTH = 12;
 
     if (datagram.size() < MINIMUM_HEADER_LENGTH) {
@@ -231,15 +365,14 @@ void OpenHDVideo::parseRTP(QByteArray datagram) {
                 uint8_t reassembled = 0;
                 reassembled |= (nalu_f << 7);
                 reassembled |= (nalu_nri << 5);
-                reassembled |= (fu_a.type);
+                reassembled |= (fu_a.type & 0x1f);
                 rtpBuffer.append((char*)&reassembled, 1);
-            }
-
-            rtpBuffer.append(payload.data() + 2, payload.size() - 2);
-            if (fu_a.e == 1) {
-                tempBuffer.append(rtpBuffer.data(), rtpBuffer.size());
-                rtpBuffer.clear();
+                rtpBuffer.append(payload.data() + 2, payload.size() - 2);
+            } else if (fu_a.e == 1) {
+                rtpBuffer.append(payload.data() + 2, payload.size() - 2);
                 submit = true;
+            } else {
+                rtpBuffer.append(payload.data() + 2, payload.size() - 2);
             }
             break;
         }
@@ -249,46 +382,20 @@ void OpenHDVideo::parseRTP(QByteArray datagram) {
         }
         default: {
             // should be a single NAL
-            tempBuffer.append(payload.data(), payload.size());
-            rtpBuffer.clear();
+            rtpBuffer.append(payload);
             submit = true;
             break;
         }
     }
     if (submit) {
-        QByteArray nalUnit(tempBuffer);
-        tempBuffer.clear();
-        processNAL((uint8_t*)nalUnit.data(), nalUnit.length());
+        QByteArray nalUnit(rtpBuffer);
+        rtpBuffer.clear();
+        processNAL(nalUnit);
     }
 };
 
 
 
-/*
- * Simple NAL search
- *
- */
-void OpenHDVideo::findNAL() {
-    size_t sz = tempBuffer.size();
-    uint8_t* p = (uint8_t*)tempBuffer.data();
-
-    int nal_start, nal_end;
-
-    while (find_nal_unit(p, sz, &nal_start, &nal_end) > 0) {
-        auto nal_size = nal_end - nal_start;
-
-        processNAL((uint8_t*)&p[nal_start], nal_size);
-
-        tempBuffer.remove(0, nal_end);
-
-        // update the temporary pointer with the new start of the buffer
-        p = (uint8_t*)tempBuffer.data();
-        sz = tempBuffer.size();
-    }
-}
-
-
-/*
 void OpenHDVideo::findNAL() {
     size_t sz = tempBuffer.size();
 
@@ -302,18 +409,23 @@ void OpenHDVideo::findNAL() {
 
     auto indexes = webrtc::H264::FindNaluIndices(p, sz);
 
+    if (indexes.empty()) {
+        return;
+    }
+
     for (auto & index : indexes) {
-        qDebug() << "p: " << p;
-        qDebug() << "NAL<" << index.payload_size << "> : " << index.payload_start_offset << ":" << index.payload_start_offset + index.payload_size;
-        processNAL(&p[index.payload_start_offset], index.payload_size);
+        if (index.payload_size == 0) {
+            continue;
+        }
+        QByteArray nalUnit((const char*)&p[index.payload_start_offset], index.payload_size);
+        processNAL(nalUnit);
         final_offset = index.payload_start_offset + index.payload_size;
     }
 
     if (final_offset != 0) {
-        qDebug() << "Removing 0:" << final_offset;
         tempBuffer.remove(0, final_offset);
     }
-}*/
+}
 
 
 /*
@@ -325,16 +437,16 @@ void OpenHDVideo::findNAL() {
  * before the PPS/SPS, or a non-IDR before an IDR.
  *
  */
-void OpenHDVideo::processNAL(const uint8_t* data, size_t length) {
-    webrtc::H264::NaluType nalu_type = webrtc::H264::ParseNaluType(data[0]);
+void OpenHDVideo::processNAL(QByteArray &nalUnit) {
+    webrtc::H264::NaluType nalu_type = webrtc::H264::ParseNaluType(nalUnit.data()[0]);
 
     switch (nalu_type) {
         case webrtc::H264::NaluType::kSlice: {
             if (isConfigured && sentSPS && sentPPS && sentIDR) {
                 QByteArray _n;
                 _n.append(NAL_HEADER, 4);
-                _n.append((const char*)data, length);
-                processFrame(_n, FrameTypeNonIDR);
+                _n.append(nalUnit);
+                processFrame(_n, nalu_type);
                 //nalQueue.push_back(_n);
             }
             break;
@@ -343,9 +455,9 @@ void OpenHDVideo::processNAL(const uint8_t* data, size_t length) {
             if (isConfigured && sentSPS && sentPPS) {
                 QByteArray _n;
                 _n.append(NAL_HEADER, 4);
-                _n.append((const char*)data, length);
+                _n.append(nalUnit);
 
-                processFrame(_n, FrameTypeIDR);
+                processFrame(_n, nalu_type);
                 //nalQueue.push_back(_n);
 
                 sentIDR = true;
@@ -357,8 +469,7 @@ void OpenHDVideo::processNAL(const uint8_t* data, size_t length) {
             auto new_height = 0;
             auto new_fps = 0;
 
-            int sps_id = 0;
-            auto _sps = webrtc::SpsParser::ParseSps(data + webrtc::H264::kNaluTypeSize, length - webrtc::H264::kNaluTypeSize);
+            auto _sps = webrtc::SpsParser::ParseSps((const uint8_t*)nalUnit.data() + webrtc::H264::kNaluTypeSize, nalUnit.size() - webrtc::H264::kNaluTypeSize);
 
             if (_sps) {
                 new_width = _sps->width;
@@ -387,7 +498,7 @@ void OpenHDVideo::processNAL(const uint8_t* data, size_t length) {
                 if (!haveSPS) {
                     QByteArray extraData;
                     extraData.append(NAL_HEADER, 4);
-                    extraData.append((const char*)data, length);
+                    extraData.append(nalUnit);
 
                     sps_len = extraData.size();
                     memcpy(sps, extraData.data(), extraData.size());
@@ -396,9 +507,9 @@ void OpenHDVideo::processNAL(const uint8_t* data, size_t length) {
                 if (isConfigured) {
                     QByteArray _n;
                     _n.append(NAL_HEADER, 4);
-                    _n.append((const char*)data, length);
+                    _n.append(nalUnit);
 
-                    processFrame(_n, FrameTypeSPS);
+                    processFrame(_n, nalu_type);
                     //nalQueue.push_back(_n);
 
                     sentSPS = true;
@@ -411,7 +522,7 @@ void OpenHDVideo::processNAL(const uint8_t* data, size_t length) {
             if (!havePPS) {
                 QByteArray extraData;
                 extraData.append(NAL_HEADER, 4);
-                extraData.append((const char*)data, length);
+                extraData.append(nalUnit);
 
                 pps_len = extraData.length();
                 memcpy(pps, extraData.data(), extraData.size());
@@ -420,9 +531,9 @@ void OpenHDVideo::processNAL(const uint8_t* data, size_t length) {
             if (isConfigured && sentSPS) {
                 QByteArray _n;
                 _n.append(NAL_HEADER, 4);
-                _n.append((const char*)data, length);
+                _n.append(nalUnit);
 
-                processFrame(_n, FrameTypePPS);
+                processFrame(_n, nalu_type);
                 //nalQueue.push_back(_n);
 
                 sentPPS = true;
@@ -432,12 +543,13 @@ void OpenHDVideo::processNAL(const uint8_t* data, size_t length) {
         case webrtc::H264::NaluType::kAud: {
             QByteArray _n;
             _n.append(NAL_HEADER, 4);
-            _n.append((const char*)data, length);
+            _n.append(nalUnit);
 
-            processFrame(_n, FrameTypeAU);
+            processFrame(_n, nalu_type);
             break;
         }
         default: {
+            qDebug() << "unknown frame_type: " << nalu_type;
             break;
         }
     }

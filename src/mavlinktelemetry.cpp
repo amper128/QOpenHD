@@ -33,9 +33,12 @@ MavlinkTelemetry* MavlinkTelemetry::instance() {
 
 MavlinkTelemetry::MavlinkTelemetry(QObject *parent): MavlinkBase(parent) {
     qDebug() << "MavlinkTelemetry::MavlinkTelemetry()";
-    targetSysID = 1;
+    targetSysID1 = 1;
+    targetSysID2 = 0;
     targetCompID1 = MAV_COMP_ID_AUTOPILOT1;
     targetCompID2 = MAV_COMP_ID_SYSTEM_CONTROL;
+    // betaflight
+    targetCompID3 = 200;
 
     localPort = 14550;
 
@@ -52,14 +55,24 @@ void MavlinkTelemetry::onSetup() {
 
     connect(this, &MavlinkTelemetry::processMavlinkMessage, this, &MavlinkTelemetry::onProcessMavlinkMessage);
 
+    pause_telemetry=false;
+
     timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, &MavlinkTelemetry::stateLoop);
     resetParamVars();
     timer->start(200);
 }
 
+void MavlinkTelemetry::pauseTelemetry(bool toggle) {
+    pause_telemetry=toggle;
+}
 
-void MavlinkTelemetry::onProcessMavlinkMessage(mavlink_message_t msg) {    
+void MavlinkTelemetry::onProcessMavlinkMessage(mavlink_message_t msg) {
+
+    if(pause_telemetry==true){
+        return;
+    }
+
     switch (msg.msgid) {
             case MAVLINK_MSG_ID_HEARTBEAT: {
                     mavlink_heartbeat_t heartbeat;
@@ -76,41 +89,63 @@ void MavlinkTelemetry::onProcessMavlinkMessage(mavlink_message_t msg) {
 
                     auto custom_mode = heartbeat.custom_mode;
 
-                    auto uav_type = heartbeat.type;
+                    auto autopilot = (MAV_AUTOPILOT)heartbeat.autopilot;
 
-                    switch (uav_type) {
-                        case MAV_TYPE_GENERIC: {
+                    switch (autopilot) {
+                        case MAV_AUTOPILOT_GENERIC: {
                             break;
                         }
-                        case MAV_TYPE_FIXED_WING: {
-                            auto plane_mode = plane_mode_from_enum((PLANE_MODE)custom_mode);
-                            OpenHD::instance()->set_flight_mode(plane_mode);
-                            //qDebug() << "Mavlink Mav Type= PLANE";
+                        case MAV_AUTOPILOT_PX4: {
+                            if (heartbeat.base_mode & MAV_MODE_FLAG_CUSTOM_MODE_ENABLED) {
+                                auto px4_mode = px4_mode_from_custom_mode(custom_mode);
+                                OpenHD::instance()->set_flight_mode(px4_mode);
+                            }
                             break;
                         }
-                        case MAV_TYPE_GROUND_ROVER: {
-                            auto rover_mode = rover_mode_from_enum((ROVER_MODE)custom_mode);
-                            OpenHD::instance()->set_flight_mode(rover_mode);
-                            break;
-                        }
-                        case MAV_TYPE_QUADROTOR: {
-                            auto copter_mode = copter_mode_from_enum((COPTER_MODE)custom_mode);
-                            OpenHD::instance()->set_flight_mode(copter_mode);
-                            //qDebug() << "Mavlink Mav Type= QUADROTOR";
-                            break;
-                        }
-                        case MAV_TYPE_SUBMARINE: {
-                            auto sub_mode = sub_mode_from_enum((SUB_MODE)custom_mode);
-                            OpenHD::instance()->set_flight_mode(sub_mode);
-                            break;
-                        }
-                        case MAV_TYPE_ANTENNA_TRACKER: {
-                            auto tracker_mode = tracker_mode_from_enum((TRACKER_MODE)custom_mode);
-                            //OpenHD::instance()->set_tracker_mode(tracker_mode);
+                        case MAV_AUTOPILOT_ARDUPILOTMEGA: {
+                            if (heartbeat.base_mode & MAV_MODE_FLAG_CUSTOM_MODE_ENABLED) {
+                                auto uav_type = heartbeat.type;
+
+                                switch (uav_type) {
+                                    case MAV_TYPE_GENERIC: {
+                                        break;
+                                    }
+                                    case MAV_TYPE_FIXED_WING: {
+                                        auto plane_mode = plane_mode_from_enum((PLANE_MODE)custom_mode);
+                                        OpenHD::instance()->set_flight_mode(plane_mode);
+                                        //qDebug() << "Mavlink Mav Type= PLANE";
+                                        break;
+                                    }
+                                    case MAV_TYPE_GROUND_ROVER: {
+                                        auto rover_mode = rover_mode_from_enum((ROVER_MODE)custom_mode);
+                                        OpenHD::instance()->set_flight_mode(rover_mode);
+                                        break;
+                                    }
+                                    case MAV_TYPE_QUADROTOR: {
+                                        auto copter_mode = copter_mode_from_enum((COPTER_MODE)custom_mode);
+                                        OpenHD::instance()->set_flight_mode(copter_mode);
+                                        //qDebug() << "Mavlink Mav Type= QUADROTOR";
+                                        break;
+                                    }
+                                    case MAV_TYPE_SUBMARINE: {
+                                        auto sub_mode = sub_mode_from_enum((SUB_MODE)custom_mode);
+                                        OpenHD::instance()->set_flight_mode(sub_mode);
+                                        break;
+                                    }
+                                    case MAV_TYPE_ANTENNA_TRACKER: {
+                                        auto tracker_mode = tracker_mode_from_enum((TRACKER_MODE)custom_mode);
+                                        //OpenHD::instance()->set_tracker_mode(tracker_mode);
+                                        break;
+                                    }
+                                    default: {
+                                        // do nothing
+                                    }
+                                }
+                            }
                             break;
                         }
                         default: {
-                            // do nothing
+                            break;
                         }
                     }
 
@@ -257,7 +292,6 @@ void MavlinkTelemetry::onProcessMavlinkMessage(mavlink_message_t msg) {
             auto rssi = static_cast<int>(static_cast<double>(rc_channels_raw.rssi) / 255.0 * 100.0);
             OpenHD::instance()->set_rc_rssi(rssi);
 
-            qDebug() << "RC RSSI: " << rc_channels_raw.rssi;
             break;
         }
         case MAVLINK_MSG_ID_SERVO_OUTPUT_RAW:{
@@ -290,6 +324,8 @@ void MavlinkTelemetry::onProcessMavlinkMessage(mavlink_message_t msg) {
             OpenHD::instance()->setRCChannel7(rc_channels.chan7_raw);
             OpenHD::instance()->setRCChannel8(rc_channels.chan8_raw);
 
+            auto rssi = static_cast<int>(static_cast<double>(rc_channels.rssi) / 255.0 * 100.0);
+            OpenHD::instance()->set_rc_rssi(rssi);
 
             /*qDebug() << "RC: " << rc_channels.chan1_raw
                                  << rc_channels.chan2_raw

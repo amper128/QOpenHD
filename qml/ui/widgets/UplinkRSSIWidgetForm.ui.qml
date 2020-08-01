@@ -8,7 +8,7 @@ import OpenHD 1.0
 
 BaseWidget {
     id: uplinkRSSIWidget
-    width: 92
+    width: 112
     height:24
 
     visible: settings.show_uplink_rssi
@@ -55,16 +55,6 @@ BaseWidget {
         }
     }
 
-    Glow {
-        anchors.fill: widgetInner
-        visible: settings.show_uplink_rssi
-        radius: 3
-        samples: 17
-        color: settings.color_glow
-        opacity: settings.uplink_rssi_opacity
-        source: widgetInner
-    }
-
     Item {
         id: widgetInner
 
@@ -78,15 +68,16 @@ BaseWidget {
             opacity: settings.uplink_rssi_opacity
             text: "\uf382"
             anchors.right: uplink_rssi.left
-            anchors.rightMargin: 0
+            anchors.rightMargin: 4
             font.family: "Font Awesome 5 Free"
             font.pixelSize: 18
             anchors.top: parent.top
-            styleColor: "#f7f7f7"
             verticalAlignment: Text.AlignVCenter
             z: 2.2
             anchors.topMargin: 0
             horizontalAlignment: Text.AlignRight
+            style: Text.Outline
+            styleColor: settings.color_glow
         }
 
         Label {
@@ -104,8 +95,10 @@ BaseWidget {
             font.pixelSize: 12
             verticalAlignment: Text.AlignTop
             wrapMode: Text.NoWrap
-            elide: Text.ElideRight
+            elide: Text.ElideNone
             clip: false
+            style: Text.Outline
+            styleColor: settings.color_glow
         }
 
         Label {
@@ -123,8 +116,10 @@ BaseWidget {
             font.pixelSize: 18
             verticalAlignment: Text.AlignVCenter
             wrapMode: Text.NoWrap
-            elide: Text.ElideRight
+            elide: Text.ElideNone
             clip: false
+            style: Text.Outline
+            styleColor: settings.color_glow
         }
 
         Label {
@@ -142,9 +137,11 @@ BaseWidget {
             font.pixelSize: 14
             horizontalAlignment: Text.AlignRight
             wrapMode: Text.NoWrap
-            elide: Text.ElideRight
+            elide: Text.ElideNone
             clip: false
             visible: false
+            style: Text.Outline
+            styleColor: settings.color_glow
         }
 
         Label {
@@ -165,6 +162,8 @@ BaseWidget {
             elide: Text.ElideRight
             clip: false
             visible: false
+            style: Text.Outline
+            styleColor: settings.color_glow
         }
     }
 }

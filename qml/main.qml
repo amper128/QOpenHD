@@ -65,6 +65,8 @@ ApplicationWindow {
         id: settings
         property double global_scale: 1.0
 
+        property string locale: "en"
+
         property int main_video_port: 5600
         property int pip_video_port: 5601
         property int lte_video_port: 8000
@@ -239,7 +241,17 @@ ApplicationWindow {
         property bool roll_sky_pointer: false
         property double roll_opacity: 1
 
+        property bool show_adsb: false
+        property int adsb_distance_limit: 100000//meters. Bound box for api from map center (so x2)
+        property int adsb_marker_limit: 19
+        property double adsb_opacity: 1
+
+        property bool show_blackbox: false
+        property double blackbox_opacity: 1
+
         property bool show_example_widget: false
+
+        property int stereo_mode: 0
     }
 
 
@@ -263,6 +275,14 @@ ApplicationWindow {
         id: vectorTelemetry
     }
 
+    MarkerModel {
+        id: markerModel
+    }
+
+    BlackBoxModel {
+        id: blackBoxModel
+    }
+
     Loader {
         anchors.fill: parent
         z: 1.0
@@ -271,7 +291,7 @@ ApplicationWindow {
                 return "MainVideoGStreamer.qml";
             }
             if (IsAndroid && EnableVideoRender && EnableMainVideo) {
-                return "MainVideoAndroid.qml";
+                return "MainVideoRender.qml";
             }
             if (IsRaspPi && EnableVideoRender && EnableMainVideo) {
                 return "MainVideoRender.qml";
@@ -327,19 +347,54 @@ ApplicationWindow {
     // UI areas
 
     UpperOverlayBar {
+        visible: settings.stereo_mode == 0
         id: upperOverlayBar
+    }
+
+    HUDOverlayGrid {
+        id: hudOverlayGrid
+        anchors.left: parent.left
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        anchors.right: parent.right
+        transform: Scale {
+            origin.x: 0
+            origin.y: hudOverlayGrid.height / 2
+            xScale: settings.stereo_mode == 1 ? 0.5 : 1.0
+            yScale: settings.stereo_mode == 1 ? 0.5 : 1.0
+        }
+        z: 3.0
+        layer.enabled: true
+
         onSettingsButtonClicked: {
             settings_panel.openSettings();
         }
     }
 
-    HUDOverlayGrid {
-        id: hudOverlayGrid
-        anchors.fill: parent
+    Rectangle {
+        id: hudOverlayGridClone
+        anchors.right: parent.right
+        width: parent.width / 2
+        height: parent.height / 2
+        anchors.verticalCenter: settings.stereo_mode == 1 ? parent.verticalCenter : undefined
+        visible: settings.stereo_mode != 0
         z: 3.0
+        layer.enabled: true
+        layer.effect: ShaderEffect {
+            id: shader
+            property variant cloneSource : hudOverlayGrid
+            fragmentShader: "
+                  varying highp vec2 qt_TexCoord0;
+                  uniform highp sampler2D cloneSource;
+                  void main(void) {
+                       gl_FragColor =  texture2D(cloneSource, qt_TexCoord0);
+                  }
+            "
+        }
     }
 
     LowerOverlayBar {
+        visible: settings.stereo_mode == 0
         id: lowerOverlayBar
     }
 
