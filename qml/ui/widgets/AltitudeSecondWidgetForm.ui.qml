@@ -91,7 +91,7 @@ BaseWidget {
         id: widgetInner
         anchors.fill: parent
 
-        Text {
+        Label {
             id: second_alt_text
             color: settings.color_text
             opacity: settings.altitude_second_opacity

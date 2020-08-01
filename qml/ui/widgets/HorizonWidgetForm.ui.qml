@@ -366,7 +366,8 @@ BaseWidget {
                     //cant get a good approximation of glow via canvas
                     //ctx.strokeStyle = settings.color_glow;
                     //ctx.lineWidth = 1;
-                    ctx.font = "bold 11px sans-serif";
+                    //ctx.font = "bold 11px sans-serif";
+                    ctx.font = "bold 11px Orbitron";
                     ctx.textAlign = "center";
 
 
@@ -408,7 +409,8 @@ BaseWidget {
                         if (h == OpenHD.home_heading && settings.show_horizon_home === true) {
                             ctx.font='14px "Font Awesome 5 Free"';
                             ctx.fillText("\uf015", x, y_label);
-                            ctx.font = "bold 11px sans-serif";
+                            //ctx.font = "bold 11px sans-serif";
+                            ctx.font = "bold 11px Orbitron";
                             h_drawn=false;
                         }
 

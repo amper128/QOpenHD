@@ -220,7 +220,8 @@ BaseWidget {
                     //cant get a good approximation of glow via canvas
                     //ctx.strokeStyle = settings.color_glow;
                     //ctx.lineWidth = .5;
-                    ctx.font = "bold 11px sans-serif";
+                    //ctx.font = "bold 11px sans-serif";
+                    ctx.font = "bold 11px Orbitron";
 
                     var enable_imperial = settings.enable_imperial;
                     var altitude_rel_msl = settings.altitude_rel_msl;

@@ -187,7 +187,7 @@ BaseWidget {
             }
         }
 
-        Text {
+        Label {
             id: percent_symbol
             color: settings.color_text
             opacity: settings.rc_rssi_opacity
@@ -204,7 +204,7 @@ BaseWidget {
 
         }
 
-        Text {
+        Label {
             id: rc_rssi
             color: settings.color_text
             opacity: settings.rc_rssi_opacity

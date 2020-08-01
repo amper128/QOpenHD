@@ -200,7 +200,7 @@ BaseWidget {
                     color: settings.color_shape
                 }
 
-                Text {
+                Label {
                     color: settings.color_shape
                     visible: settings.roll_show_numbers
                     text: "60"
@@ -232,7 +232,7 @@ BaseWidget {
                     color: settings.color_shape
                 }
 
-                Text {
+                Label {
                     color: settings.color_shape
                     visible: settings.roll_show_numbers
                     text: "40"
@@ -264,7 +264,7 @@ BaseWidget {
                     color: settings.color_shape
                 }
 
-                Text {
+                Label {
                     color: settings.color_shape
                     visible: settings.roll_show_numbers
                     text: "20"
@@ -316,7 +316,7 @@ BaseWidget {
                     color: settings.color_shape
                 }
 
-                Text {
+                Label {
                     color: settings.color_shape
                     visible: settings.roll_show_numbers
                     text: "60"
@@ -348,7 +348,7 @@ BaseWidget {
                     color: settings.color_shape
                 }
 
-                Text {
+                Label {
                     color: settings.color_shape
                     visible: settings.roll_show_numbers
                     text: "40"
@@ -380,7 +380,7 @@ BaseWidget {
                     color: settings.color_shape
                 }
 
-                Text {
+                Label {
                     color: settings.color_shape
                     visible: settings.roll_show_numbers
                     text: "20"

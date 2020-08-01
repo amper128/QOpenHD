@@ -87,7 +87,7 @@ BaseWidget {
 
         }
 
-        Text {
+        Label {
             id: fc_temp
             color: OpenHD.fc_temp >= 65 ? (OpenHD.fc_temp >= 75 ? "#ff0000" : "#fbfd15") : settings.color_text
             opacity: settings.fc_temp_opacity

@@ -11,7 +11,7 @@ Item {
     height: 24
     clip: true
 
-    Text {
+    Label {
         id: messageIcon
         width: 24
         height: 24
@@ -58,7 +58,7 @@ Item {
         font.bold: true
     }
 
-    Text {
+    Label {
         height: parent.height
         font.pixelSize: 16
         verticalAlignment: Text.AlignVCenter
