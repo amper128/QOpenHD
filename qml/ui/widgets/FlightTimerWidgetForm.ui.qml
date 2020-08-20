@@ -53,12 +53,42 @@ BaseWidget {
                 }
             }
         }
+        Item {
+            width: parent.width
+            height: 32
+            Text {
+                text: qsTr("Size")
+                color: "white"
+                height: parent.height
+                font.bold: true
+                font.pixelSize: detailPanelFontPixels
+                anchors.left: parent.left
+                verticalAlignment: Text.AlignVCenter
+            }
+            Slider {
+                id: flight_timer_size_Slider
+                orientation: Qt.Horizontal
+                from: .5
+                value: settings.flight_timer_size
+                to: 3
+                stepSize: .1
+                height: parent.height
+                anchors.rightMargin: 0
+                anchors.right: parent.right
+                width: parent.width - 96
+
+                onValueChanged: {
+                    settings.flight_timer_size = flight_timer_size_Slider.value
+                }
+            }
+        }
     }
 
     Item {
         id: widgetInner
 
         anchors.fill: parent
+        scale: settings.flight_timer_size
 
         Label {
             id: flight_timer_text
@@ -73,6 +103,7 @@ BaseWidget {
             anchors.rightMargin: 8
             verticalAlignment: Text.AlignVCenter
             font.pixelSize: 16
+            font.family: settings.font_text
             horizontalAlignment: Text.AlignLeft
             style: Text.Outline
             styleColor: settings.color_glow

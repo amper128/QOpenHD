@@ -59,6 +59,35 @@ BaseWidget {
             width: parent.width
             height: 32
             Text {
+                text: qsTr("Size")
+                color: "white"
+                height: parent.height
+                font.bold: true
+                font.pixelSize: detailPanelFontPixels
+                anchors.left: parent.left
+                verticalAlignment: Text.AlignVCenter
+            }
+            Slider {
+                id: mah_size_Slider
+                orientation: Qt.Horizontal
+                from: .5
+                value: settings.mah_size
+                to: 3
+                stepSize: .1
+                height: parent.height
+                anchors.rightMargin: 0
+                anchors.right: parent.right
+                width: parent.width - 96
+
+                onValueChanged: {
+                    settings.mah_size = mah_size_Slider.value
+                }
+            }
+        }
+        Item {
+            width: parent.width
+            height: 32
+            Text {
                 text: qsTr("Use telemetry data")
                 color: "white"
                 height: parent.height
@@ -82,6 +111,7 @@ BaseWidget {
         id: widgetInner
 
         anchors.fill: parent
+        scale: settings.mah_size
 
         Text {
             id: home_icon
@@ -110,11 +140,12 @@ BaseWidget {
             clip: true
             color: settings.color_text
             opacity: settings.mah_opacity
-            text: settings.air_battery_mah_source ? OpenHD.flight_mah+"mAh" : OpenHD.app_mah+"mAh"
+            text: settings.flight_mah_use_telemetry ? OpenHD.flight_mah + "mAh" : OpenHD.app_mah + "mAh"
             anchors.right: parent.right
             anchors.rightMargin: 0
             verticalAlignment: Text.AlignVCenter
             font.pixelSize: 16
+            font.family: settings.font_text
             horizontalAlignment: Text.AlignLeft
             style: Text.Outline
             styleColor: settings.color_glow

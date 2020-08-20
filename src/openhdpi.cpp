@@ -21,7 +21,6 @@ bool OpenHDPi::is_raspberry_pi() {
 }
 
 void OpenHDPi::activate_console() {
-#if defined(__rasp_pi__)
     qDebug() << "OpenHDPi::activate_console()";
     QString program = "/bin/chvt";
     QStringList arguments;
@@ -29,11 +28,9 @@ void OpenHDPi::activate_console() {
     QProcess *process = new QProcess(this);
     process->start(program, arguments);
     process->waitForFinished();
-#endif
 }
 
 void OpenHDPi::stop_app() {
-#if defined(__rasp_pi__)
     qDebug() << "OpenHDPi::stop_app()";
     QString program = "/bin/systemctl";
     QStringList arguments;
@@ -41,37 +38,33 @@ void OpenHDPi::stop_app() {
     QProcess *process = new QProcess(this);
     process->start(program, arguments);
     process->waitForFinished();
-#endif
 }
 
-void OpenHDPi::set_mount_rw() {
-#if defined(__rasp_pi__)
-    qDebug() << "OpenHDPi::set_mount_rw()";
+
+void OpenHDPi::set_boot_mount_rw() {
+    qDebug() << "OpenHDPi::set_boot_mount_rw()";
     QString program = "/bin/mount";
     QStringList arguments;
-    arguments << "-o" << "remount,rw" << "/";
+    arguments << "-o" << "remount,rw" << "/boot";
     if (mountProcess != nullptr) {
         delete mountProcess;
     }
     mountProcess = new QProcess(this);
     mountProcess->start(program, arguments);
     mountProcess->waitForFinished();
-#endif
 }
 
-void OpenHDPi::set_mount_ro() {
-#if defined(__rasp_pi__)
-    qDebug() << "OpenHDPi::set_mount_ro()";
+void OpenHDPi::set_boot_mount_ro() {
+    qDebug() << "OpenHDPi::set_boot_mount_ro()";
     QString program = "/bin/mount";
     QStringList arguments;
-    arguments << "-o" << "remount,ro" << "/";
+    arguments << "-o" << "remount,ro" << "/boot";
     if (mountProcess != nullptr) {
         delete mountProcess;
     }
     mountProcess = new QProcess(this);
     mountProcess->start(program, arguments);
     mountProcess->waitForFinished();
-#endif
 }
 
 

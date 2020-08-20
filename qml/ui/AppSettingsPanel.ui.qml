@@ -1,6 +1,8 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
+import QtQuick.Dialogs 1.0
+import QtQuick.Controls.Material 2.12
 
 import Qt.labs.settings 1.0
 
@@ -63,6 +65,15 @@ Item {
             visible: (EnableMainVideo || EnablePiP)
         }
 
+        TabButton {
+            text: qsTr("Manage")
+            width: (!IsRaspPi && !IsiOS) ? implicitWidth : 0
+            height: 48
+            font.pixelSize: 13
+            visible: !IsRaspPi && !IsiOS
+
+        }
+
 
         /*TabButton {
             text: qsTr("Joystick")
@@ -90,6 +101,7 @@ Item {
             width: parent.width
             height: parent.height
             contentHeight: generalColumn.height
+            visible: appSettingsBar.currentIndex == 0
 
             clip: true
 
@@ -264,7 +276,7 @@ Item {
                         width: parent.width
                         height: rowHeight
                         color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
-                        visible: false
+                        visible: true
 
                         Text {
                             text: qsTr("Language / Locale")
@@ -297,9 +309,9 @@ Item {
             width: parent.width
             height: parent.height
             contentHeight: widgetColumn.height
+            visible: appSettingsBar.currentIndex == 1
 
             clip: true
-
             Item {
                 anchors.fill: parent
 
@@ -326,43 +338,31 @@ Item {
                             anchors.left: parent.left
                         }
 
-                        ComboBox {
+                        RoundButton {
+                            //text: "Open"
+
                             height: elementHeight
                             anchors.right: parent.right
                             anchors.rightMargin: Qt.inputMethod.visible ? 96 : 36
                             anchors.verticalCenter: parent.verticalCenter
                             anchors.horizontalCenter: parent.horizonatalCenter
-                            model: ListModel {
-                                id: color_shape
-                                ListElement { text: "White"; color: "white" }
-                                ListElement { text: "Black"; color: "black" }
-                                ListElement { text: "Green"; color: "green" }
-                                ListElement { text: "Drk Green"; color: "darkGreen" }
-                                ListElement { text: "Yellow"; color: "yellow" }
-                                ListElement { text: "Drk Yellow"; color: "darkYellow" }
-                                ListElement { text: "Grey"; color: "grey" }
-                                ListElement { text: "Lgt Grey"; color: "lightGrey" }
-                                ListElement { text: "Drk Grey"; color: "darkGrey" }
-				ListElement { text: "Light Blue"; color: "#FF8BDAD7" }
+                            onClicked: {
+                                colorPicker.previousColor = settings.color_shape
+                                colorPicker.currentColorType = ColorPicker.ColorType.ShapeColor
+                                colorPicker.visible = true
                             }
-                            textRole: "text"
-                            // @disable-check M223
-                            Component.onCompleted: {
-                                // @disable-check M223
-                                for (var i = 0; i < model.count; i++) {
-                                    // @disable-check M222
-                                    var choice = model.get(i);
-                                    // @disable-check M223
-                                    if (choice.color == settings.color_shape) {
-                                        currentIndex = i;
-                                    }
-                                }
+
+                            Rectangle {
+                                anchors.centerIn: parent
+                                width: ((parent.width<parent.height?parent.width:parent.height))-20
+                                height: width
+                                radius: width*0.5
+                                color: settings.color_shape
                             }
-                            onCurrentIndexChanged: {
-                                    settings.color_shape = color_shape.get(currentIndex).color
-                            }
+
                         }
                     }
+
 
                     Rectangle {
                         width: parent.width
@@ -379,42 +379,28 @@ Item {
                             width: 224
                             height: elementHeight
                             anchors.left: parent.left
-                        }
+                        }                        
 
-                        ComboBox {
+                        RoundButton {
+                            //text: "Open"
+
                             height: elementHeight
                             anchors.right: parent.right
                             anchors.rightMargin: Qt.inputMethod.visible ? 96 : 36
                             anchors.verticalCenter: parent.verticalCenter
                             anchors.horizontalCenter: parent.horizonatalCenter
-                            model: ListModel {
-                                id: color_glow
-                                ListElement { text: "Black"; color: "black" }
-                                ListElement { text: "White"; color: "white" }
-                                ListElement { text: "Green"; color: "green" }
-                                ListElement { text: "Drk Green"; color: "darkGreen" }
-                                ListElement { text: "Yellow"; color: "yellow" }
-                                ListElement { text: "Drk Yellow"; color: "darkYellow" }
-                                ListElement { text: "Grey"; color: "grey" }
-                                ListElement { text: "Lgt Grey"; color: "lightGrey" }
-                                ListElement { text: "Drk Grey"; color: "darkGrey" }
-				ListElement { text: "Light Blue"; color: "#FF8BDAD7" }
+                            onClicked: {
+                                colorPicker.previousColor = settings.color_glow
+                                colorPicker.currentColorType = ColorPicker.ColorType.GlowColor
+                                colorPicker.visible = true
                             }
-                            textRole: "text"
-                            // @disable-check M223
-                            Component.onCompleted: {
-                                // @disable-check M223
-                                for (var i = 0; i < model.count; i++) {
-                                    // @disable-check M222
-                                    var choice = model.get(i);
-                                    // @disable-check M223
-                                    if (choice.color == settings.color_glow) {
-                                        currentIndex = i;
-                                    }
-                                }
-                            }
-                            onCurrentIndexChanged: {
-                                    settings.color_glow = color_glow.get(currentIndex).color
+
+                            Rectangle {
+                                anchors.centerIn: parent
+                                width: ((parent.width<parent.height?parent.width:parent.height))-20
+                                height: width
+                                radius: width*0.5
+                                color: settings.color_glow
                             }
                         }
                     }
@@ -434,45 +420,64 @@ Item {
                             width: 224
                             height: elementHeight
                             anchors.left: parent.left
-                        }
+                        }                       
 
-                        ComboBox {
+                        RoundButton {
+                            //text: "Open"
+
                             height: elementHeight
                             anchors.right: parent.right
                             anchors.rightMargin: Qt.inputMethod.visible ? 96 : 36
                             anchors.verticalCenter: parent.verticalCenter
                             anchors.horizontalCenter: parent.horizonatalCenter
-                            model: ListModel {
-                                id: color_text
-                                ListElement { text: "White"; color: "white" }
-                                ListElement { text: "Black"; color: "black" }
-                                ListElement { text: "Green"; color: "green" }
-                                ListElement { text: "Drk Green"; color: "darkGreen" }
-                                ListElement { text: "Yellow"; color: "yellow" }
-                                ListElement { text: "Drk Yellow"; color: "darkYellow" }
-                                ListElement { text: "Grey"; color: "grey" }
-                                ListElement { text: "Lgt Grey"; color: "lightGrey" }
-                                ListElement { text: "Drk Grey"; color: "darkGrey" }
-				ListElement { text: "Light Blue"; color: "#FF8BDAD7" }
+                            onClicked: {
+                                colorPicker.previousColor = settings.color_text
+                                colorPicker.currentColorType = ColorPicker.ColorType.TextColor
+                                colorPicker.visible = true
                             }
-                            textRole: "text"
-                            // @disable-check M223
-                            Component.onCompleted: {
-                                // @disable-check M223
-                                for (var i = 0; i < model.count; i++) {
-                                    // @disable-check M222
-                                    var choice = model.get(i);
-                                    // @disable-check M223
-                                    if (choice.color == settings.color_text) {
-                                        currentIndex = i;
-                                    }
-                                }
-                            }
-                            onCurrentIndexChanged: {
-                                    settings.color_text = color_text.get(currentIndex).color
+
+                            Rectangle {
+                                anchors.centerIn: parent
+                                width: ((parent.width<parent.height?parent.width:parent.height))-20
+                                height: width
+                                radius: width*0.5
+                                color: settings.color_text
                             }
                         }
                     }
+
+
+
+                    Rectangle {
+                        width: parent.width
+                        height: rowHeight
+                        color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
+
+                        Text {
+                            text: qsTr("Text font")
+                            font.weight: Font.Bold
+                            font.pixelSize: 13
+                            anchors.leftMargin: 8
+                            verticalAlignment: Text.AlignVCenter
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: 224
+                            height: elementHeight
+                            anchors.left: parent.left
+                        }
+
+                        FontSelect {
+                            id: fontSelectBox
+                            height: elementHeight
+                            width: 320
+                            anchors.right: parent.right
+                            anchors.rightMargin: Qt.inputMethod.visible ? 96 : 36
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.horizontalCenter: parent.horizonatalCenter
+                        }
+                    }
+
+
+
 
                     Rectangle {
                         width: parent.width
@@ -500,10 +505,10 @@ Item {
                             width: 320
                             model: ListModel {
                                 id: bar_behavior
-                                ListElement { text: "Hide" ; behavior: "none" }
-                                ListElement { text: "Transparent black" ; behavior: "black" }
-                                ListElement { text: "Hide when drone armed" ; behavior: "disappear" }
-                                ListElement { text: "Turn red when drone armed" ; behavior: "red" }
+                                ListElement { text: qsTr("Hide") ; behavior: "none" }
+                                ListElement { text: qsTr("Transparent black") ; behavior: "black" }
+                                ListElement { text: qsTr("Hide when drone armed") ; behavior: "disappear" }
+                                ListElement { text: qsTr("Turn red when drone armed") ; behavior: "red" }
 
                             }
                             textRole: "text"
@@ -1082,6 +1087,35 @@ Item {
                         color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
 
                         Text {
+                            text: qsTr("Show Second Speed")
+                            font.weight: Font.Bold
+                            font.pixelSize: 13
+                            anchors.leftMargin: 8
+                            verticalAlignment: Text.AlignVCenter
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: 224
+                            height: elementHeight
+                            anchors.left: parent.left
+                        }
+
+                        Switch {
+                            width: 32
+                            height: elementHeight
+                            anchors.rightMargin: Qt.inputMethod.visible ? 96 : 36
+
+                            anchors.right: parent.right
+                            anchors.verticalCenter: parent.verticalCenter
+                            checked: settings.show_speed_second
+                            onCheckedChanged: settings.show_speed_second = checked
+                        }
+                    }
+
+                    Rectangle {
+                        width: parent.width
+                        height: rowHeight
+                        color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
+
+                        Text {
                             text: qsTr("Show Heading")
                             font.weight: Font.Bold
                             font.pixelSize: 13
@@ -1401,7 +1435,7 @@ Item {
                         visible: EnableADSB
 
                         Text {
-                            text: "Show ADS-B Traffic"
+                            text: qsTr("Show ADS-B Traffic")
                             font.weight: Font.Bold
                             font.pixelSize: 13
                             anchors.leftMargin: 8
@@ -1429,10 +1463,11 @@ Item {
                         width: parent.width
                         height: rowHeight
                         color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
+                        visible: EnableBlackbox
 
 
                         Text {
-                            text: "Show BlackBox"
+                            text: qsTr("Show BlackBox")
                             font.weight: Font.Bold
                             font.pixelSize: 13
                             anchors.leftMargin: 8
@@ -1455,12 +1490,12 @@ Item {
                                 settings.show_blackbox = checked;
                             }
                         }
-                    }
-
+                    }                    
                     Rectangle {
                         width: parent.width
                         height: rowHeight
                         color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
+                        visible: EnableExampleWidget
 
                         Text {
                             text: qsTr("Show example widget")
@@ -1494,6 +1529,7 @@ Item {
             width: parent.width
             height: parent.height
             contentHeight: piColumn.height
+            visible: appSettingsBar.currentIndex == 2
 
             clip: true
 
@@ -1595,53 +1631,7 @@ Item {
                             }
                         }
 
-                        Rectangle {
-                            width: parent.width
-                            height: rowHeight
-                            color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
-                            visible: false
 
-                            Text {
-                                text: qsTr("Stereo OSD mode")
-                                font.weight: Font.Bold
-                                font.pixelSize: 13
-                                anchors.leftMargin: 8
-                                verticalAlignment: Text.AlignVCenter
-                                anchors.verticalCenter: parent.verticalCenter
-                                width: 224
-                                height: elementHeight
-                                anchors.left: parent.left
-                            }
-
-                            ComboBox {
-                                height: elementHeight
-                                anchors.right: parent.right
-                                anchors.rightMargin: Qt.inputMethod.visible ? 96 : 36
-                                anchors.verticalCenter: parent.verticalCenter
-                                anchors.horizontalCenter: parent.horizonatalCenter
-                                model: ListModel {
-                                    id: stereo_list_model
-                                    ListElement { text: "Off"; mode: 0 }
-                                    ListElement { text: "Aspect Fit"; mode: 1  }
-                                }
-                                textRole: "text"
-                                // @disable-check M223
-                                Component.onCompleted: {
-                                    // @disable-check M223
-                                    for (var i = 0; i < model.count; i++) {
-                                        // @disable-check M222
-                                        var choice = model.get(i);
-                                        // @disable-check M223
-                                        if (choice.mode == settings.stereo_mode) {
-                                            currentIndex = i;
-                                        }
-                                    }
-                                }
-                                onActivated: {
-                                        settings.stereo_mode = stereo_list_model.get(currentIndex).mode
-                                }
-                            }
-                        }
                     }
                 }
             }
@@ -1654,7 +1644,7 @@ Item {
             contentHeight: videoColumn.height
 
             clip: true
-            visible: EnableMainVideo || EnablePiP
+            visible: (EnableMainVideo || EnablePiP) && appSettingsBar.currentIndex == 3
 
 
             Item {
@@ -1782,6 +1772,247 @@ Item {
                             anchors.verticalCenter: parent.verticalCenter
                             checked: settings.hide_watermark
                             onCheckedChanged: settings.hide_watermark = checked
+                        }
+                    }
+
+                    Rectangle {
+                        width: parent.width
+                        height: rowHeight
+                        color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
+                        visible: false
+
+                        Text {
+                            text: qsTr("Enable stereo mode")
+                            font.weight: Font.Bold
+                            font.pixelSize: 13
+                            anchors.leftMargin: 8
+                            verticalAlignment: Text.AlignVCenter
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: 224
+                            height: elementHeight
+                            anchors.left: parent.left
+                        }
+
+                        Switch {
+                            width: 32
+                            height: elementHeight
+                            anchors.rightMargin: Qt.inputMethod.visible ? 96 : 36
+
+                            anchors.right: parent.right
+                            anchors.verticalCenter: parent.verticalCenter
+                            checked: settings.stereo_enable
+                            onCheckedChanged: settings.stereo_enable = checked
+                        }
+                    }
+
+                    Rectangle {
+                        width: parent.width
+                        height: rowHeight
+                        color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
+                        visible: settings.stereo_enable && false
+
+                        Text {
+                            text: qsTr("Stereo OSD mode")
+                            font.weight: Font.Bold
+                            font.pixelSize: 13
+                            anchors.leftMargin: 8
+                            verticalAlignment: Text.AlignVCenter
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: 224
+                            height: elementHeight
+                            anchors.left: parent.left
+                        }
+
+                        ComboBox {
+                            id: stereoDropdown
+                            height: elementHeight
+                            width: 320
+                            anchors.right: parent.right
+                            anchors.rightMargin: Qt.inputMethod.visible ? 96 : 36
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.horizontalCenter: parent.horizonatalCenter
+                            model: ListModel {
+                                id: stereo_list_model
+                                ListElement { text: "Side by side (no lens correction)"; mode: 0  }
+                                ListElement { text: "Google Daydream"; mode: 1 }
+                            }
+                            textRole: "text"
+                            // @disable-check M223
+                            Component.onCompleted: {
+                                // @disable-check M223
+                                for (var i = 0; i < model.count; i++) {
+                                    // @disable-check M222
+                                    var choice = model.get(i);
+                                    // @disable-check M223
+                                    if (choice.mode == settings.stereo_mode) {
+                                        currentIndex = i;
+                                    }
+                                }
+                            }
+                            onActivated: {
+                                settings.stereo_mode = stereo_list_model.get(currentIndex).mode
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        ScrollView {
+            id: manageView
+            width: parent.width
+            height: parent.height
+            contentHeight: manageColumn.height
+            visible: appSettingsBar.currentIndex == 4
+
+            clip: true
+
+            Item {
+                anchors.fill: parent
+
+                Column {
+                    id: manageColumn
+                    spacing: 0
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+
+                    Rectangle {
+                        width: parent.width
+                        height: rowHeight
+                        color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
+                        visible: !IsRaspPi
+
+                        Text {
+                            text: qsTr("Load settings from file")
+                            font.weight: Font.Bold
+                            font.pixelSize: 13
+                            anchors.leftMargin: 8
+                            verticalAlignment: Text.AlignVCenter
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: 224
+                            height: elementHeight
+                            anchors.left: parent.left
+                        }
+
+                        Button {
+                            width: 128
+                            height: elementHeight
+                            anchors.rightMargin: Qt.inputMethod.visible ? 96 : 36
+
+                            anchors.right: parent.right
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: qsTr("Load")
+                            onClicked: {
+                                fileDialog.open();
+                            }
+                        }
+
+                        FileDialog {
+                            id: fileDialog
+                            title: qsTr("Select settings file")
+                            folder: shortcuts.home
+                            selectMultiple: false
+                            selectFolder: false
+                            defaultSuffix: "conf"
+                            onAccepted: {
+                                ManageSettings.loadSettingsFile(fileDialog.fileUrl);
+                                settings.sync();
+                            }
+                            onRejected: {
+                                console.log("Canceled")
+                            }
+                        }
+                    }
+
+                    Rectangle {
+                        width: parent.width
+                        height: rowHeight
+                        color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
+                        visible: !IsRaspPi
+
+                        Text {
+                            text: qsTr("Save settings to file")
+                            font.weight: Font.Bold
+                            font.pixelSize: 13
+                            anchors.leftMargin: 8
+                            verticalAlignment: Text.AlignVCenter
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: 224
+                            height: elementHeight
+                            anchors.left: parent.left
+                        }
+
+                        Button {
+                            width: 128
+                            height: elementHeight
+                            anchors.rightMargin: Qt.inputMethod.visible ? 96 : 36
+
+                            anchors.right: parent.right
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: qsTr("Save")
+                            onClicked: {
+                                saveDialog.open();
+                            }
+                        }
+
+                        FileDialog {
+                            id: saveDialog
+                            title: qsTr("Select location")
+                            folder: shortcuts.home + "/qopenhd.conf";
+                            selectMultiple: false
+                            selectFolder: false
+                            selectExisting: false
+
+                            onAccepted: {
+                                console.log("Sa: " + saveDialog.fileUrl);
+                                settings.sync();
+                                // this is a folder path, the ManualSettings class chooses a filename to put there
+                                ManageSettings.saveSettingsFile(saveDialog.fileUrl);
+                            }
+                            onRejected: {
+                                console.log("Canceled")
+                            }
+                        }
+                    }
+
+                    Rectangle {
+                        width: parent.width
+                        height: rowHeight
+                        color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
+                        visible: false
+
+                        Text {
+                            text: qsTr("Reset all settings")
+                            font.weight: Font.Bold
+                            font.pixelSize: 13
+                            anchors.leftMargin: 8
+                            verticalAlignment: Text.AlignVCenter
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: 224
+                            height: elementHeight
+                            anchors.left: parent.left
+                        }
+
+                        Button {
+                            id: resetButton
+                            width: 128
+                            height: elementHeight
+                            anchors.rightMargin: Qt.inputMethod.visible ? 96 : 36
+
+                            anchors.right: parent.right
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: qsTr("Reset")
+                            Material.accent: Material.Red
+                            highlighted: true
+
+                            ToolTip.delay: 250
+                            ToolTip.timeout: 5000
+                            ToolTip.visible: pressed
+                            ToolTip.text: qsTr("Settings reset")
+
+                            onClicked: {
+                                //settings.clear()
+                            }
                         }
                     }
                 }

@@ -15,12 +15,10 @@ SpeedLadder::SpeedLadder(QQuickItem *parent): QQuickPaintedItem(parent) {
 void SpeedLadder::paint(QPainter* painter) {
     painter->save();
 
-    QFont font("sans-serif", 11, QFont::Bold, false);
+    painter->setFont(m_font);
 
-    painter->setFont(font);
-
-    auto speed = m_imperial ? (m_airspeedOrGps ? (m_airspeed * 0.621371) : (m_speed * 0.621371)) :
-                              (m_airspeedOrGps ? m_airspeed : m_speed);
+    auto speed = m_imperial ? (m_useGroundspeed ? (m_speed * 0.621371) : (m_airspeed * 0.621371)) :
+                              (m_useGroundspeed ? m_speed : m_airspeed);
 
     //weird rounding issue where decimals make ladder dissappear
     speed = round(speed);
@@ -32,7 +30,7 @@ void SpeedLadder::paint(QPainter* painter) {
     auto y_position = height() / 2 + 11;
 
     // ladder labels right/left position
-    auto x_label = 10;
+    auto x_label = 9;
 
     auto ratio_speed = height() / m_speedRange;
 
@@ -45,21 +43,35 @@ void SpeedLadder::paint(QPainter* painter) {
         y =  y_position + ((k - speed) * ratio_speed) * -1;
         if (k % 10 == 0) {
             if (k >= 0) {
-                // big ticks
+                // big ticks                
                 painter->fillRect(QRectF(x, y, 12, 3), m_color);
+                painter->setPen(m_glow);
+                painter->drawRect(QRectF(x, y, 12, 3));
+                painter->setPen(m_color);
 
                 if (k > speed + 5 || k < speed - 5) {
-                    painter->drawText(x_label, y + 6, QString::number(k));
+                    if (QString::number(k).count()>2){ //workaround cuz qfont does not have align
+                        painter->drawText(x_label-10, y + 6, QString::number(k));
+                    }
+                    else {
+                        painter->drawText(x_label, y + 6, QString::number(k));
+                    }
                 }
             }
             if (k < m_speedMinimum) {
                 //start position speed (squares) below "0"
                 painter->fillRect(QRectF(x, y - 12, 15, 15), m_color);
+                painter->setPen(m_glow);
+                painter->drawRect(QRectF(x, y - 12, 15, 15));
+                painter->setPen(m_color);
             }
         }
         else if ((k % 5 == 0) && (k > m_speedMinimum)) {
             //little ticks
             painter->fillRect(QRectF(x + 5, y, 7, 2), m_color);
+            painter->setPen(m_glow);
+            painter->drawRect(QRectF(x + 5, y, 7, 2));
+            painter->setPen(m_color);
         }
     }
 
@@ -72,6 +84,11 @@ QColor SpeedLadder::color() const {
 }
 
 
+QColor SpeedLadder::glow() const {
+    return m_glow;
+}
+
+
 void SpeedLadder::setColor(QColor color) {
     m_color = color;
     emit colorChanged(m_color);
@@ -79,9 +96,16 @@ void SpeedLadder::setColor(QColor color) {
 }
 
 
-void SpeedLadder::setAirspeedOrGps(bool airspeedOrGps) {
-    m_airspeedOrGps = airspeedOrGps;
-    emit airspeedOrGpsChanged(m_airspeedOrGps);
+void SpeedLadder::setGlow(QColor glow) {
+    m_glow = glow;
+    emit glowChanged(m_glow);
+    update();
+}
+
+
+void SpeedLadder::setUseGroundspeed(bool useGroundspeed) {
+    m_useGroundspeed = useGroundspeed;
+    emit useGroundspeedChanged(m_useGroundspeed);
     update();
 }
 
@@ -117,5 +141,12 @@ void SpeedLadder::setSpeed(int speed) {
 void SpeedLadder::setAirspeed(int airspeed) {
     m_airspeed = airspeed;
     emit airspeedChanged(m_airspeed);
+    update();
+}
+
+void SpeedLadder::setFontFamily(QString fontFamily) {
+    m_fontFamily = fontFamily;
+    emit fontFamilyChanged(m_fontFamily);
+    m_font = QFont(m_fontFamily, 10, QFont::Bold, false);
     update();
 }

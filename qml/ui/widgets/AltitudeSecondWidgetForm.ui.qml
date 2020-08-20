@@ -58,6 +58,35 @@ BaseWidget {
             width: parent.width
             height: 32
             Text {
+                text: qsTr("Size")
+                color: "white"
+                height: parent.height
+                font.bold: true
+                font.pixelSize: detailPanelFontPixels
+                anchors.left: parent.left
+                verticalAlignment: Text.AlignVCenter
+            }
+            Slider {
+                id: alt_second_size_Slider
+                orientation: Qt.Horizontal
+                from: .5
+                value: settings.altitude_second_size
+                to: 3
+                stepSize: .1
+                height: parent.height
+                anchors.rightMargin: 0
+                anchors.right: parent.right
+                width: parent.width - 96
+
+                onValueChanged: {
+                    settings.altitude_second_size = alt_second_size_Slider.value
+                }
+            }
+        }
+        Item {
+            width: parent.width
+            height: 32
+            Text {
                 id: mslTitle
                 text: qsTr("Relative / MSL")
                 color: "white"
@@ -82,14 +111,16 @@ BaseWidget {
         id: widgetInner
         anchors.fill: parent
 
+        scale: settings.altitude_second_size
+
         Label {
             id: second_alt_text
             color: settings.color_text
             opacity: settings.altitude_second_opacity
             font.pixelSize: 14
-            width: 40
-            anchors.right: parent.right
-            anchors.rightMargin: 0
+            font.family: settings.font_text
+            anchors.left: widgetGlyph.right
+            anchors.leftMargin: 0
             anchors.verticalCenter: widgetGlyph.verticalCenter
             text: Number(settings.enable_imperial ? (settings.altitude_second_msl_rel ? (OpenHD.alt_msl*3.28) : (OpenHD.alt_rel*3.28)) :
                       (settings.altitude_second_msl_rel ? OpenHD.alt_msl : OpenHD.alt_rel)
@@ -103,7 +134,7 @@ BaseWidget {
 
         Text {
             id: widgetGlyph
-            width: 40
+            width: 16
             height: parent.height
             color: settings.color_shape
             opacity: settings.altitude_second_opacity

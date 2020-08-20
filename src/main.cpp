@@ -51,6 +51,8 @@ const QVector<QString> permissions({"android.permission.INTERNET",
 #include "altitudeladder.h"
 #include "headingladder.h"
 
+#include "managesettings.h"
+
 #if defined(__ios__)
 #include "appleplatform.h"
 #endif
@@ -136,20 +138,6 @@ int main(int argc, char *argv[]) {
 #if defined(__rasp_pi__)
     qDebug() << "Initializing Pi";
     OpenHDPi pi;
-    if (pi.is_raspberry_pi()) {
-        /* no way around this for the moment due to the way Settings works, hopefully won't
-           be needed forever though */
-        pi.set_mount_rw();
-
-        // ensure the local message fifo exists before we continue
-        QString program("/usr/bin/mkfifo");
-        QStringList arguments;
-        arguments << MESSAGE_FIFO;
-        QProcess p;
-        p.start(program, arguments);
-        p.waitForFinished();
-    }
-
 
     // set persistent brightness level at startup
     if (pi.is_raspberry_pi()) {
@@ -164,7 +152,63 @@ int main(int argc, char *argv[]) {
     QFontDatabase::addApplicationFont(":/osdicons.ttf");
 
     QFontDatabase::addApplicationFont(":/materialdesignicons-webfont.ttf");
-    QFontDatabase::addApplicationFont(":/Orbitron-Regular.ttf");
+
+
+    QFontDatabase::addApplicationFont(":/osdfonts/Acme-Regular.ttf");
+    QFontDatabase::addApplicationFont(":/osdfonts/Aldrich-Regular.ttf");
+    QFontDatabase::addApplicationFont(":/osdfonts/AnonymousPro-Bold.ttf");
+    QFontDatabase::addApplicationFont(":/osdfonts/AnonymousPro-BoldItalic.ttf");
+    QFontDatabase::addApplicationFont(":/osdfonts/Archivo-Bold.ttf");
+    QFontDatabase::addApplicationFont(":/osdfonts/Archivo-Medium.ttf");
+    QFontDatabase::addApplicationFont(":/osdfonts/Archivo-Regular.ttf");
+    QFontDatabase::addApplicationFont(":/osdfonts/ArchivoBlack-Regular.ttf");
+    QFontDatabase::addApplicationFont(":/osdfonts/Armata-Regular.ttf");
+    QFontDatabase::addApplicationFont(":/osdfonts/Bangers-Regular.ttf");
+    QFontDatabase::addApplicationFont(":/osdfonts/BlackOpsOne-Regular.ttf");
+    QFontDatabase::addApplicationFont(":/osdfonts/Bungee-Regular.ttf");
+    QFontDatabase::addApplicationFont(":/osdfonts/Carbon-Bold.ttf");
+    QFontDatabase::addApplicationFont(":/osdfonts/Chicle-Regular.ttf");
+    QFontDatabase::addApplicationFont(":/osdfonts/Digital7SegmentDisplay.ttf");
+    QFontDatabase::addApplicationFont(":/osdfonts/DigitalDotDisplay.ttf");
+    QFontDatabase::addApplicationFont(":/osdfonts/DigitalSubwayTicker.ttf");
+    QFontDatabase::addApplicationFont(":/osdfonts/ExpletusSans-Bold.ttf");
+    QFontDatabase::addApplicationFont(":/osdfonts/FjallaOne-Regular.ttf");
+    QFontDatabase::addApplicationFont(":/osdfonts/FredokaOne-Regular.ttf");
+    QFontDatabase::addApplicationFont(":/osdfonts/GeostarFill-Regular.ttf");
+    QFontDatabase::addApplicationFont(":/osdfonts/Iceberg-Regular.ttf");
+    QFontDatabase::addApplicationFont(":/osdfonts/Iceland-Regular.ttf");
+    QFontDatabase::addApplicationFont(":/osdfonts/Jura-Bold.ttf");
+    QFontDatabase::addApplicationFont(":/osdfonts/KeaniaOne-Regular.ttf");
+    QFontDatabase::addApplicationFont(":/osdfonts/Larabie.ttf");
+    QFontDatabase::addApplicationFont(":/osdfonts/LuckiestGuy-Regular.ttf");
+    QFontDatabase::addApplicationFont(":/osdfonts/Merysha-Regular.ttf");
+    QFontDatabase::addApplicationFont(":/osdfonts/NixieOne-Regular.ttf");
+    QFontDatabase::addApplicationFont(":/osdfonts/Orbitron-Bold.ttf");
+    QFontDatabase::addApplicationFont(":/osdfonts/Orbitron-Regular.ttf");
+    QFontDatabase::addApplicationFont(":/osdfonts/Oxygen-Bold.ttf");
+    QFontDatabase::addApplicationFont(":/osdfonts/Oxygen-Regular.ttf");
+    QFontDatabase::addApplicationFont(":/osdfonts/PassionOne-Bold.ttf");
+    QFontDatabase::addApplicationFont(":/osdfonts/Quantico-Bold.ttf");
+    QFontDatabase::addApplicationFont(":/osdfonts/Quantico-Regular.ttf");
+    QFontDatabase::addApplicationFont(":/osdfonts/Quicksand-Bold.ttf");
+    QFontDatabase::addApplicationFont(":/osdfonts/Quicksand-Regular.ttf");
+    QFontDatabase::addApplicationFont(":/osdfonts/RammettoOne-Regular.ttf");
+    QFontDatabase::addApplicationFont(":/osdfonts/Rationale-Regular.ttf");
+    QFontDatabase::addApplicationFont(":/osdfonts/Righteous-Regular.ttf");
+    QFontDatabase::addApplicationFont(":/osdfonts/RobotoMono-Bold.ttf");
+    QFontDatabase::addApplicationFont(":/osdfonts/RobotoMono-Regular.ttf");
+    QFontDatabase::addApplicationFont(":/osdfonts/RussoOne-Regular.ttf");
+    QFontDatabase::addApplicationFont(":/osdfonts/ShareTech-Regular.ttf");
+    QFontDatabase::addApplicationFont(":/osdfonts/ShareTechMono-Regular.ttf");
+    QFontDatabase::addApplicationFont(":/osdfonts/SigmarOne-Regular.ttf");
+    QFontDatabase::addApplicationFont(":/osdfonts/Slackey-Regular.ttf");
+    QFontDatabase::addApplicationFont(":/osdfonts/UbuntuMono-Bold.ttf");
+    QFontDatabase::addApplicationFont(":/osdfonts/UbuntuMono-BoldItalic.ttf");
+    QFontDatabase::addApplicationFont(":/osdfonts/Visitor.ttf");
+    QFontDatabase::addApplicationFont(":/osdfonts/ZolanMonoOblique.ttf");
+
+
+
     qmlRegisterType<FrSkyTelemetry>("OpenHD", 1, 0, "FrSkyTelemetry");
     qmlRegisterType<MSPTelemetry>("OpenHD", 1, 0, "MSPTelemetry");
     qmlRegisterType<LTMTelemetry>("OpenHD", 1, 0, "LTMTelemetry");
@@ -294,6 +338,14 @@ OpenHDAppleVideo *pipVideo = new OpenHDAppleVideo(OpenHDStreamTypePiP);
 
 #endif
 
+    auto manageSettings = new ManageSettings();
+    engine.rootContext()->setContextProperty("ManageSettings", manageSettings);
+
+    #if defined(__rasp_pi__)
+    manageSettings->loadPiSettings();
+    #endif
+
+
     auto openHDSettings = new OpenHDSettings();
     engine.rootContext()->setContextProperty("openHDSettings", openHDSettings);
 
@@ -377,9 +429,23 @@ OpenHDAppleVideo *pipVideo = new OpenHDAppleVideo(OpenHDStreamTypePiP);
     engine.rootContext()->setContextProperty("MarkerModel", markerModel);
     markerModel->initMarkerModel();
 
+
+    #if defined(ENABLE_EXAMPLE_WIDGET)
+    engine.rootContext()->setContextProperty("EnableExampleWidget", QVariant(true));
+    #else
+    engine.rootContext()->setContextProperty("EnableExampleWidget", QVariant(false));
+    #endif
+
+
     auto blackBoxModel = BlackBoxModel::instance();
     engine.rootContext()->setContextProperty("BlackBoxModel", blackBoxModel);
     blackBoxModel->initBlackBoxModel();
+
+    #if defined(ENABLE_BLACKBOX)
+    engine.rootContext()->setContextProperty("EnableBlackbox", QVariant(true));
+    #else
+    engine.rootContext()->setContextProperty("EnableBlackbox", QVariant(false));
+    #endif
 
 
     #if defined(ENABLE_ADSB)

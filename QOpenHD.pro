@@ -3,7 +3,15 @@ BASEDIR = $$IN_PWD
 LANGUAGE = C++
 CONFIG += c++17
 CONFIG+=sdk_no_version_check
-TRANSLATIONS = translations/QOpenHD_en.ts translations/QOpenHD_de.ts translations/QOpenHD_ru.ts translations/QOpenHD_nl.ts translations/QOpenHD_es.ts translations/QOpenHD_fr.ts
+TRANSLATIONS = translations/QOpenHD_en.ts \
+               translations/QOpenHD_de.ts \
+               translations/QOpenHD_ru.ts \
+               translations/QOpenHD_nl.ts \
+               translations/QOpenHD_es.ts \
+               translations/QOpenHD_fr.ts \
+               translations/QOpenHD_zh.ts \
+               translations/QOpenHD_it.ts \
+               translations/QOpenHD_ro.ts
 
 
 include(platforms.pri)
@@ -66,6 +74,7 @@ SOURCES += \
     src/localmessage.cpp \
     src/ltmtelemetry.cpp \
     src/main.cpp \
+    src/managesettings.cpp \
     src/markermodel.cpp \
     src/mavlinkbase.cpp \
     src/mavlinktelemetry.cpp \
@@ -93,6 +102,7 @@ HEADERS += \
     inc/blackboxmodel.h \
     inc/gpiomicroservice.h \
     inc/headingladder.h \
+    inc/managesettings.h \
     inc/markermodel.h \
     inc/mavlinkbase.h \
     inc/powermicroservice.h \
@@ -139,8 +149,10 @@ DISTFILES += \
     android/src/org/freedesktop/gstreamer/androidmedia/GstAhsCallback.java \
     android/src/org/freedesktop/gstreamer/androidmedia/GstAmcOnFrameAvailableListener.java \
     qml/qtquickcontrols2.conf \
-    qml/ui/qmldir
-
+    qml/ui/qmldir \
+    translations/QOpenHD_it.ts \
+    translations/QOpenHD_ro.ts \
+    translations/QOpenHD_zh.ts
 
 
 SOURCES += \
@@ -358,7 +370,25 @@ AndroidBuild {
             $$PWD/android/src/org/openhd/SurfaceTextureListener.java
     }
     QT += androidextras
+
+    #Androidx86Build {
+    #    ANDROID_EXTRA_LIBS += $$PWD/lib/android/openssl/latest/x86/libcrypto_1_1.so \
+    #                          $$PWD/lib/android/openssl/latest/x86/libssl_1_1.so
+    #} AndroidARM64Build {
+    #    ANDROID_EXTRA_LIBS += $$PWD/lib/android/openssl/latest/arm64/libcrypto_1_1.so \
+    #                          $$PWD/lib/android/openssl/latest/arm64/libssl_1_1.so
+    #} else {
+        ANDROID_EXTRA_LIBS += $$PWD/lib/android/openssl/latest/arm/libcrypto_1_1.so \
+                              $$PWD/lib/android/openssl/latest/arm/libssl_1_1.so
+    #}
 }
+
+
+EnableBlackbox {
+    message("EnableBlackbox")
+    DEFINES += ENABLE_BLACKBOX
+}
+
 
 EnableADSB {
     message("EnableADSB")
@@ -431,7 +461,6 @@ EnablePiP {
 EnableLink {
     message("EnableLink")
     DEFINES += ENABLE_LINK
-    HEADERS += lib/json.hpp
 }
 
 

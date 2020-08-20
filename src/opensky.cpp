@@ -32,7 +32,8 @@
 #include <QGeoCoordinate>
 #include "markermodel.h"
 #include <QTimer>
-#include <openhd.h>
+#include "openhd.h"
+#include "localmessage.h"
 
 
 static OpenSky* _instance = nullptr;
@@ -120,7 +121,7 @@ void OpenSky::requestData() {
     QUrl api_request= "https://opensky-network.org/api/states/all?lamin="+lowerr_lat+"&lomin="+upperl_lon+"&lamax="+upperl_lat+"&lomax="+lowerr_lon;
     request.setUrl(api_request);
     request.setRawHeader("User-Agent", "MyOwnBrowser 1.0");
-        qDebug() << "url=" << api_request;
+    //qDebug() << "url=" << api_request;
     QNetworkReply *reply = m_manager->get(request);
 }
 
@@ -191,8 +192,10 @@ void OpenSky::processReply(QNetworkReply *reply){
 
         //calculate distance from center of map so we can sort in marker model
 
-        distance= calculateKmDistance(center_lat, center_lon,lat,lon);
+        distance = calculateKmDistance(OpenHD::instance()->get_lat(), OpenHD::instance()->get_lon(), lat, lon);
         emit addMarker(current_row, last_row, Traffic(callsign,contact,lat,lon,alt,velocity,track,vertical,distance));
+
+        evaluateTraffic(callsign, contact, lat, lon, alt, velocity, track, vertical, distance);
 
         current_row=current_row+1;
 
@@ -210,17 +213,43 @@ void OpenSky::processReply(QNetworkReply *reply){
         qDebug() << "----------------------------------------------------------";
 */
     }
-    emit doneAddingMarkers();
+    //emit doneAddingMarkers();
 }
 
-int OpenSky::calculateKmDistance(double center_lat, double center_lon,
-                                 double marker_lat, double marker_lon) {
+void OpenSky::evaluateTraffic(QString traffic_callsign,
+                              int traffic_contact,
+                              double traffic_lat,
+                              double traffic_lon,
+                              double traffic_alt,
+                              double traffic_velocity,
+                              double traffic_track,
+                              double traffic_vertical,
+                              double traffic_distance) {
 
-    double latDistance = qDegreesToRadians(center_lat - marker_lat);
-    double lngDistance = qDegreesToRadians(center_lon - marker_lon);
+    /*
+     * Centralise traffic threat detection here. Once threat is detected it should be
+     * labled and then sent over to the adsb widget
+     *
+     *  need to calculate azimuth and bearing of any threats so that it can be shared
+     *  and depicted in the adsb widget
+     */
+    int drone_alt = OpenHD::instance()->get_msl_alt();
+
+    if (traffic_alt - drone_alt < 300 && traffic_distance < 2) {
+        LocalMessage::instance()->showMessage("Aircraft Traffic", 3);
+    } else if (traffic_alt - drone_alt < 500 && traffic_distance < 5) {
+        LocalMessage::instance()->showMessage("Aircraft Traffic", 4);
+    }
+}
+
+int OpenSky::calculateKmDistance(double lat_1, double lon_1,
+                                 double lat_2, double lon_2) {
+
+    double latDistance = qDegreesToRadians(lat_1 - lat_2);
+    double lngDistance = qDegreesToRadians(lon_1 - lon_2);
 
     double a = qSin(latDistance / 2) * qSin(latDistance / 2)
-            + qCos(qDegreesToRadians(center_lat)) * qCos(qDegreesToRadians(marker_lat))
+            + qCos(qDegreesToRadians(center_lat)) * qCos(qDegreesToRadians(lat_2))
             * qSin(lngDistance / 2) * qSin(lngDistance / 2);
 
     double c = 2 * qAtan2(qSqrt(a), qSqrt(1 - a));

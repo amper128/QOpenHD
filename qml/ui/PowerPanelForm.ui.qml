@@ -32,7 +32,7 @@ Rectangle {
         cardBody: Column {
             id: infoColumn
             spacing: 12
-            width: parent.width
+            width: infoPanel.width
 
             Text {
                 text: qsTr("Reboot or safely shut down the air/ground before removing power, or to apply settings changes when it is difficult to cycle power manually. If you have a power control board or sensors connected you may also see power supply information.")
@@ -62,8 +62,6 @@ Rectangle {
             Layout.fillWidth: true
             cardName: qsTr("Air")
             cardBody: ColumnLayout {
-                height: parent.height
-
                 RowLayout {
                     Layout.fillWidth: true
 
@@ -131,7 +129,7 @@ Rectangle {
 
                     onPressed: {
                         powerAction = PowerPanel.PowerAction.RebootAir
-                        powerDialog.open()
+                        powerDialog.visible = true
                     }
                 }
 
@@ -152,7 +150,7 @@ Rectangle {
 
                     onPressed: {
                         powerAction = PowerPanel.PowerAction.ShutdownAir
-                        powerDialog.open()
+                        powerDialog.visible = true
                     }
                 }
             }
@@ -165,8 +163,6 @@ Rectangle {
             Layout.fillWidth: true
             cardName: qsTr("Ground")
             cardBody: ColumnLayout {
-                height: parent.height
-
                 RowLayout {
                     Layout.fillWidth: true
 
@@ -285,7 +281,7 @@ Rectangle {
 
                     onPressed: {
                         powerAction = PowerPanel.PowerAction.RebootGround
-                        powerDialog.open()
+                        powerDialog.visible = true
                     }
                 }
 
@@ -306,7 +302,7 @@ Rectangle {
 
                     onPressed: {
                         powerAction = PowerPanel.PowerAction.ShutdownGround
-                        powerDialog.open()
+                        powerDialog.visible = true
                     }
                 }
             }

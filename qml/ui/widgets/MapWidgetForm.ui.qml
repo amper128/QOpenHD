@@ -37,11 +37,6 @@ BaseWidget {
             name: "osm"
             description: "OpenStreetMap"
         }
-
-        ListElement {
-            name: "mapboxgl"
-            description: "MapboxGL"
-        }
     }
 
     function configure() {
@@ -71,6 +66,9 @@ BaseWidget {
 
 
     Component.onCompleted: {
+        if (!IsRaspPi) {
+            pluginModel.append({"name": "mapboxgl", "description":"MapboxGL"})
+        }
         configure();
     }
 
@@ -184,6 +182,28 @@ BaseWidget {
                     anchors.right: parent.right
                     checked: settings.map_orientation
                     onCheckedChanged: settings.map_orientation = checked
+                }
+            }
+            Item {
+                width: parent.width
+                height: 32
+                visible: EnableBlackbox
+                Text {
+                    text: qsTr("Show Drone Track")
+                    color: "white"
+                    height: parent.height
+                    font.bold: true
+                    font.pixelSize: detailPanelFontPixels
+                    anchors.left: parent.left
+                    verticalAlignment: Text.AlignVCenter
+                }
+                Switch {
+                    width: 32
+                    height: parent.height
+                    anchors.rightMargin: 6
+                    anchors.right: parent.right
+                    checked: settings.map_drone_track
+                    onCheckedChanged: settings.map_drone_track = checked
                 }
             }
             /*
@@ -481,7 +501,7 @@ BaseWidget {
                         Text {
                             id: zoomTitle
                             height: parent.height
-                            text: "Zoom"
+                            text: qsTr("Zoom")
                             color: "white"
                             font.bold: true
                             font.pixelSize: detailPanelFontPixels
@@ -513,7 +533,7 @@ BaseWidget {
 
                         Text {
                             id: opacityTitle
-                            text: "Transparency"
+                            text: qsTr("Transparency")
                             color: "white"
                             height: parent.height
                             font.bold: true
@@ -545,7 +565,7 @@ BaseWidget {
                         height: 32
 
                         Text {
-                            text: "Lock map to drone direction"
+                            text: qsTr("Lock map to drone direction")
                             color: "white"
                             height: parent.height
                             font.bold: true

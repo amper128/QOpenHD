@@ -24,7 +24,7 @@ BaseWidget {
 
     hasWidgetDetail: true
 
-    widgetDetailHeight: 192
+    widgetDetailHeight: 210
 
     widgetDetailComponent: Column {
         Item {
@@ -123,6 +123,35 @@ BaseWidget {
             width: parent.width
             height: 32
             Text {
+                text: qsTr("Size")
+                color: "white"
+                height: parent.height
+                font.bold: true
+                font.pixelSize: detailPanelFontPixels
+                anchors.left: parent.left
+                verticalAlignment: Text.AlignVCenter
+            }
+            Slider {
+                id: gps_size_Slider
+                orientation: Qt.Horizontal
+                from: .5
+                value: settings.gps_size
+                to: 3
+                stepSize: .1
+                height: parent.height
+                anchors.rightMargin: 0
+                anchors.right: parent.right
+                width: parent.width - 96
+
+                onValueChanged: {
+                    settings.gps_size = gps_size_Slider.value
+                }
+            }
+        }
+        Item {
+            width: parent.width
+            height: 32
+            Text {
                 text: qsTr("Always show lat/lon")
                 color: "white"
                 height: parent.height
@@ -146,6 +175,7 @@ BaseWidget {
         id: widgetInner
 
         anchors.fill: parent
+        scale: settings.gps_size
 
         Text {
             id: satellite_icon
@@ -180,6 +210,7 @@ BaseWidget {
             verticalAlignment: Text.AlignVCenter
             horizontalAlignment: Text.AlignRight
             font.pixelSize: 16
+            font.family: settings.font_text
             style: Text.Outline
             styleColor: settings.color_glow
         }
@@ -195,6 +226,7 @@ BaseWidget {
             anchors.rightMargin: 0
             verticalAlignment: Text.AlignTop
             font.pixelSize: 10
+            font.family: settings.font_text
             horizontalAlignment: Text.AlignLeft
             style: Text.Outline
             styleColor: settings.color_glow
@@ -220,7 +252,7 @@ BaseWidget {
                     color: settings.color_shape
                     opacity: settings.gps_opacity
                     //font.family: "Font Awesome 5 Free"
-                    text: "Lat:"
+                    text: qsTr("Lat:")
                     horizontalAlignment: Text.AlignLeft
                     font.pixelSize: 14
                     style: Text.Outline
@@ -234,6 +266,7 @@ BaseWidget {
                     color: settings.color_text
                     opacity: settings.gps_opacity
                     font.bold: true;
+                    font.family: settings.font_text
                     height: parent.height
                     width: 92
                     font.pixelSize: 14
@@ -256,7 +289,7 @@ BaseWidget {
                     color: settings.color_shape
                     opacity: settings.gps_opacity
                     //font.family: "Font Awesome 5 Free"
-                    text: "Lon:"
+                    text: qsTr("Lon:")
                     horizontalAlignment: Text.AlignLeft
                     font.pixelSize: 14
                     style: Text.Outline
@@ -270,6 +303,7 @@ BaseWidget {
                     color: settings.color_text
                     opacity: settings.gps_opacity
                     font.bold: true
+                    font.family: settings.font_text
                     height: parent.height
                     width: 92
                     font.pixelSize: 14

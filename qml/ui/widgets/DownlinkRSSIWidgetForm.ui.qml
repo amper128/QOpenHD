@@ -9,7 +9,7 @@ import OpenHD 1.0
 
 BaseWidget {
     id: downlinkRSSIWidget
-    width: 92
+    width: 112
     height: 24
 
     visible: settings.show_downlink_rssi
@@ -134,6 +134,35 @@ BaseWidget {
             width: parent.width
             height: 32
             Text {
+                text: qsTr("Size")
+                color: "white"
+                height: parent.height
+                font.bold: true
+                font.pixelSize: detailPanelFontPixels
+                anchors.left: parent.left
+                verticalAlignment: Text.AlignVCenter
+            }
+            Slider {
+                id: downlink_rssi_size_Slider
+                orientation: Qt.Horizontal
+                from: .5
+                value: settings.downlink_rssi_size
+                to: 3
+                stepSize: .1
+                height: parent.height
+                anchors.rightMargin: 0
+                anchors.right: parent.right
+                width: parent.width - 96
+
+                onValueChanged: {
+                    settings.downlink_rssi_size = downlink_rssi_size_Slider.value
+                }
+            }
+        }
+        Item {
+            width: parent.width
+            height: 32
+            Text {
                 text: qsTr("Show lost/damaged")
                 color: "white"
                 height: parent.height
@@ -182,19 +211,19 @@ BaseWidget {
         id: widgetInner
 
         anchors.fill: parent
-
         opacity: settings.downlink_rssi_opacity
+        scale: settings.downlink_rssi_size
 
         Text {
             id: downlink_icon
-            y: 0
             width: 24
             height: 24
             color: settings.color_shape
             text: "\uf381"
             anchors.left: parent.left
-            anchors.leftMargin: -2
+            anchors.leftMargin: 0
             anchors.top: parent.top
+            anchors.topMargin: 0
             font.family: "Font Awesome 5 Free"
             font.pixelSize: 18
             verticalAlignment: Text.AlignVCenter
@@ -204,40 +233,41 @@ BaseWidget {
         }
 
         Label {
-            id: downlink_dbm
-            width: 32
+            id: downlink_rssi
             height: 24
             color: settings.color_text
-            text: "dBm"            
-            anchors.right: parent.right
-            anchors.rightMargin: 0
+
+            text: OpenHD.downlink_rssi == -127 ? qsTr("N/A") : OpenHD.downlink_rssi
+            anchors.left: downlink_icon.right
+            anchors.leftMargin: 3
             anchors.top: parent.top
-            anchors.topMargin: 2
-            horizontalAlignment: Text.AlignLeft
-            font.pixelSize: 12
-            verticalAlignment: Text.AlignTop
+            horizontalAlignment: Text.AlignRight
+            font.pixelSize: 18
+            font.family: settings.font_text
+            verticalAlignment: Text.AlignVCenter
             wrapMode: Text.NoWrap
-            elide: Text.ElideRight
+            elide: Text.ElideNone
             clip: false
             style: Text.Outline
             styleColor: settings.color_glow
         }
 
         Label {
-            id: downlink_rssi
+            id: downlink_dbm
             width: 42
             height: 24
             color: settings.color_text
-
-            text: OpenHD.downlink_rssi == -127 ? qsTr("N/A") : OpenHD.downlink_rssi
-            anchors.right: downlink_dbm.left
-            anchors.rightMargin: 2
+            text: qsTr("dBm")            
+            anchors.left: downlink_rssi.right
+            anchors.leftMargin: 2
             anchors.top: parent.top
-            horizontalAlignment: Text.AlignRight
-            font.pixelSize: 18
+            anchors.topMargin: 2
+            horizontalAlignment: Text.AlignLeft
+            font.pixelSize: 12
+            font.family: settings.font_text
             verticalAlignment: Text.AlignTop
             wrapMode: Text.NoWrap
-            elide: Text.ElideRight
+            elide: Text.ElideNone
             clip: false
             style: Text.Outline
             styleColor: settings.color_glow
@@ -253,6 +283,7 @@ BaseWidget {
             anchors.left: parent.left
             verticalAlignment: Text.AlignVCenter
             font.pixelSize: 12
+            font.family: settings.font_text
             horizontalAlignment: Text.AlignLeft
             wrapMode: Text.NoWrap
             elide: Text.ElideRight
@@ -269,6 +300,7 @@ BaseWidget {
             anchors.left: extra_text.left
             verticalAlignment: Text.AlignVCenter
             font.pixelSize: 12
+            font.family: settings.font_text
             horizontalAlignment: Text.AlignLeft
             wrapMode: Text.NoWrap
             elide: Text.ElideRight
@@ -309,6 +341,7 @@ BaseWidget {
                     visible: false
                     verticalAlignment: Text.AlignVCenter
                     font.pixelSize: 14
+                    font.family: settings.font_text
                     horizontalAlignment: Text.AlignLeft
                     wrapMode: Text.NoWrap
                     style: Text.Outline
@@ -340,6 +373,7 @@ BaseWidget {
                     visible: false
                     verticalAlignment: Text.AlignVCenter
                     font.pixelSize: 14
+                    font.family: settings.font_text
                     horizontalAlignment: Text.AlignLeft
                     wrapMode: Text.NoWrap
                     style: Text.Outline
@@ -371,6 +405,7 @@ BaseWidget {
                     visible: false
                     verticalAlignment: Text.AlignVCenter
                     font.pixelSize: 14
+                    font.family: settings.font_text
                     horizontalAlignment: Text.AlignLeft
                     wrapMode: Text.NoWrap
                     style: Text.Outline
@@ -402,6 +437,7 @@ BaseWidget {
                     visible: false
                     verticalAlignment: Text.AlignVCenter
                     font.pixelSize: 14
+                    font.family: settings.font_text
                     horizontalAlignment: Text.AlignLeft
                     wrapMode: Text.NoWrap
                     style: Text.Outline
@@ -433,6 +469,7 @@ BaseWidget {
                     visible: false
                     verticalAlignment: Text.AlignVCenter
                     font.pixelSize: 14
+                    font.family: settings.font_text
                     horizontalAlignment: Text.AlignLeft
                     wrapMode: Text.NoWrap
                     style: Text.Outline
@@ -464,6 +501,7 @@ BaseWidget {
                     visible: false
                     verticalAlignment: Text.AlignVCenter
                     font.pixelSize: 14
+                    font.family: settings.font_text
                     horizontalAlignment: Text.AlignLeft
                     wrapMode: Text.NoWrap
                     style: Text.Outline

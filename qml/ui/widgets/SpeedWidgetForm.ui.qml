@@ -94,7 +94,7 @@ BaseWidget {
             width: parent.width
             height: 32
             Text {
-                text: qsTr("Airspeed / GPS")
+                text: qsTr("Airspeed / Groundspeed")
                 horizontalAlignment: Text.AlignRight
                 color: "white"
                 height: parent.height
@@ -108,8 +108,8 @@ BaseWidget {
                 height: parent.height
                 anchors.rightMargin: 6
                 anchors.right: parent.right
-                checked: settings.speed_airspeed_gps
-                onCheckedChanged: settings.speed_airspeed_gps = checked
+                checked: settings.speed_use_groundspeed
+                onCheckedChanged: settings.speed_use_groundspeed = checked
             }
         }
         Item {
@@ -216,12 +216,14 @@ BaseWidget {
                 height: 300
                 clip: false
                 color: settings.color_shape
-                airspeedOrGps: settings.speed_airspeed_gps
+                glow: settings.color_glow
+                useGroundspeed: settings.speed_use_groundspeed
                 imperial: settings.enable_imperial
                 speedMinimum: settings.speed_minimum
                 speedRange: settings.speed_range
                 speed: OpenHD.speed
                 airspeed: OpenHD.airspeed
+                fontFamily: settings.font_text
             }
         }
         //-----------------------ladder end---------------
@@ -233,18 +235,56 @@ BaseWidget {
             id: speed_text
             color: settings.color_text           
             font.pixelSize: 14
+            font.family: settings.font_text
             transform: Scale { origin.x: 12; origin.y: 12; xScale: settings.speed_size ; yScale: settings.speed_size}
             text: Number(
                       settings.enable_imperial ?
-                      (settings.speed_airspeed_gps ? OpenHD.airspeed*0.621371 : OpenHD.speed*0.621371) :
-                      (settings.speed_airspeed_gps ? OpenHD.airspeed : OpenHD.speed)   ).toLocaleString(
+                      (settings.speed_use_groundspeed ? OpenHD.speed * 0.621371 : OpenHD.airspeed * 0.621371) :
+                      (settings.speed_use_groundspeed ? OpenHD.speed : OpenHD.airspeed)   ).toLocaleString(
                       Qt.locale(), 'f', 0)
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
             style: Text.Outline
             styleColor: settings.color_glow
         }
-
+        Shape {
+            id: outlineGlow
+            anchors.fill: parent
+            rotation: 180
+            transform: Scale { origin.x: 12; origin.y: 12; xScale: settings.speed_size ; yScale: settings.speed_size}
+            ShapePath {
+                strokeColor: settings.color_glow
+                strokeWidth: 3
+                strokeStyle: ShapePath.SolidLine
+                fillColor: "transparent"
+                startX: 0
+                startY: 12
+                PathLine {
+                    x: 0
+                    y: 12
+                }
+                PathLine {
+                    x: 12
+                    y: 0
+                }
+                PathLine {
+                    x: 58
+                    y: 0
+                }
+                PathLine {
+                    x: 58
+                    y: 24
+                }
+                PathLine {
+                    x: 12
+                    y: 24
+                }
+                PathLine {
+                    x: 0
+                    y: 12
+                }
+            }
+        }
         Shape {
             id: outline
             anchors.fill: parent

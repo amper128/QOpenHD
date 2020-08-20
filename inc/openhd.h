@@ -117,6 +117,22 @@ public:
     Q_PROPERTY(double lon MEMBER m_lon WRITE set_lon NOTIFY lon_changed)
     void set_lon(double lon);
 
+    double get_lat() {
+        return m_lat;
+    };
+    
+    double get_lon() { 
+        return m_lon;
+    };
+
+    double get_msl_alt() {
+        return m_alt_msl;
+    }
+
+    double get_hdg() {
+        return m_hdg;
+    }
+
     Q_PROPERTY(int satellites_visible MEMBER m_satellites_visible WRITE set_satellites_visible NOTIFY satellites_visible_changed)
     void set_satellites_visible(int satellites_visible);
 
@@ -195,8 +211,8 @@ public:
     Q_PROPERTY(float mav_wind_speed MEMBER m_mav_wind_speed WRITE set_mav_wind_speed NOTIFY mav_wind_speed_changed)
     void set_mav_wind_speed(float mav_wind_speed);
 
-    Q_PROPERTY(int rc_rssi MEMBER m_rc_rssi WRITE set_rc_rssi NOTIFY rc_rssi_changed)
-    void set_rc_rssi(int rc_rssi);
+    Q_PROPERTY(int rcRssi MEMBER m_rcRssi WRITE setRcRssi NOTIFY rcRssiChanged)
+    void setRcRssi(int rcRssi);
 
     Q_PROPERTY(int fc_temp MEMBER m_fc_temp WRITE set_fc_temp NOTIFY fc_temp_changed)
     void set_fc_temp(int fc_temp);
@@ -284,6 +300,18 @@ public:
 
     Q_PROPERTY(qint64 last_telemetry_heartbeat MEMBER m_last_telemetry_heartbeat WRITE set_last_telemetry_heartbeat NOTIFY last_telemetry_heartbeat_changed)
     void set_last_telemetry_heartbeat(qint64 last_telemetry_heartbeat);
+
+    Q_PROPERTY(qint64 last_telemetry_attitude MEMBER m_last_telemetry_attitude WRITE set_last_telemetry_attitude NOTIFY last_telemetry_attitude_changed)
+    void set_last_telemetry_attitude(qint64 last_telemetry_attitude);
+
+    Q_PROPERTY(qint64 last_telemetry_battery MEMBER m_last_telemetry_battery WRITE set_last_telemetry_battery NOTIFY last_telemetry_battery_changed)
+    void set_last_telemetry_battery(qint64 last_telemetry_battery);
+
+    Q_PROPERTY(qint64 last_telemetry_gps MEMBER m_last_telemetry_gps WRITE set_last_telemetry_gps NOTIFY last_telemetry_gps_changed)
+    void set_last_telemetry_gps(qint64 last_telemetry_gps);
+
+    Q_PROPERTY(qint64 last_telemetry_vfr MEMBER m_last_telemetry_vfr WRITE set_last_telemetry_vfr NOTIFY last_telemetry_vfr_changed)
+    void set_last_telemetry_vfr(qint64 last_telemetry_vfr);
 
 
     Q_PROPERTY(bool main_video_running MEMBER m_main_video_running WRITE set_main_video_running NOTIFY main_video_running_changed)
@@ -441,7 +469,7 @@ signals:
     void mav_wind_direction_changed(float mav_wind_direction);
     void mav_wind_speed_changed(float mav_wind_speed);
 
-    void rc_rssi_changed(int rc_rssi);
+    void rcRssiChanged(int rcRssi);
 
     void fc_temp_changed (int fc_temp);
 
@@ -478,6 +506,10 @@ signals:
     void last_openhd_heartbeat_changed(qint64 last_openhd_heartbeat);
 
     void last_telemetry_heartbeat_changed(qint64 last_telemetry_heartbeat);
+    void last_telemetry_attitude_changed(qint64 last_telemetry_attitude);
+    void last_telemetry_battery_changed(qint64 last_telemetry_battery);
+    void last_telemetry_gps_changed(qint64 last_telemetry_gps);
+    void last_telemetry_vfr_changed(qint64 last_telemetry_vfr);
 
     void main_video_running_changed(bool main_video_running);
     void pip_video_running_changed(bool pip_video_running);
@@ -590,7 +622,7 @@ public:
     float m_mav_wind_direction = 0.0;
     float m_mav_wind_speed = 0.0;
 
-    int m_rc_rssi = 0;
+    int m_rcRssi = 0;
 
     // openhd
 
@@ -640,6 +672,10 @@ public:
 
     qint64 m_last_openhd_heartbeat = -1;
     qint64 m_last_telemetry_heartbeat = -1;
+    qint64 m_last_telemetry_attitude = -1;
+    qint64 m_last_telemetry_battery = -1;
+    qint64 m_last_telemetry_gps = -1;
+    qint64 m_last_telemetry_vfr = -1;
 
     bool m_main_video_running = false;
     bool m_pip_video_running = false;
