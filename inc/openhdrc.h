@@ -56,45 +56,16 @@ public:
     Q_PROPERTY(uint rc4 MEMBER m_rc4 WRITE set_rc4 NOTIFY rc4_changed)
     void set_rc4(uint rc4);
 
-    Q_PROPERTY(uint rc5 MEMBER m_rc5 WRITE set_rc5 NOTIFY rc5_changed)
-    void set_rc5(uint rc5);
-
-    Q_PROPERTY(uint rc6 MEMBER m_rc6 WRITE set_rc6 NOTIFY rc6_changed)
-    void set_rc6(uint rc6);
-
-    Q_PROPERTY(uint rc7 MEMBER m_rc7 WRITE set_rc7 NOTIFY rc7_changed)
-    void set_rc7(uint rc7);
-
-    Q_PROPERTY(uint rc8 MEMBER m_rc8 WRITE set_rc8 NOTIFY rc8_changed)
-    void set_rc8(uint rc8);
-
-    Q_PROPERTY(uint rc9 MEMBER m_rc9 WRITE set_rc9 NOTIFY rc9_changed)
-    void set_rc9(uint rc9);
-
-    Q_PROPERTY(uint rc10 MEMBER m_rc10 WRITE set_rc10 NOTIFY rc10_changed)
-    void set_rc10(uint rc10);
 signals:
     void channelUpdate(uint rc1,
-                       uint rc2,
-                       uint rc3,
-                       uint rc4,
-                       uint rc5,
-                       uint rc6,
-                       uint rc7,
-                       uint rc8,
-                       uint rc9,
-                       uint rc10);
+		       uint rc2,
+		       uint rc3,
+		       uint rc4);
 
     void rc1_changed(uint rc1);
     void rc2_changed(uint rc2);
     void rc3_changed(uint rc3);
     void rc4_changed(uint rc4);
-    void rc5_changed(uint rc5);
-    void rc6_changed(uint rc6);
-    void rc7_changed(uint rc7);
-    void rc8_changed(uint rc8);
-    void rc9_changed(uint rc9);
-    void rc10_changed(uint rc10);
 
 #if defined(ENABLE_GAMEPADS)
     void selectedGamepadChanged(int selectedGamepad);
@@ -120,6 +91,7 @@ private slots:
     void processRCDatagrams();
 
     void axisChanged (const int js, const int axis, const qreal value);
+    void buttonChanged(const int js, const int button, const bool pressed);
 
     void connectedChanged(bool value);
     void axisLeftXChanged(double value);
@@ -175,12 +147,8 @@ private:
     uint m_rc2 = 1500;
     uint m_rc3 = 1500;
     uint m_rc4 = 1500;
-    uint m_rc5 = 1500;
-    uint m_rc6 = 1500;
-    uint m_rc7 = 1500;
-    uint m_rc8 = 1500;
-    uint m_rc9 = 1500;
-    uint m_rc10 = 1500;
+
+    uint16_t btn_map[4] = {0, 0, 0, 0};
 
 };
 
