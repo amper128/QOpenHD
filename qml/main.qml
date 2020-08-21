@@ -240,7 +240,40 @@ ApplicationWindow {
         onSettingsButtonClicked: {
             settings_panel.openSettings();
         }
+
+        /*transform: Scale {
+            origin.x: 0
+            origin.y: hudOverlayGrid.height / 2
+            xScale: settings.stereo_enable ? 0.5 : 1.0
+            yScale: settings.stereo_enable ? 0.5 : 1.0
+        }
+
+        layer.enabled: true*/
     }
+
+
+    /*Rectangle {
+        id: hudOverlayGridClone
+        anchors.right: parent.right
+        width: parent.width / 2
+        height: parent.height / 2
+        anchors.verticalCenter: settings.stereo_enable ? parent.verticalCenter : undefined
+        visible: settings.stereo_enable
+        z: 3.0
+        layer.enabled: settings.stereo_enable
+        layer.samplerName: "hudOverlayGrid"
+        layer.effect: ShaderEffect {
+            id: shader
+            property variant cloneSource : hudOverlayGrid
+            fragmentShader: "
+                varying highp vec2 qt_TexCoord0;
+                uniform highp sampler2D cloneSource;
+                void main(void) {
+                    gl_FragColor =  texture2D(cloneSource, qt_TexCoord0);
+                }
+            "
+        }
+    }*/
 
     OSDCustomizer {
         id: osdCustomizer
@@ -274,14 +307,19 @@ ApplicationWindow {
 
     Item {
         anchors.fill: parent
-        z: settings.stereo_enable ? 10.0 : 1.0
+        //z: settings.stereo_enable ? 10.0 : 1.0
+        z: 1.0
 
         TapHandler {
             enabled: settings_panel.visible == false
             acceptedButtons: Qt.AllButtons
             onTapped: {
+                return;
                 if (tapCount == 3) {
-                    settings.stereo_enable = false
+                    settings.stereo_enable = !settings.stereo_enable
+                    if (IsRaspPi) {
+                        piSettingsTimer.start();
+                    }
                 }
             }
             onLongPressed: {
