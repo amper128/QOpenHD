@@ -5,7 +5,14 @@ import QtGraphicalEffects 1.12
 import Qt.labs.settings 1.0
 import QtQuick.Extras 1.4
 
-//import OpenHD 1.0
+import QtQml.Models 2.15
+import QtPositioning 5.2
+import QtLocation 5.12
+
+
+import OpenHD 1.0
+
+
 
 BaseWidget {
     id: adsbWidget
@@ -28,115 +35,218 @@ BaseWidget {
 
     property double lastData: 0
 
-    Timer {
-        interval: 1000;
-        running: true;
-        repeat: true
-        onTriggered: {
-            var currentTime = (new Date).getTime();
-            if (currentTime - lastData > 20000) {
-                adsb_status.color = "red";
-            }
-        }
-    }
+    // Property status from adsbVehicleManager can be
+    // 0 - not active ( if more than 60 seconds since last update )
+    // 1 - active but more than 20 seconds since last update
+    // 2 - active, less than 20 seconds since last update
+    property bool adsbStatus: AdsbVehicleManager.status ? true : false
+    property color adsbStatusColor: AdsbVehicleManager.status == 2 ? "green" : "red"
 
-    Connections {
-        target: MarkerModel
-        function onDataChanged() {
-            console.log("MARKER MODEL DATA CHANGED");
-            lastData = (new Date).getTime();
-            adsb_status.active=true;
-            adsb_status.color="green";
-            adsb_status_animation.restart();
-        }
-    }
 
-    widgetDetailComponent: Column {
-        Item {
-            width: parent.width
-            height: 32
-            Text {
-                id: opacityTitle
-                text: qsTr("Transparency")
-                color: "white"
-                height: parent.height
-                font.bold: true
-                font.pixelSize: detailPanelFontPixels
-                anchors.left: parent.left
-                verticalAlignment: Text.AlignVCenter
-            }
-            Slider {
-                id: adsb_opacity_Slider
-                orientation: Qt.Horizontal
-                from: .1
-                value: settings.adsb_opacity
-                to: 1
-                stepSize: .1
-                height: parent.height
-                anchors.rightMargin: 0
-                anchors.right: parent.right
-                width: parent.width - 96
+    widgetDetailComponent: ScrollView{
 
-                onValueChanged: {
-                    settings.adsb_opacity = adsb_opacity_Slider.value
+        contentHeight: adsbSettingsColumn.height
+        ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+        clip: true
+
+        Column {
+            id: adsbSettingsColumn
+            Item {
+                width: parent.width
+                height: 32
+                Text {
+                    id: opacityTitle
+                    text: qsTr("Transparency")
+                    color: "white"
+                    height: parent.height
+                    font.bold: true
+                    font.pixelSize: detailPanelFontPixels
+                    anchors.left: parent.left
+                    verticalAlignment: Text.AlignVCenter
+                }
+                Slider {
+                    id: adsb_opacity_Slider
+                    orientation: Qt.Horizontal
+                    from: .1
+                    value: settings.adsb_opacity
+                    to: 1
+                    stepSize: .1
+                    height: parent.height
+                    anchors.rightMargin: 0
+                    anchors.right: parent.right
+                    width: parent.width - 96
+
+                    onValueChanged: {
+                        settings.adsb_opacity = adsb_opacity_Slider.value
+                    }
                 }
             }
-        }
-        Item {
-            width: parent.width
-            height: 32
-            Text {
-                text: qsTr("Size")
-                color: "white"
-                height: parent.height
-                font.bold: true
-                font.pixelSize: detailPanelFontPixels
-                anchors.left: parent.left
-                verticalAlignment: Text.AlignVCenter
-            }
-            Slider {
-                id: adsb_size_Slider
-                orientation: Qt.Horizontal
-                from: .5
-                value: settings.adsb_size
-                to: 3
-                stepSize: .1
-                height: parent.height
-                anchors.rightMargin: 0
-                anchors.right: parent.right
-                width: parent.width - 96
+            Item {
+                width: parent.width
+                height: 32
+                Text {
+                    text: qsTr("Size")
+                    color: "white"
+                    height: parent.height
+                    font.bold: true
+                    font.pixelSize: detailPanelFontPixels
+                    anchors.left: parent.left
+                    verticalAlignment: Text.AlignVCenter
+                }
+                Slider {
+                    id: adsb_size_Slider
+                    orientation: Qt.Horizontal
+                    from: .5
+                    value: settings.adsb_size
+                    to: 3
+                    stepSize: .1
+                    height: parent.height
+                    anchors.rightMargin: 0
+                    anchors.right: parent.right
+                    width: parent.width - 96
 
-                onValueChanged: {
-                    settings.adsb_size = adsb_size_Slider.value
+                    onValueChanged: {
+                        settings.adsb_size = adsb_size_Slider.value
+                    }
                 }
             }
-        }
-        Item {
-            width: parent.width
-            height: 32
-            Text {
-                text: qsTr("Range")
-                color: "white"
-                height: parent.height
-                font.bold: true
-                font.pixelSize: detailPanelFontPixels
-                anchors.left: parent.left
-                verticalAlignment: Text.AlignVCenter
-            }
-            Slider {
-                id: adsb_distance_Slider
-                orientation: Qt.Horizontal
-                from: 7000
-                value: settings.adsb_distance_limit
-                to: 25000
-                stepSize: 1000
-                height: parent.height
-                anchors.rightMargin: 0
-                anchors.right: parent.right
-                width: parent.width - 96
+            Item {
+                width: 230
+                height: 32
+                Text {
+                    text: qsTr("Lock to Horizontal Center")
+                    color: "white"
+                    height: parent.height
+                    font.bold: true
+                    font.pixelSize: detailPanelFontPixels
+                    anchors.left: parent.left
+                    verticalAlignment: Text.AlignVCenter
+                }
+                Switch {
+                    width: 32
+                    height: parent.height
+                    anchors.rightMargin: 6
+                    anchors.right: parent.right
+                    checked: {
+                        // @disable-check M222
+                        var _hCenter = settings.value(hCenterIdentifier, defaultHCenter)
+                        // @disable-check M223
+                        if (_hCenter === "true" || _hCenter === 1 || _hCenter === true) {
+                            checked = true;
+                            // @disable-check M223
+                        } else {
+                            checked = false;
+                        }
+                    }
 
-                onValueChanged: {
-                    settings.adsb_distance_limit = adsb_distance_Slider.value
+                    onCheckedChanged: settings.setValue(hCenterIdentifier, checked)
+                }
+            }
+            Item {
+                width: 230
+                height: 32
+                Text {
+                    text: qsTr("Lock to Vertical Center")
+                    color: "white"
+                    height: parent.height
+                    font.bold: true
+                    font.pixelSize: detailPanelFontPixels
+                    anchors.left: parent.left
+                    verticalAlignment: Text.AlignVCenter
+                }
+                Switch {
+                    width: 32
+                    height: parent.height
+                    anchors.rightMargin: 6
+                    anchors.right: parent.right
+                    checked: {
+                        // @disable-check M222
+                        var _vCenter = settings.value(vCenterIdentifier, defaultVCenter)
+                        // @disable-check M223
+                        if (_vCenter === "true" || _vCenter === 1 || _vCenter === true) {
+                            checked = true;
+                            // @disable-check M223
+                        } else {
+                            checked = false;
+                        }
+                    }
+
+                    onCheckedChanged: settings.setValue(vCenterIdentifier, checked)
+                }
+            }
+            Item {
+                width: parent.width
+                height: 32
+                Text {
+                    text: qsTr("Source SDR")
+                    color: "white"
+                    height: parent.height
+                    font.bold: true
+                    font.pixelSize: detailPanelFontPixels
+                    anchors.left: parent.left
+                    verticalAlignment: Text.AlignVCenter
+                }
+                Switch {
+                    width: 32
+                    height: parent.height
+                    anchors.rightMargin: 6
+                    anchors.right: parent.right
+                    checked: settings.adsb_api_sdr
+                    onCheckedChanged: {
+                        settings.adsb_api_sdr = checked;
+                    }
+                }
+            }
+            Item {
+                width: parent.width
+                height: 32
+                Text {
+                    text: qsTr("Source OpenSky")
+                    color: "white"
+                    height: parent.height
+                    font.bold: true
+                    font.pixelSize: detailPanelFontPixels
+                    anchors.left: parent.left
+                    verticalAlignment: Text.AlignVCenter
+                }
+                Switch {
+                    width: 32
+                    height: parent.height
+                    anchors.rightMargin: 6
+                    anchors.right: parent.right
+                    checked: settings.adsb_api_openskynetwork
+                    onCheckedChanged: {
+                        settings.adsb_api_openskynetwork = checked;
+                    }
+                }
+            }
+            Item {
+                width: parent.width
+                height: 32
+                Text {
+                    text: qsTr("Range")
+                    color: "white"
+                    height: parent.height
+                    font.bold: true
+                    font.pixelSize: detailPanelFontPixels
+                    anchors.left: parent.left
+                    verticalAlignment: Text.AlignVCenter
+                }
+                Slider {
+                    id: adsb_distance_Slider
+                    orientation: Qt.Horizontal
+                    from: 7000
+                    value: settings.adsb_distance_limit
+                    to: 25000
+                    stepSize: 1000
+                    height: parent.height
+                    anchors.rightMargin: 0
+                    anchors.right: parent.right
+                    width: parent.width - 96
+
+                    onValueChanged: {
+                        settings.adsb_distance_limit = adsb_distance_Slider.value
+                    }
                 }
             }
         }
@@ -144,7 +254,7 @@ BaseWidget {
 
     Item {
         id: widgetInner
-
+        visible: settings.show_adsb
         anchors.fill: parent
         scale: settings.adsb_size
 
@@ -171,7 +281,9 @@ BaseWidget {
             anchors.left: adsb_text.right
             anchors.leftMargin: 5
             anchors.verticalCenter: parent.verticalCenter
-            active: false
+            color: adsbStatusColor
+            active: adsbStatus
+            visible: !settings.adsb_api_sdr
         }
     }
 }

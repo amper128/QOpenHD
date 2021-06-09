@@ -1,6 +1,8 @@
 #ifndef UTIL_CPP
 #define UTIL_CPP
 
+#include <QObject>
+
 #include "util.h"
 
 #if defined(__android__)
@@ -8,7 +10,10 @@
 #include <QAndroidJniEnvironment>
 #endif
 
-int lipo_battery_voltage_to_percent(int cells, double voltage) {
+OpenHDUtil::OpenHDUtil(QObject *parent): QObject(parent) { }
+
+
+int OpenHDUtil::lipo_battery_voltage_to_percent(int cells, double voltage) {
     double cell_voltage = voltage / static_cast<double>(cells);
 
     if (cell_voltage >= 4.2) {
@@ -57,7 +62,7 @@ int lipo_battery_voltage_to_percent(int cells, double voltage) {
 }
 
 
-int lifepo4_battery_voltage_to_percent(int cells, double voltage) {
+int OpenHDUtil::lifepo4_battery_voltage_to_percent(int cells, double voltage) {
     double cell_voltage = voltage / static_cast<double>(cells);
 
     if (cell_voltage >= 3.40) {
@@ -106,7 +111,8 @@ int lifepo4_battery_voltage_to_percent(int cells, double voltage) {
 }
 
 
-QString battery_gauge_glyph_from_percentage(int percent) {
+QString OpenHDUtil::battery_gauge_glyph_from_percentage(int percent) {
+    percent = (percent / 5) * 5;
     // these are Material Design Icon codepoints from the battery gauge icon set
     switch (percent) {
         case 100:return "\uf079";
@@ -134,7 +140,7 @@ QString battery_gauge_glyph_from_percentage(int percent) {
     }
 }
 
-QString sub_mode_from_enum(SUB_MODE mode) {
+QString OpenHDUtil::sub_mode_from_enum(SUB_MODE mode) {
     switch (mode) {
        case SUB_MODE_MANUAL:
             return "Manual";
@@ -158,7 +164,7 @@ QString sub_mode_from_enum(SUB_MODE mode) {
     return "Unknown";
 }
 
-QString rover_mode_from_enum(ROVER_MODE mode) {
+QString OpenHDUtil::rover_mode_from_enum(ROVER_MODE mode) {
     switch (mode) {
        case ROVER_MODE_HOLD:
             return "Hold";
@@ -184,7 +190,7 @@ QString rover_mode_from_enum(ROVER_MODE mode) {
     return "Unknown";
 }
 
-QString copter_mode_from_enum(COPTER_MODE mode) {
+QString OpenHDUtil::copter_mode_from_enum(COPTER_MODE mode) {
     switch (mode) {
         case COPTER_MODE_LAND:
              return "Landing";
@@ -228,7 +234,7 @@ QString copter_mode_from_enum(COPTER_MODE mode) {
     return "Unknown";
 }
 
-QString plane_mode_from_enum(PLANE_MODE mode) {
+QString OpenHDUtil::plane_mode_from_enum(PLANE_MODE mode) {
     switch (mode) {
        case PLANE_MODE_MANUAL:
             return "Manual";
@@ -279,7 +285,7 @@ QString plane_mode_from_enum(PLANE_MODE mode) {
 }
 
 
-QString tracker_mode_from_enum(TRACKER_MODE mode) {
+QString OpenHDUtil::tracker_mode_from_enum(TRACKER_MODE mode) {
     switch (mode) {
        case TRACKER_MODE_MANUAL:
             return "Manual";
@@ -297,7 +303,7 @@ QString tracker_mode_from_enum(TRACKER_MODE mode) {
     return "Unknown";
 }
 
-QString vot_mode_from_telemetry(uint8_t mode) {
+QString OpenHDUtil::vot_mode_from_telemetry(uint8_t mode) {
     switch (mode) {
         case 0:
             return "2D";
@@ -340,7 +346,7 @@ QString vot_mode_from_telemetry(uint8_t mode) {
 }
 
 
-QString ltm_mode_from_telem(int mode) {
+QString OpenHDUtil::ltm_mode_from_telem(int mode) {
     switch (mode) {
         case 0:
             return "Manual";
@@ -386,7 +392,7 @@ QString ltm_mode_from_telem(int mode) {
     return "Unknown";
 }
 
-QString px4_mode_from_custom_mode(int custom_mode) {
+QString OpenHDUtil::px4_mode_from_custom_mode(int custom_mode) {
     union px4_custom_mode px4_mode;
     px4_mode.data = custom_mode;
 
@@ -472,15 +478,28 @@ QString px4_mode_from_custom_mode(int custom_mode) {
 }
 
 
-uint map(double input, double input_start, double input_end, uint16_t output_start, uint16_t output_end) {
+uint OpenHDUtil::map(double input, double input_start, double input_end, uint16_t output_start, uint16_t output_end) {
     double input_range = input_end - input_start;
     int output_range = output_end - output_start;
 
     return (input - input_start)*output_range / input_range + output_start;
 }
 
+
+float OpenHDUtil::pt1FilterApply4(OpenHDUtil::pt1Filter_t *filter, float input, float f_cut, float dT)
+{
+    // Pre calculate and store RC
+    if (!filter->RC) {
+        filter->RC = 1.0f / ( 2.0f * M_PIf * f_cut );
+    }
+
+    filter->dT = dT;    // cache latest dT for possible use in pt1FilterApply
+    filter->state = filter->state + dT / (filter->RC + dT) * (input - filter->state);
+    return filter->state;
+}
+
 #if defined(__android__)
-void keep_screen_on(bool on) {
+void OpenHDUtil::keep_screen_on(bool on) {
     QtAndroid::runOnAndroidThread([on] {
         QAndroidJniObject activity = QtAndroid::androidActivity();
         if (activity.isValid()) {
@@ -503,7 +522,7 @@ void keep_screen_on(bool on) {
 }
 #endif
 
-int default_mavlink_sysid() {
+int OpenHDUtil::default_mavlink_sysid() {
     #if defined (__macos__)
         return 220;
     #endif

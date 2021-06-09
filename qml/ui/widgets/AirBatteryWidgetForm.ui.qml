@@ -22,153 +22,203 @@ BaseWidget {
     defaultVCenter: false
 
     hasWidgetDetail: true
-    widgetDetailHeight: 215
+    widgetDetailComponent: ScrollView {
 
-    widgetDetailComponent: Column {
-        Item {
-            width: parent.width
-            height: 32
-            Text {
-                text: qsTr("Voltage:")
-                color: "white"
-                font.bold: true
-                height: parent.height
-                font.pixelSize: detailPanelFontPixels
-                anchors.left: parent.left
-                verticalAlignment: Text.AlignVCenter
-            }
-            Text {
-                text: Number(OpenHD.battery_voltage).toLocaleString(Qt.locale(), 'f', 1) + "V";
-                color: "white";
-                font.bold: true;
-                height: parent.height
-                font.pixelSize: detailPanelFontPixels;
-                anchors.right: parent.right
-                verticalAlignment: Text.AlignVCenter
-            }
-        }
-        Item {
-            width: parent.width
-            height: 32
-            Text {
-                text: qsTr("Current:")
-                color: "white"
-                font.bold: true
-                height: parent.height
-                font.pixelSize: detailPanelFontPixels
-                anchors.left: parent.left
-                verticalAlignment: Text.AlignVCenter
-            }
-            Text {
-                text: Number(OpenHD.battery_current/100.0).toLocaleString(Qt.locale(), 'f', 1) + "A";
-                color: "white";
-                font.bold: true;
-                height: parent.height
-                font.pixelSize: detailPanelFontPixels;
-                anchors.right: parent.right
-                verticalAlignment: Text.AlignVCenter
-            }
-        }
-        Item {
-            width: parent.width
-            height: 32
-            Text {
-                id: opacityTitle
-                text: qsTr("Transparency")
-                color: "white"
-                height: parent.height
-                font.bold: true
-                font.pixelSize: detailPanelFontPixels
-                anchors.left: parent.left
-                verticalAlignment: Text.AlignVCenter
-            }
-            Slider {
-                id: air_battery_opacity_Slider
-                orientation: Qt.Horizontal
-                height: parent.height
-                from: .1
-                value: settings.air_battery_opacity
-                to: 1
-                stepSize: .1
-                anchors.rightMargin: 0
-                anchors.right: parent.right
-                width: parent.width - 96
+        contentHeight: airBatterySettingsColumn.height
+        ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+        clip: true
 
-                onValueChanged: {
-                    settings.air_battery_opacity = air_battery_opacity_Slider.value
+        ColumnLayout {
+            id: airBatterySettingsColumn
+            spacing: 0
+            clip: true
+
+            Item {
+                width: 230
+                height: 32
+                Text {
+                    id: opacityTitle
+                    text: qsTr("Transparency")
+                    color: "white"
+                    height: parent.height
+                    font.bold: true
+                    font.pixelSize: detailPanelFontPixels
+                    anchors.left: parent.left
+                    verticalAlignment: Text.AlignVCenter
+                }
+                Slider {
+                    id: air_battery_opacity_Slider
+                    orientation: Qt.Horizontal
+                    height: parent.height
+                    from: .1
+                    value: settings.air_battery_opacity
+                    to: 1
+                    stepSize: .1
+                    anchors.rightMargin: 0
+                    anchors.right: parent.right
+                    width: parent.width - 96
+
+                    onValueChanged: {
+                        settings.air_battery_opacity = air_battery_opacity_Slider.value
+                    }
                 }
             }
-        }
-        Item {
-            width: parent.width
-            height: 32
-            Text {
-                text: qsTr("Size")
-                color: "white"
-                height: parent.height
-                font.bold: true
-                font.pixelSize: detailPanelFontPixels
-                anchors.left: parent.left
-                verticalAlignment: Text.AlignVCenter
-            }
-            Slider {
-                id: air_battery_size_Slider
-                orientation: Qt.Horizontal
-                from: .5
-                value: settings.air_battery_size
-                to: 3
-                stepSize: .1
-                height: parent.height
-                anchors.rightMargin: 0
-                anchors.right: parent.right
-                width: parent.width - 96
+            Item {
+                width: 230
+                height: 32
+                Text {
+                    text: qsTr("Size")
+                    color: "white"
+                    height: parent.height
+                    font.bold: true
+                    font.pixelSize: detailPanelFontPixels
+                    anchors.left: parent.left
+                    verticalAlignment: Text.AlignVCenter
+                }
+                Slider {
+                    id: air_battery_size_Slider
+                    orientation: Qt.Horizontal
+                    from: .5
+                    value: settings.air_battery_size
+                    to: 3
+                    stepSize: .1
+                    height: parent.height
+                    anchors.rightMargin: 0
+                    anchors.right: parent.right
+                    width: parent.width - 96
 
-                onValueChanged: {
-                    settings.air_battery_size = air_battery_size_Slider.value
+                    onValueChanged: {
+                        settings.air_battery_size = air_battery_size_Slider.value
+                    }
                 }
             }
-        }
-        Item {
-            width: parent.width
-            height: 32
-            Text {
-                text: qsTr("Show volts and amps")
-                color: "white"
-                height: parent.height
-                font.bold: true
-                font.pixelSize: detailPanelFontPixels;
-                anchors.left: parent.left
-                verticalAlignment: Text.AlignVCenter
+            Item {
+                width: 230
+                height: 32
+                Text {
+                    text: qsTr("Lock to Horizontal Center")
+                    color: "white"
+                    height: parent.height
+                    font.bold: true
+                    font.pixelSize: detailPanelFontPixels
+                    anchors.left: parent.left
+                    verticalAlignment: Text.AlignVCenter
+                }
+                Switch {
+                    width: 32
+                    height: parent.height
+                    anchors.rightMargin: 6
+                    anchors.right: parent.right
+                    checked: {
+                        // @disable-check M222
+                        var _hCenter = settings.value(hCenterIdentifier, defaultHCenter)
+                        // @disable-check M223
+                        if (_hCenter === "true" || _hCenter === 1 || _hCenter === true) {
+                            checked = true;
+                            // @disable-check M223
+                        } else {
+                            checked = false;
+                        }
+                    }
+
+                    onCheckedChanged: settings.setValue(hCenterIdentifier, checked)
+                }
             }
-            Switch {
-                width: 32
-                height: parent.height
-                anchors.rightMargin: 6
-                anchors.right: parent.right
-                checked: settings.air_battery_show_voltage_current
-                onCheckedChanged: settings.air_battery_show_voltage_current = checked
+            Item {
+                width: 230
+                height: 32
+                Text {
+                    text: qsTr("Lock to Vertical Center")
+                    color: "white"
+                    height: parent.height
+                    font.bold: true
+                    font.pixelSize: detailPanelFontPixels
+                    anchors.left: parent.left
+                    verticalAlignment: Text.AlignVCenter
+                }
+                Switch {
+                    width: 32
+                    height: parent.height
+                    anchors.rightMargin: 6
+                    anchors.right: parent.right
+                    checked: {
+                        // @disable-check M222
+                        var _vCenter = settings.value(vCenterIdentifier, defaultVCenter)
+                        // @disable-check M223
+                        if (_vCenter === "true" || _vCenter === 1 || _vCenter === true) {
+                            checked = true;
+                            // @disable-check M223
+                        } else {
+                            checked = false;
+                        }
+                    }
+
+                    onCheckedChanged: settings.setValue(vCenterIdentifier, checked)
+                }
+            }                   
+            Item {
+                width: 230
+                height: 32
+                Text {
+                    text: qsTr("Show volts and amps")
+                    color: "white"
+                    height: parent.height
+                    font.bold: true
+                    font.pixelSize: detailPanelFontPixels
+                    anchors.left: parent.left
+                    verticalAlignment: Text.AlignVCenter
+                }
+                Switch {
+                    width: 32
+                    height: parent.height
+                    anchors.rightMargin: 6
+                    anchors.right: parent.right
+                    checked: settings.air_battery_show_voltage_current
+                    onCheckedChanged: settings.air_battery_show_voltage_current = checked
+                }
             }
-        }
-        Item {
-            width: parent.width
-            height: 32
-            visible: settings.air_battery_show_voltage_current
-            Text {
-                text: qsTr("Show single cell voltage")
-                color: "white"
-                height: parent.height
-                font.bold: true
-                font.pixelSize: detailPanelFontPixels;
-                anchors.left: parent.left
-                verticalAlignment: Text.AlignVCenter
+            Item {
+                width: 230
+                height: 32
+                visible: settings.air_battery_show_voltage_current
+                Text {
+                    text: qsTr("Show single cell voltage")
+                    color: "white"
+                    height: parent.height
+                    font.bold: true
+                    font.pixelSize: detailPanelFontPixels
+                    anchors.left: parent.left
+                    verticalAlignment: Text.AlignVCenter
+                }
+                Switch {
+                    width: 32
+                    height: parent.height
+                    anchors.rightMargin: 6
+                    anchors.right: parent.right
+                    checked: settings.air_battery_show_single_cell
+                    onCheckedChanged: settings.air_battery_show_single_cell = checked
+                }
             }
-            Switch {
-                width: 32
-                height: parent.height
-                anchors.rightMargin: 6
-                anchors.right: parent.right
-                checked: settings.air_battery_show_single_cell
-                onCheckedChanged: settings.air_battery_show_single_cell = checked
+            Item {
+                width: 230
+                height: 32
+                Text {
+                    text: qsTr("Use telemetry percentege")
+                    color: "white"
+                    height: parent.height
+                    font.bold: true
+                    font.pixelSize: detailPanelFontPixels
+                    anchors.left: parent.left
+                    verticalAlignment: Text.AlignVCenter
+                }
+                Switch {
+                    width: 32
+                    height: parent.height
+                    anchors.rightMargin: 6
+                    anchors.right: parent.right
+                    checked: settings.air_battery_show_fc_percent
+                    onCheckedChanged: settings.air_battery_show_fc_percent = checked
+                }
             }
         }
     }
@@ -178,13 +228,35 @@ BaseWidget {
 
         anchors.fill: parent
         opacity: settings.air_battery_opacity
-        scale:settings.air_battery_size
+        scale: settings.air_battery_size
+
+        Text {
+            id: airTag
+            y: 0
+            rotation: -90
+            color: settings.color_text
+            text: "air"
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.left: parent.left
+            anchors.leftMargin: 2
+            clip: true
+            verticalAlignment: Text.AlignVCenter
+            elide: Text.ElideRight
+            horizontalAlignment: Text.AlignLeft
+            font.pixelSize: 14
+            font.family: settings.font_text
+            style: Text.Outline
+            styleColor: settings.color_glow
+        }
 
         Label {
             id: battery_percent
             y: 0
-            color: settings.color_text            
-            text: qsTr("%L1%").arg(OpenHD.battery_percent)
+            color: settings.color_text
+            text: settings.air_battery_show_fc_percent ? qsTr("%L1%").arg(
+                                                             OpenHD.fc_battery_percent) : qsTr(
+                                                             "%L1%").arg(
+                                                             OpenHD.battery_percent)
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: batteryGauge.right
             anchors.leftMargin: 0
@@ -200,7 +272,8 @@ BaseWidget {
         Label {
             id: battery_amp_text
             visible: settings.air_battery_show_voltage_current
-            text: Number(OpenHD.battery_current/100.0).toLocaleString(Qt.locale(), 'f', 1) + "A";
+            text: Number(OpenHD.battery_current / 100.0).toLocaleString(
+                      Qt.locale(), 'f', 1) + "A"
             color: settings.color_text
             anchors.bottom: battery_percent.top
             anchors.left: batteryGauge.right
@@ -217,8 +290,12 @@ BaseWidget {
         Label {
             id: battery_volt_text
             visible: settings.air_battery_show_voltage_current
-            text: settings.air_battery_show_single_cell ? Number((OpenHD.battery_voltage)/settings.battery_cells).toLocaleString(Qt.locale(), 'f', 2) + "V" :
-                                                          Number(OpenHD.battery_voltage).toLocaleString(Qt.locale(), 'f', 2) + "V";
+            text: settings.air_battery_show_single_cell ? Number(
+                                                              (OpenHD.battery_voltage) / settings.battery_cells).toLocaleString(
+                                                              Qt.locale(),
+                                                              'f', 2) + "V" : Number(OpenHD.battery_voltage).toLocaleString(
+                                                              Qt.locale(),
+                                                              'f', 2) + "V"
             color: settings.color_text
             anchors.top: battery_percent.bottom
             anchors.left: batteryGauge.right
@@ -239,16 +316,15 @@ BaseWidget {
             height: 48
             // @disable-check M223
             color: {
-                /* todo: expose battery_voltage_to_percent to QML instead of using cell levels here
-                   @disable-check M222
-                */
-                var cells = settings.value("show_ground_status", true);
-                var cellVoltage = OpenHD.battery_voltage / cells;
+                // @disable-check M222
+                var percent = settings.air_battery_show_fc_percent ? OpenHD.fc_battery_percent : OpenHDUtil.lipo_battery_voltage_to_percent(
+                                                                         settings.battery_cells,
+                                                                         OpenHD.battery_voltage)
                 // 20% warning, 15% critical
-                return cellVoltage < 3.73 ? (cellVoltage < 3.71 ? "#ff0000" : "#fbfd15") :  settings.color_shape
+                return percent < 20 ? (percent < 15 ? "#ff0000" : "#fbfd15") : settings.color_shape
             }
             opacity: settings.air_battery_opacity
-            text: OpenHD.battery_gauge
+            text: settings.air_battery_show_fc_percent ? OpenHD.fc_battery_gauge : OpenHD.battery_gauge
             anchors.left: parent.left
             anchors.leftMargin: 12
             fontSizeMode: Text.VerticalFit

@@ -22,6 +22,8 @@
 
 #include "localmessage.h"
 
+#include "adsb.h"
+
 static MavlinkTelemetry* _instance = nullptr;
 
 MavlinkTelemetry* MavlinkTelemetry::instance() {
@@ -33,18 +35,19 @@ MavlinkTelemetry* MavlinkTelemetry::instance() {
 
 MavlinkTelemetry::MavlinkTelemetry(QObject *parent): MavlinkBase(parent) {
     qDebug() << "MavlinkTelemetry::MavlinkTelemetry()";
-    targetSysID1 = 1;
-    targetSysID2 = 0;
-    targetCompID1 = MAV_COMP_ID_AUTOPILOT1;
-    targetCompID2 = MAV_COMP_ID_SYSTEM_CONTROL;
-    // betaflight
-    targetCompID3 = 200;
 
+    requestSysIdSettings();
+    m_restrict_compid = false;
+    targetCompID = MAV_COMP_ID_AUTOPILOT1;
+
+    m_restrict_sysid = false;
+    m_restrict_compid = false;
+    
     localPort = 14550;
-
-    #if defined(__rasp_pi__)
+//------------------------------------DONT FORGET TO REDO THIS------------------------------
+//    #if defined(__rasp_pi__)
     groundAddress = "127.0.0.1";
-    #endif
+//    #endif
 
     connect(this, &MavlinkTelemetry::setup, this, &MavlinkTelemetry::onSetup);
 
@@ -59,12 +62,58 @@ void MavlinkTelemetry::onSetup() {
 
     timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, &MavlinkTelemetry::stateLoop);
+    connect(timer, &QTimer::timeout, this, &MavlinkTelemetry::requestSysIdSettings);
     resetParamVars();
     timer->start(200);
 }
 
+void MavlinkTelemetry::requestSysIdSettings() {
+    //qDebug() << "requestTargetSysId called";
+    QSettings settings;
+    m_restrict_sysid = settings.value("filter_mavlink_telemetry", false).toBool();
+    targetSysID = settings.value("fc_mavlink_sysid", m_util.default_mavlink_sysid()).toInt();
+}
+
 void MavlinkTelemetry::pauseTelemetry(bool toggle) {
     pause_telemetry=toggle;
+    //qDebug() << "PAUSE TELEMTRY CALLED";
+}
+
+void MavlinkTelemetry::requested_Flight_Mode_Changed(int mode) {
+    m_mode=mode;
+    qDebug() << "MavlinkTelemetry::requested_Flight_Mode_Changed="<< m_mode;
+
+    MavlinkCommand command(MavlinkCommandTypeLong);
+    command.command_id = MAV_CMD_DO_SET_MODE;
+    command.long_param1 = MAV_MODE_FLAG_CUSTOM_MODE_ENABLED;
+    command.long_param2 = m_mode;
+    sendCommand(command);
+
+/*
+MavlinkCommand command(MAVLINK_MSG_ID_MISSION_REQUEST_LIST);
+*/
+}
+
+void MavlinkTelemetry::requested_ArmDisarm_Changed(int arm_disarm) {
+    m_arm_disarm=arm_disarm;
+    qDebug() << "MavlinkTelemetry::requested_ArmDisarm_Changed="<< m_arm_disarm;
+
+    MavlinkCommand command(MavlinkCommandTypeLong);
+    command.command_id = MAV_CMD_COMPONENT_ARM_DISARM ;
+    command.long_param1 = m_arm_disarm;
+    //command.long_param2 = m_arm_disarm;
+    sendCommand(command);
+}
+
+void MavlinkTelemetry::FC_Reboot_Shutdown_Changed(int reboot_shutdown) {
+    m_reboot_shutdown=reboot_shutdown;
+    qDebug() << "MavlinkTelemetry::FC_Reboot_Shutdown_Changed="<< m_reboot_shutdown;
+
+    MavlinkCommand command(MavlinkCommandTypeLong);
+    command.command_id = MAV_CMD_PREFLIGHT_REBOOT_SHUTDOWN ;
+    command.long_param1 = m_reboot_shutdown;
+    //command.long_param2 = m_arm_disarm;
+    sendCommand(command);
 }
 
 void MavlinkTelemetry::onProcessMavlinkMessage(mavlink_message_t msg) {
@@ -77,15 +126,6 @@ void MavlinkTelemetry::onProcessMavlinkMessage(mavlink_message_t msg) {
             case MAVLINK_MSG_ID_HEARTBEAT: {
                     mavlink_heartbeat_t heartbeat;
                     mavlink_msg_heartbeat_decode(&msg, &heartbeat);
-                    //MAV_STATE state = (MAV_STATE)heartbeat.system_status;
-                    MAV_MODE_FLAG mode = (MAV_MODE_FLAG)heartbeat.base_mode;
-
-                    if (mode & MAV_MODE_FLAG_SAFETY_ARMED) {
-                        // armed
-                        OpenHD::instance()->set_armed(true);
-                    } else {
-                        OpenHD::instance()->set_armed(false);
-                    }
 
                     auto custom_mode = heartbeat.custom_mode;
 
@@ -94,7 +134,7 @@ void MavlinkTelemetry::onProcessMavlinkMessage(mavlink_message_t msg) {
                     switch (autopilot) {
                         case MAV_AUTOPILOT_PX4: {
                             if (heartbeat.base_mode & MAV_MODE_FLAG_CUSTOM_MODE_ENABLED) {
-                                auto px4_mode = px4_mode_from_custom_mode(custom_mode);
+                                auto px4_mode = m_util.px4_mode_from_custom_mode(custom_mode);
                                 OpenHD::instance()->set_flight_mode(px4_mode);
                             }
                             break;
@@ -109,29 +149,33 @@ void MavlinkTelemetry::onProcessMavlinkMessage(mavlink_message_t msg) {
                                         break;
                                     }
                                     case MAV_TYPE_FIXED_WING: {
-                                        auto plane_mode = plane_mode_from_enum((PLANE_MODE)custom_mode);
+                                        auto plane_mode = m_util.plane_mode_from_enum((PLANE_MODE)custom_mode);
                                         OpenHD::instance()->set_flight_mode(plane_mode);
-                                        //qDebug() << "Mavlink Mav Type= PLANE";
+                                        OpenHD::instance()->set_mav_type("ARDUPLANE");
+
+                                        //qDebug() << "Mavlink Mav Type= ARDUPLANE";
                                         break;
                                     }
                                     case MAV_TYPE_GROUND_ROVER: {
-                                        auto rover_mode = rover_mode_from_enum((ROVER_MODE)custom_mode);
+                                        auto rover_mode = m_util.rover_mode_from_enum((ROVER_MODE)custom_mode);
                                         OpenHD::instance()->set_flight_mode(rover_mode);
                                         break;
                                     }
                                     case MAV_TYPE_QUADROTOR: {
-                                        auto copter_mode = copter_mode_from_enum((COPTER_MODE)custom_mode);
+                                        auto copter_mode = m_util.copter_mode_from_enum((COPTER_MODE)custom_mode);
                                         OpenHD::instance()->set_flight_mode(copter_mode);
-                                        //qDebug() << "Mavlink Mav Type= QUADROTOR";
+                                        OpenHD::instance()->set_mav_type("ARDUCOPTER");
+
+                                        qDebug() << "Mavlink Mav Type= ARDUCOPTER";
                                         break;
                                     }
                                     case MAV_TYPE_SUBMARINE: {
-                                        auto sub_mode = sub_mode_from_enum((SUB_MODE)custom_mode);
+                                        auto sub_mode = m_util.sub_mode_from_enum((SUB_MODE)custom_mode);
                                         OpenHD::instance()->set_flight_mode(sub_mode);
                                         break;
                                     }
                                     case MAV_TYPE_ANTENNA_TRACKER: {
-                                        auto tracker_mode = tracker_mode_from_enum((TRACKER_MODE)custom_mode);
+                                        auto tracker_mode = m_util.tracker_mode_from_enum((TRACKER_MODE)custom_mode);
                                         //OpenHD::instance()->set_tracker_mode(tracker_mode);
                                         break;
                                     }
@@ -143,8 +187,20 @@ void MavlinkTelemetry::onProcessMavlinkMessage(mavlink_message_t msg) {
                             break;
                         }
                         default: {
-                            break;
+                            // this returns to prevent heartbeats from devices other than an autopilot from setting
+                            // the armed/disarmed flag or resetting the last heartbeat timestamp
+                            return;
                         }
+                    }
+
+                    //MAV_STATE state = (MAV_STATE)heartbeat.system_status;
+                    MAV_MODE_FLAG mode = (MAV_MODE_FLAG)heartbeat.base_mode;
+
+                    if (mode & MAV_MODE_FLAG_SAFETY_ARMED) {
+                        // armed
+                        OpenHD::instance()->set_armed(true);
+                    } else {
+                        OpenHD::instance()->set_armed(false);
                     }
 
                     qint64 current_timestamp = QDateTime::currentMSecsSinceEpoch();
@@ -164,12 +220,14 @@ void MavlinkTelemetry::onProcessMavlinkMessage(mavlink_message_t msg) {
 
             OpenHD::instance()->updateAppMah();
 
+            OpenHD::instance()->updateAppMahKm();
+
             QSettings settings;
             auto battery_cells = settings.value("battery_cells", QVariant(3)).toInt();
 
-            int battery_percent = lipo_battery_voltage_to_percent(battery_cells, battery_voltage);
+            int battery_percent = m_util.lipo_battery_voltage_to_percent(battery_cells, battery_voltage);
             OpenHD::instance()->set_battery_percent(battery_percent);
-            QString battery_gauge_glyph = battery_gauge_glyph_from_percentage(battery_percent);
+            QString battery_gauge_glyph = m_util.battery_gauge_glyph_from_percentage(battery_percent);
             OpenHD::instance()->set_battery_gauge(battery_gauge_glyph);
 
             qint64 current_timestamp = QDateTime::currentMSecsSinceEpoch();
@@ -185,7 +243,7 @@ void MavlinkTelemetry::onProcessMavlinkMessage(mavlink_message_t msg) {
 
             if (boot_time < m_last_boot || m_last_boot == 0) {
                 m_last_boot = boot_time;
-    
+
                 setDataStreamRate(MAV_DATA_STREAM_EXTENDED_STATUS, 2);
                 setDataStreamRate(MAV_DATA_STREAM_EXTRA1, 10);
                 setDataStreamRate(MAV_DATA_STREAM_EXTRA2, 5);
@@ -227,20 +285,27 @@ void MavlinkTelemetry::onProcessMavlinkMessage(mavlink_message_t msg) {
             mavlink_msg_gps_raw_int_decode(&msg, &gps_status);
             OpenHD::instance()->set_satellites_visible(gps_status.satellites_visible);
             OpenHD::instance()->set_gps_hdop(gps_status.eph / 100.0);
+            OpenHD::instance()->set_gps_fix_type((unsigned int)gps_status.fix_type);
             break;
         }
         case MAVLINK_MSG_ID_GPS_STATUS: {
             break;
         }
+        case MAVLINK_MSG_ID_SCALED_IMU:{
+            break;
+        }
         case MAVLINK_MSG_ID_RAW_IMU:{
+            mavlink_raw_imu_t raw_imu;
+            mavlink_msg_raw_imu_decode(&msg, &raw_imu);
+            OpenHD::instance()->set_imu_temp((int)raw_imu.temperature/100);
             break;
         }
         case MAVLINK_MSG_ID_SCALED_PRESSURE:{
-        mavlink_scaled_pressure_t raw_imu;
-        mavlink_msg_scaled_pressure_decode(&msg, &raw_imu);
+            mavlink_scaled_pressure_t scaled_pressure;
+            mavlink_msg_scaled_pressure_decode(&msg, &scaled_pressure);
 
-        OpenHD::instance()->set_fc_temp((int)raw_imu.temperature/100);
-        //qDebug() << "Temp:" <<  raw_imu.temperature;
+            OpenHD::instance()->set_press_temp((int)scaled_pressure.temperature/100);
+            //qDebug() << "Temp:" <<  scaled_pressure.temperature;
             break;
         }
         case MAVLINK_MSG_ID_ATTITUDE:{
@@ -293,7 +358,7 @@ void MavlinkTelemetry::onProcessMavlinkMessage(mavlink_message_t msg) {
 
             OpenHD::instance()->updateFlightDistance();
 
-            OpenHD::instance()->updateLateralSpeed();
+            OpenHD::instance()->updateVehicleAngles();
 
             OpenHD::instance()->updateWind();
 
@@ -411,13 +476,22 @@ void MavlinkTelemetry::onProcessMavlinkMessage(mavlink_message_t msg) {
             OpenHD::instance()->set_flight_mah(battery_status.current_consumed);
 
             int total_voltage = 0;
-            for (int cell = 0; cell < 10; cell++) {
-                int cell_voltage  = battery_status.voltages[cell];
-                if (cell_voltage != UINT16_MAX) {
-                    // qDebug() << "Battery cell voltage " << cell << " :" << cell_voltage;
-                    total_voltage += cell_voltage;
-                }
+            int cell_count;
+            for (cell_count = 0; ( (cell_count < MAVLINK_MSG_BATTERY_STATUS_FIELD_VOLTAGES_LEN)
+                                 && (battery_status.voltages[cell_count] != UINT16_MAX) ); cell_count++) {
+                total_voltage += battery_status.voltages[cell_count];
             }
+
+//            QSettings settings;
+//            if (cell_count && (cell_count != settings.value("battery_cells", QVariant(3)).toInt()) ) {
+//                LocalMessage::instance()->showMessage("Battery Cells updated by Telemetry", 7);
+//                settings.setValue("battery_cells", QVariant(cell_count));
+//                settings.sync();
+//            }
+
+            OpenHD::instance()->set_fc_battery_percent(battery_status.battery_remaining);
+            QString fc_battery_gauge_glyph = m_util.battery_gauge_glyph_from_percentage(battery_status.battery_remaining);
+            OpenHD::instance()->set_fc_battery_gauge(fc_battery_gauge_glyph);
             break;
         }
         case MAVLINK_MSG_ID_SENSOR_OFFSETS: {
@@ -474,42 +548,12 @@ void MavlinkTelemetry::onProcessMavlinkMessage(mavlink_message_t msg) {
             mavlink_msg_home_position_decode(&msg, &home_position);
             OpenHD::instance()->set_homelat((double)home_position.latitude / 10000000.0);
             OpenHD::instance()->set_homelon((double)home_position.longitude / 10000000.0);
-            LocalMessage::instance()->showMessage("Home Position set by OpenHD", 2);
+            //LocalMessage::instance()->showMessage("Home Position set by Telemetry", 7);
             break;
         }
         case MAVLINK_MSG_ID_STATUSTEXT: {
             mavlink_statustext_t statustext;
             mavlink_msg_statustext_decode(&msg, &statustext);
-            int level = 0;
-            switch (statustext.severity) {
-                case MAV_SEVERITY_EMERGENCY:
-                    level = 7;
-                    break;
-                case MAV_SEVERITY_ALERT:
-                    level = 6;
-                    break;
-                case MAV_SEVERITY_CRITICAL:
-                    level = 5;
-                    break;
-                case MAV_SEVERITY_ERROR:
-                    level = 4;
-                    break;
-                case MAV_SEVERITY_WARNING:
-                    level = 3;
-                    break;
-                case MAV_SEVERITY_NOTICE:
-                    level = 2;
-                    break;
-                case MAV_SEVERITY_INFO:
-                    level = 1;
-                    break;
-                case MAV_SEVERITY_DEBUG:
-                    level = 0;
-                    break;
-                default:
-                    break;
-            }
-
             QByteArray param_id(statustext.text, 50);
             /*
              * If there's no null in the text array, the mavlink docs say it has to be exactly 50 characters,
@@ -523,10 +567,58 @@ void MavlinkTelemetry::onProcessMavlinkMessage(mavlink_message_t msg) {
 
             QString s(param_id.data());
 
-            OpenHD::instance()->messageReceived(s, level);
+            OpenHD::instance()->messageReceived(s, statustext.severity);
             break;
         }
         case MAVLINK_MSG_ID_ESC_TELEMETRY_1_TO_4: {
+            mavlink_esc_telemetry_1_to_4_t esc_telemetry;
+            mavlink_msg_esc_telemetry_1_to_4_decode(&msg, &esc_telemetry);
+
+            OpenHD::instance()->set_esc_temp((int)esc_telemetry.temperature[0]);
+            break;
+        }
+        case MAVLINK_MSG_ID_ADSB_VEHICLE: {
+            mavlink_adsb_vehicle_t adsbVehicleMsg;
+            static const int maxTimeSinceLastSeen = 15;
+
+            mavlink_msg_adsb_vehicle_decode(&msg, &adsbVehicleMsg);
+
+            // ignore report if more than 15 since last seen
+            if ((adsbVehicleMsg.flags & ADSB_FLAGS_VALID_COORDS) && adsbVehicleMsg.tslc <= maxTimeSinceLastSeen) {
+                ADSBVehicle::VehicleInfo_t vehicleInfo;
+
+                vehicleInfo.availableFlags = 0;
+                vehicleInfo.icaoAddress = adsbVehicleMsg.ICAO_address;
+
+                vehicleInfo.location.setLatitude(adsbVehicleMsg.lat / 1e7); // degE7 to deg 
+                vehicleInfo.location.setLongitude(adsbVehicleMsg.lon / 1e7); // degE7 to deg
+                vehicleInfo.availableFlags |= ADSBVehicle::LocationAvailable;
+
+                vehicleInfo.callsign = adsbVehicleMsg.callsign;
+                vehicleInfo.availableFlags |= ADSBVehicle::CallsignAvailable;
+
+                if (adsbVehicleMsg.flags & ADSB_FLAGS_VALID_ALTITUDE) {
+                    vehicleInfo.altitude = (double)adsbVehicleMsg.altitude / 1e3; // mm to m
+                    vehicleInfo.availableFlags |= ADSBVehicle::AltitudeAvailable;
+                }
+
+                if (adsbVehicleMsg.flags & ADSB_FLAGS_VALID_HEADING) {
+                    vehicleInfo.heading = (double)adsbVehicleMsg.heading / 100.0; // centideg to deg
+                    vehicleInfo.availableFlags |= ADSBVehicle::HeadingAvailable;
+                }
+
+                if (adsbVehicleMsg.flags & ADSB_FLAGS_VALID_VELOCITY) {
+                    vehicleInfo.velocity = (double)adsbVehicleMsg.hor_velocity * 0.036; // cm/s to km/h
+                    vehicleInfo.availableFlags |= ADSBVehicle::VelocityAvailable;
+                }
+
+                if (adsbVehicleMsg.flags & ADSB_FLAGS_VERTICAL_VELOCITY_VALID) {
+                    vehicleInfo.verticalVel = (double)adsbVehicleMsg.ver_velocity / 100; // cm/s to m/s 
+                    vehicleInfo.availableFlags |= ADSBVehicle::VerticalVelAvailable;
+                }
+
+                emit adsbVehicleUpdate(vehicleInfo);
+            }
             break;
         }
         default: {
@@ -535,4 +627,3 @@ void MavlinkTelemetry::onProcessMavlinkMessage(mavlink_message_t msg) {
         }
     }
 }
-

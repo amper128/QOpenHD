@@ -157,10 +157,6 @@ ApplicationWindow {
         id: vectorTelemetry
     }
 
-    MarkerModel {
-        id: markerModel
-    }
-
     BlackBoxModel {
         id: blackBoxModel
     }
@@ -192,7 +188,7 @@ ApplicationWindow {
     Connections {
         target: OpenHD
         function onMessageReceived(message, level) {
-            if (level >= settings.log_level) {
+            if (level <= settings.log_level) {
                 hudOverlayGrid.messageHUD.pushMessage(message, level)
             }
         }
@@ -201,7 +197,7 @@ ApplicationWindow {
     Connections {
         target: LocalMessage
         function onMessageReceived(message, level) {
-            if (level >= settings.log_level) {
+            if (level <= settings.log_level) {
                 hudOverlayGrid.messageHUD.pushMessage(message, level)
             }
         }
@@ -210,7 +206,7 @@ ApplicationWindow {
     Connections {
         target: GroundStatusMicroservice
         function onStatusMessage(sysid, message, level, timestamp) {
-            if (level >= settings.log_level) {
+            if (level <= settings.log_level) {
                 hudOverlayGrid.messageHUD.pushMessage(message, level)
             }
         }
@@ -219,7 +215,7 @@ ApplicationWindow {
     Connections {
         target: AirStatusMicroservice
         function onStatusMessage(sysid, message, level, timestamp) {
-            if (level >= settings.log_level) {
+            if (level <= settings.log_level) {
                 hudOverlayGrid.messageHUD.pushMessage(message, level)
             }
         }
@@ -241,18 +237,18 @@ ApplicationWindow {
             settings_panel.openSettings();
         }
 
-        /*transform: Scale {
+        transform: Scale {
             origin.x: 0
             origin.y: hudOverlayGrid.height / 2
             xScale: settings.stereo_enable ? 0.5 : 1.0
             yScale: settings.stereo_enable ? 0.5 : 1.0
         }
 
-        layer.enabled: true*/
+        layer.enabled: true
     }
 
 
-    /*Rectangle {
+    Rectangle {
         id: hudOverlayGridClone
         anchors.right: parent.right
         width: parent.width / 2
@@ -273,7 +269,7 @@ ApplicationWindow {
                 }
             "
         }
-    }*/
+    }
 
     OSDCustomizer {
         id: osdCustomizer
@@ -295,6 +291,13 @@ ApplicationWindow {
         onLocalMessage: {
             hudOverlayGrid.messageHUD.pushMessage(message, level)
         }
+
+        onSettingsClosed: {
+            if (settings.stereo_enable) {
+                stereoHelpMessage.visible = true
+                stereoHelpTimer.start()
+            }
+        }
     }
 
     Shortcut {
@@ -307,16 +310,19 @@ ApplicationWindow {
 
     Item {
         anchors.fill: parent
-        //z: settings.stereo_enable ? 10.0 : 1.0
-        z: 1.0
+        z: settings.stereo_enable ? 10.0 : 1.0
 
         TapHandler {
             enabled: settings_panel.visible == false
             acceptedButtons: Qt.AllButtons
             onTapped: {
-                return;
                 if (tapCount == 3) {
                     settings.stereo_enable = !settings.stereo_enable
+                    if (settings.stereo_enable) {
+                        stereoHelpMessage.visible = true
+                        stereoHelpTimer.start()
+                    }
+
                     if (IsRaspPi) {
                         piSettingsTimer.start();
                     }
@@ -334,7 +340,34 @@ ApplicationWindow {
         }
     }
 
+    Text {
+        id: stereoHelpMessage
+        z: 2.0
+        color: "#89ffffff"
+        visible: false
+        font.pixelSize: 18
+        font.family: settings.font_text
+        text: qsTr("Rapidly tap between widgets to enable/disable stereo")
+        horizontalAlignment: Text.AlignHCenter
+        height: 24
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: parent.top
+        anchors.topMargin: 64
+        style: Text.Outline
+        styleColor: "black"
+    }
 
+    Timer {
+        id: stereoHelpTimer
+        running: false
+        interval: 4000
+        repeat: false
+
+        onTriggered: {
+            stereoHelpMessage.visible = false;
+        }
+    }
 }
 
 /*##^##

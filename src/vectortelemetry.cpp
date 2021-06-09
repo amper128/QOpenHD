@@ -162,16 +162,20 @@ void VectorTelemetry::processVectorMessage() {
 
     QSettings settings;
     auto battery_cells = settings.value("battery_cells", QVariant(3)).toInt();
-    int battery_percent = lipo_battery_voltage_to_percent(battery_cells, battery_voltage);
+    int battery_percent = m_util.lipo_battery_voltage_to_percent(battery_cells, battery_voltage);
     OpenHD::instance()->set_battery_percent(battery_percent);
-    QString battery_gauge_glyph = battery_gauge_glyph_from_percentage(battery_percent);
+    QString battery_gauge_glyph = m_util.battery_gauge_glyph_from_percentage(battery_percent);
     OpenHD::instance()->set_battery_gauge(battery_gauge_glyph);
 
 
     dummy16 = (uint16_t)votbread_u16(); // TempDegreesCX10-- degrees C * 10, from optional temperature sensor
-    dummy16 = (uint16_t)votbread_u16(); // mAHConsumed-not used-
+    auto mah = (uint16_t)votbread_u16(); // mAHConsumed-not used-
+    OpenHD::instance()->set_flight_mah(mah);
+
     dummy16 = (uint16_t)votbread_u16(); // CompassDegrees-not used- either magnetic compass reading (if compass enabled) or filtered GPS course over ground if not
     auto rssi = v.td.RSSIPercent;  // RSSIPercent-rssi-
+    OpenHD::instance()->setRcRssi(rssi);
+
     auto lq   = (uint8_t)votread_u8();  // LQPercent-not used-
 
     auto latitude = (double)v.td.LatitudeX1E7 / 10000000; // -latitude- (degrees * 10,000,000 )
@@ -199,7 +203,7 @@ void VectorTelemetry::processVectorMessage() {
 
 
     auto _flightmode = v.td.PresentFlightMode; // PresentFlightMode -uav_flightmode- present flight mode, as defined in VECTOR_FLIGHT_MODES
-    QString flightmode = vot_mode_from_telemetry(_flightmode);
+    QString flightmode = m_util.vot_mode_from_telemetry(_flightmode);
     OpenHD::instance()->set_flight_mode(flightmode);
 
     OpenHD::instance()->calculate_home_distance();

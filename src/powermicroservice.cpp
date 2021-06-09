@@ -17,9 +17,7 @@
 PowerMicroservice::PowerMicroservice(QObject *parent, MicroserviceTarget target, MavlinkType mavlink_type): MavlinkBase(parent, mavlink_type), m_target(target) {
     qDebug() << "PowerMicroservice::PowerMicroservice()";
 
-    targetCompID1 = MAV_COMP_ID_USER1;
-    targetCompID2 = targetCompID1;
-    targetCompID3 = targetCompID1;
+    targetCompID = MAV_COMP_ID_USER1;
     localPort = 14551;
 
     #if defined(__rasp_pi__)
@@ -28,21 +26,19 @@ PowerMicroservice::PowerMicroservice(QObject *parent, MicroserviceTarget target,
 
     switch (m_target) {
         case MicroserviceTargetNone:
-        targetSysID1 = 0;
+        targetSysID = 0;
         break;
         case MicroserviceTargetAir:
-        targetSysID1 = 253;
+        targetSysID = 253;
         connect(OpenHD::instance(), &OpenHD::air_shutdown, this, &PowerMicroservice::onShutdown);
         connect(OpenHD::instance(), &OpenHD::air_reboot, this, &PowerMicroservice::onReboot);
         break;
         case MicroserviceTargetGround:
-        targetSysID1 = 254;
+        targetSysID = 254;
         connect(OpenHD::instance(), &OpenHD::ground_shutdown, this, &PowerMicroservice::onShutdown);
         connect(OpenHD::instance(), &OpenHD::ground_reboot, this, &PowerMicroservice::onReboot);
         break;
     }
-
-    targetSysID2 = targetSysID1;
 
     connect(this, &PowerMicroservice::setup, this, &PowerMicroservice::onSetup);
 }
@@ -110,6 +106,15 @@ void PowerMicroservice::onProcessMavlinkMessage(mavlink_message_t msg) {
                     OpenHD::instance()->set_ground_vout(power.vout);
                     OpenHD::instance()->set_ground_vbat(power.vbat);
                     OpenHD::instance()->set_ground_iout(power.iout);*/
+
+                    QSettings settings;
+                    auto ground_battery_cells = settings.value("ground_battery_cells", QVariant(3)).toInt();
+
+                    int ground_battery_percent = m_util.lipo_battery_voltage_to_percent(ground_battery_cells, power.vbat);
+                    OpenHD::instance()->set_ground_battery_percent(ground_battery_percent);
+                    QString ground_battery_gauge_glyph = m_util.battery_gauge_glyph_from_percentage(ground_battery_percent);
+                    OpenHD::instance()->set_ground_battery_gauge(ground_battery_gauge_glyph);
+
                     break;
                 }
                 default: {
@@ -117,13 +122,6 @@ void PowerMicroservice::onProcessMavlinkMessage(mavlink_message_t msg) {
                 }
             }
 
-            auto battery_cells = 1; //settings.value("battery_cells", QVariant(3)).toInt();
-
-            /*int battery_percent = lifepo4_battery_voltage_to_percent(battery_cells, m_vbat_raw);
-              set_battery_percent(QString("%1%").arg(battery_percent));
-              QString battery_gauge_glyph = battery_gauge_glyph_from_percentage(battery_percent);
-              set_battery_gauge(battery_gauge_glyph);
-            */
             break;
         }
         default: {

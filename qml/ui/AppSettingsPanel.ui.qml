@@ -44,6 +44,14 @@ Item {
         }
 
         TabButton {
+            y: 0
+            text: qsTr("Vehicle")
+            width: implicitWidth
+            height: 48
+            font.pixelSize: 13
+        }
+
+        TabButton {
             text: qsTr("Widgets")
             width: implicitWidth
             height: 48
@@ -119,6 +127,40 @@ Item {
                         height: rowHeight
                         color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
 
+                        Text {
+                            text: qsTr("Mavlink SysID")
+                            font.weight: Font.Bold
+                            font.pixelSize: 13
+                            anchors.leftMargin: 8
+                            verticalAlignment: Text.AlignVCenter
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: 224
+                            height: elementHeight
+                            anchors.left: parent.left
+                        }
+
+                        SpinBox {
+                            id: mavlinkSysIDSpinBox
+                            height: elementHeight
+                            width: 210
+                            font.pixelSize: 14
+                            anchors.right: parent.right
+                            anchors.verticalCenter: parent.verticalCenter
+                            from: 1
+                            to: 255
+                            stepSize: 1
+                            anchors.rightMargin: Qt.inputMethod.visible ? 78 : 18
+
+                            value: settings.mavlink_sysid
+                            onValueChanged: settings.mavlink_sysid = value
+                        }
+                    }
+
+                    Rectangle {
+                        width: parent.width
+                        height: rowHeight
+                        color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
+
                         //color: "#8cbfd7f3"
                         Text {
                             text: qsTr("Enable Speech")
@@ -149,7 +191,7 @@ Item {
                         color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
 
                         Text {
-                            text: qsTr("Battery Cells")
+                            text: qsTr("Log Level")
                             font.weight: Font.Bold
                             font.pixelSize: 13
                             anchors.leftMargin: 8
@@ -161,19 +203,19 @@ Item {
                         }
 
                         SpinBox {
-                            id: batteryCellspinBox
+                            id: logLevelspinBox
                             height: elementHeight
                             width: 210
                             font.pixelSize: 14
                             anchors.right: parent.right
                             anchors.verticalCenter: parent.verticalCenter
-                            from: 1
-                            to: 6
+                            from: 0
+                            to: 7
                             stepSize: 1
                             anchors.rightMargin: Qt.inputMethod.visible ? 78 : 18
 
-                            value: settings.battery_cells
-                            onValueChanged: settings.battery_cells = value
+                            value: settings.log_level
+                            onValueChanged: settings.log_level = value
                         }
                     }
 
@@ -203,6 +245,125 @@ Item {
                             anchors.verticalCenter: parent.verticalCenter
                             checked: settings.enable_imperial
                             onCheckedChanged: settings.enable_imperial = checked
+                        }
+                    }
+
+                    Rectangle {
+
+                        width: parent.width
+                        height: rowHeight
+                        color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
+                        visible: true
+
+                        Text {
+                            text: qsTr("Ground Battery Cells")
+                            font.weight: Font.Bold
+                            font.pixelSize: 13
+                            anchors.leftMargin: 8
+                            verticalAlignment: Text.AlignVCenter
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: 224
+                            height: elementHeight
+                            anchors.left: parent.left
+                        }
+
+                        SpinBox {
+                            id: gndBatteryCellspinBox
+                            height: elementHeight
+                            width: 210
+                            font.pixelSize: 14
+                            anchors.right: parent.right
+                            anchors.verticalCenter: parent.verticalCenter
+                            from: 1
+                            to: 6
+                            stepSize: 1
+                            anchors.rightMargin: Qt.inputMethod.visible ? 78 : 18
+
+                            value: settings.ground_battery_cells
+                            onValueChanged: settings.ground_battery_cells = value
+                        }
+                    }
+
+                    Rectangle {
+                        width: parent.width
+                        height: rowHeight
+                        color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
+
+                        Text {
+                            text: qsTr("Language / Locale")
+                            font.weight: Font.Bold
+                            font.pixelSize: 13
+                            anchors.leftMargin: 8
+                            verticalAlignment: Text.AlignVCenter
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: 224
+                            height: elementHeight
+                            anchors.left: parent.left
+                        }
+
+                        LanguageSelect {
+                            id: languageSelectBox
+                            height: elementHeight
+                            width: 210
+                            anchors.right: parent.right
+                            anchors.rightMargin: Qt.inputMethod.visible ? 96 : 36
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.horizontalCenter: parent.horizonatalCenter
+                        }
+                    }
+                }
+            }
+        }
+
+        ScrollView {
+            id: vehicleView
+            width: parent.width
+            height: parent.height
+            contentHeight: generalColumn.height
+            visible: appSettingsBar.currentIndex == 1
+
+            clip: true
+
+            Item {
+                anchors.fill: parent
+
+                Column {
+                    id: vehicleColumn
+                    spacing: 0
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+
+                    Rectangle {
+                        width: parent.width
+                        height: rowHeight
+                        color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
+
+                        Text {
+                            text: qsTr("Air Battery Cells")
+                            font.weight: Font.Bold
+                            font.pixelSize: 13
+                            anchors.leftMargin: 8
+                            verticalAlignment: Text.AlignVCenter
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: 224
+                            height: elementHeight
+                            anchors.left: parent.left
+                        }
+
+                        SpinBox {
+                            id: batteryCellspinBox
+                            height: elementHeight
+                            width: 210
+                            font.pixelSize: 14
+                            anchors.right: parent.right
+                            anchors.verticalCenter: parent.verticalCenter
+                            from: 1
+                            to: 6
+                            stepSize: 1
+                            anchors.rightMargin: Qt.inputMethod.visible ? 78 : 18
+
+                            value: settings.battery_cells
+                            onValueChanged: settings.battery_cells = value
                         }
                     }
 
@@ -242,7 +403,37 @@ Item {
                         color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
 
                         Text {
-                            text: qsTr("Mavlink SysID")
+                            text: qsTr("Filter by Mavlink SysID")
+                            font.weight: Font.Bold
+                            font.pixelSize: 13
+                            anchors.leftMargin: 8
+                            verticalAlignment: Text.AlignVCenter
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: 224
+                            height: elementHeight
+                            anchors.left: parent.left
+                        }
+
+                        Switch {
+                            width: 32
+                            height: elementHeight
+                            anchors.rightMargin: Qt.inputMethod.visible ? 96 : 36
+
+                            anchors.right: parent.right
+                            anchors.verticalCenter: parent.verticalCenter
+                            checked: settings.filter_mavlink_telemetry
+                            onCheckedChanged: settings.filter_mavlink_telemetry = checked
+                        }
+                    }
+
+                    Rectangle {
+                        width: parent.width
+                        height: rowHeight
+                        color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
+                        visible: settings.filter_mavlink_telemetry
+
+                        Text {
+                            text: qsTr("Flight Controller Mavlink SysID")
                             font.weight: Font.Bold
                             font.pixelSize: 13
                             anchors.leftMargin: 8
@@ -254,7 +445,7 @@ Item {
                         }
 
                         SpinBox {
-                            id: mavlinkSysIDSpinBox
+                            id: fcMavlinkSysIDSpinBox
                             height: elementHeight
                             width: 210
                             font.pixelSize: 14
@@ -265,39 +456,8 @@ Item {
                             stepSize: 1
                             anchors.rightMargin: Qt.inputMethod.visible ? 78 : 18
 
-                            value: settings.mavlink_sysid
-                            onValueChanged: settings.mavlink_sysid = value
-                        }
-                    }
-
-
-                    Rectangle {
-
-                        width: parent.width
-                        height: rowHeight
-                        color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
-                        visible: true
-
-                        Text {
-                            text: qsTr("Language / Locale")
-                            font.weight: Font.Bold
-                            font.pixelSize: 13
-                            anchors.leftMargin: 8
-                            verticalAlignment: Text.AlignVCenter
-                            anchors.verticalCenter: parent.verticalCenter
-                            width: 224
-                            height: elementHeight
-                            anchors.left: parent.left
-                        }
-
-                        LanguageSelect {
-                            id: languageSelectBox
-                            height: elementHeight
-                            width: 210
-                            anchors.right: parent.right
-                            anchors.rightMargin: Qt.inputMethod.visible ? 96 : 36
-                            anchors.verticalCenter: parent.verticalCenter
-                            anchors.horizontalCenter: parent.horizonatalCenter
+                            value: settings.fc_mavlink_sysid
+                            onValueChanged: settings.fc_mavlink_sysid = value
                         }
                     }
                 }
@@ -309,7 +469,7 @@ Item {
             width: parent.width
             height: parent.height
             contentHeight: widgetColumn.height
-            visible: appSettingsBar.currentIndex == 1
+            visible: appSettingsBar.currentIndex == 2
 
             clip: true
             Item {
@@ -768,7 +928,7 @@ Item {
                         color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
 
                         Text {
-                            text: qsTr("Show Flight Controller Temperature")
+                            text: qsTr("Show IMU Sensor Temperature")
                             font.weight: Font.Bold
                             font.pixelSize: 13
                             anchors.leftMargin: 8
@@ -786,8 +946,66 @@ Item {
 
                             anchors.right: parent.right
                             anchors.verticalCenter: parent.verticalCenter
-                            checked: settings.show_fc_temp
-                            onCheckedChanged: settings.show_fc_temp = checked
+                            checked: settings.show_imu_temp
+                            onCheckedChanged: settings.show_imu_temp = checked
+                        }
+                    }
+
+                    Rectangle {
+                        width: parent.width
+                        height: rowHeight
+                        color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
+
+                        Text {
+                            text: qsTr("Show Pressure Sensor Temperature")
+                            font.weight: Font.Bold
+                            font.pixelSize: 13
+                            anchors.leftMargin: 8
+                            verticalAlignment: Text.AlignVCenter
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: 224
+                            height: elementHeight
+                            anchors.left: parent.left
+                        }
+
+                        Switch {
+                            width: 32
+                            height: elementHeight
+                            anchors.rightMargin: Qt.inputMethod.visible ? 96 : 36
+
+                            anchors.right: parent.right
+                            anchors.verticalCenter: parent.verticalCenter
+                            checked: settings.show_press_temp
+                            onCheckedChanged: settings.show_press_temp = checked
+                        }
+                    }
+
+                    Rectangle {
+                        width: parent.width
+                        height: rowHeight
+                        color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
+
+                        Text {
+                            text: qsTr("Show Esc Temperature")
+                            font.weight: Font.Bold
+                            font.pixelSize: 13
+                            anchors.leftMargin: 8
+                            verticalAlignment: Text.AlignVCenter
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: 224
+                            height: elementHeight
+                            anchors.left: parent.left
+                        }
+
+                        Switch {
+                            width: 32
+                            height: elementHeight
+                            anchors.rightMargin: Qt.inputMethod.visible ? 96 : 36
+
+                            anchors.right: parent.right
+                            anchors.verticalCenter: parent.verticalCenter
+                            checked: settings.show_esc_temp
+                            onCheckedChanged: settings.show_esc_temp = checked
                         }
                     }
 
@@ -817,6 +1035,35 @@ Item {
                             anchors.verticalCenter: parent.verticalCenter
                             checked: settings.show_ground_status
                             onCheckedChanged: settings.show_ground_status = checked
+                        }
+                    }
+
+                    Rectangle {
+                        width: parent.width
+                        height: rowHeight
+                        color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
+
+                        Text {
+                            text: qsTr("Show Ground Battery")
+                            font.weight: Font.Bold
+                            font.pixelSize: 13
+                            anchors.leftMargin: 8
+                            verticalAlignment: Text.AlignVCenter
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: 224
+                            height: elementHeight
+                            anchors.left: parent.left
+                        }
+
+                        Switch {
+                            width: 32
+                            height: elementHeight
+                            anchors.rightMargin: Qt.inputMethod.visible ? 96 : 36
+
+                            anchors.right: parent.right
+                            anchors.verticalCenter: parent.verticalCenter
+                            checked: settings.show_ground_battery
+                            onCheckedChanged: settings.show_ground_battery = checked
                         }
                     }
 
@@ -904,6 +1151,35 @@ Item {
                             anchors.verticalCenter: parent.verticalCenter
                             checked: settings.show_flight_mah
                             onCheckedChanged: settings.show_flight_mah = checked
+                        }
+                    }
+
+                    Rectangle {
+                        width: parent.width
+                        height: rowHeight
+                        color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
+
+                        Text {
+                            text: qsTr("Show Efficiency in mAh/km")
+                            font.weight: Font.Bold
+                            font.pixelSize: 13
+                            anchors.leftMargin: 8
+                            verticalAlignment: Text.AlignVCenter
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: 224
+                            height: elementHeight
+                            anchors.left: parent.left
+                        }
+
+                        Switch {
+                            width: 32
+                            height: elementHeight
+                            anchors.rightMargin: Qt.inputMethod.visible ? 96 : 36
+
+                            anchors.right: parent.right
+                            anchors.verticalCenter: parent.verticalCenter
+                            checked: settings.show_flight_mah_km
+                            onCheckedChanged: settings.show_flight_mah_km = checked
                         }
                     }
 
@@ -1459,6 +1735,36 @@ Item {
                             }
                         }
                     }
+/* NOT READY YET */
+                    Rectangle {
+                        width: parent.width
+                        height: rowHeight
+                        color: (Positioner.index % 2 == 0) ? "#8cbfd7f3" : "#00000000"
+
+                        Text {
+                            text: qsTr("Show Virtual Reality Overlay")
+                            font.weight: Font.Bold
+                            font.pixelSize: 13
+                            anchors.leftMargin: 8
+                            verticalAlignment: Text.AlignVCenter
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: 224
+                            height: elementHeight
+                            anchors.left: parent.left
+                        }
+
+                        Switch {
+                            width: 32
+                            height: elementHeight
+                            anchors.rightMargin: Qt.inputMethod.visible ? 96 : 36
+
+                            anchors.right: parent.right
+                            anchors.verticalCenter: parent.verticalCenter
+                            checked: settings.show_fpv
+                            onCheckedChanged: settings.show_vroverlay = checked
+                        }
+                    }
+/**/
                     Rectangle {
                         width: parent.width
                         height: rowHeight
@@ -1529,7 +1835,7 @@ Item {
             width: parent.width
             height: parent.height
             contentHeight: piColumn.height
-            visible: appSettingsBar.currentIndex == 2
+            visible: appSettingsBar.currentIndex == 3
 
             clip: true
 
@@ -1644,7 +1950,7 @@ Item {
             contentHeight: videoColumn.height
 
             clip: true
-            visible: (EnableMainVideo || EnablePiP) && appSettingsBar.currentIndex == 3
+            visible: (EnableMainVideo || EnablePiP) && appSettingsBar.currentIndex == 4
 
 
             Item {
@@ -1863,7 +2169,7 @@ Item {
             width: parent.width
             height: parent.height
             contentHeight: manageColumn.height
-            visible: appSettingsBar.currentIndex == 4
+            visible: appSettingsBar.currentIndex == 5
 
             clip: true
 

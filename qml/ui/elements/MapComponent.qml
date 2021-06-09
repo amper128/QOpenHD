@@ -64,8 +64,6 @@ Map {
                 }
             }
         }
-
-        //console.log("drone position=",OpenHD.lat, OpenHD.lon);
     }
 
     center {
@@ -73,21 +71,28 @@ Map {
         longitude: OpenHD.lon == 0.0 ? userLon : followDrone ? OpenHD.lon : 9000
     }
 
-    onCenterChanged: {
-        //findMapBounds();
+    onMapReadyChanged: {
+        //needed to intitialize adsb api coordinates
+        console.log("map is ready");
+        findMapBounds();
     }
 
-    /*
+    onCenterChanged: {
+        findMapBounds();
+    }
+
     function findMapBounds(){
         var center_coord = map.toCoordinate(Qt.point(map.width/2,map.height/2))
         //console.log("my center",center_coord.latitude, center_coord.longitude);
-        OpenSky.mapBoundsChanged(center_coord);
-    }*/
+        if (EnableADSB) {
+            AdsbVehicleManager.newMapCenter(center_coord);
+        }
+    }
 
     PositionSource {
         id: positionSource
         updateInterval: 5000
-        active: true
+        active: followDrone
 
         onPositionChanged: {
             userLat = position.coordinate.latitude
@@ -120,22 +125,18 @@ Map {
         }
     }
 
-    /*
     MapRectangle {
         id: adsbSquare
-        //center: OpenSky.adsb_api_coord
-        //radius: MarkerModel.adsb_radius
-        topLeft : OpenSky.adsb_api_coord.atDistanceAndAzimuth(settings.adsb_distance_limit, 315, 0.0)
-        bottomRight: OpenSky.adsb_api_coord.atDistanceAndAzimuth(settings.adsb_distance_limit, 135, 0.0)
-
+        topLeft : EnableADSB ? AdsbVehicleManager.apiMapCenter.atDistanceAndAzimuth(settings.adsb_distance_limit, 315, 0.0) : QtPositioning.coordinate(0, 0)
+        bottomRight: EnableADSB ? AdsbVehicleManager.apiMapCenter.atDistanceAndAzimuth(settings.adsb_distance_limit, 135, 0.0) : QtPositioning.coordinate(0, 0)
+        enabled: EnableADSB
+        visible: settings.adsb_api_openskynetwork
         color: "white"
         border.color: "red"
         border.width: 5
         smooth: true
-        opacity: .2
+        opacity: .3
     }
-    */
-
 
     MapItemView {
         model: BlackBoxModel
@@ -185,7 +186,7 @@ Map {
 
     MapItemView {
         id: markerMapView
-        model: MarkerModel
+        model: AdsbVehicleManager.adsbVehicles
         delegate: markerComponentDelegate
         visible: EnableADSB
 
@@ -201,7 +202,7 @@ Map {
                     property alias lastMouseY: markerMouseArea.lastY
 
                     anchorPoint.x: image.width/2
-                    anchorPoint.y: image.height/10
+                    anchorPoint.y: image.height/2
                     width: image.width
                     height: image.height
 
@@ -218,11 +219,12 @@ Map {
 
                             width: image.width*.2
                             height: {
-                                if (model.velocity === undefined) {
+                                if (object.velocity === undefined) {
+                                    console.log("qml: object velocity undefined")
                                     return 0;
                                 }
                                 else {
-                                    return model.velocity / 2;
+                                    return object.velocity / 2;
                                 }
                             }
                             opacity: .5
@@ -232,25 +234,26 @@ Map {
                         }
 
                         rotation: {
-                            if (model.track === undefined) {
-                                //console.log("UNDEFINED MODEL ERROR count=", MarkerModel.rowCount() );
-                                //marker.visible=false;
+                            if (object.heading === undefined) {
+                                console.log("qml: model heading undefined")
                                 return 0;
                             }
 
-                            var orientation = model.track-OpenHD.hdg;
 
-                            if (orientation < 0) orientation += 360;
-                            if (orientation >= 360) orientation -=360;
 
-                            if (settings.map_orientation === false){
+                            if (settings.map_orientation === true){
+                                var orientation = object.heading-OpenHD.hdg;
+                                if (orientation < 0) orientation += 360;
+                                if (orientation >= 360) orientation -=360;
                                 return orientation;
                             }
-                            else {
-                                return model.track;
+                            else {                                
+                                //console.log("TRACK=", object.heading);
+                                return object.heading;
                             }
                         }
 
+                        //UNUSED MOUSE AREA.. reating for future functionality
                         opacity: markerMouseArea.pressed ? 0.6 : 1.0
                         MouseArea  {
                             id: markerMouseArea
@@ -293,20 +296,20 @@ Map {
                             x: image.width+5
                             y: image.height/2
                             rotation: {
-                                if (model.track === undefined) {
+                                if (object.heading === undefined) {
+                                    console.log("qml: model velocity undefined")
                                     return 0;
                                 }
 
-                                var orientation = model.track-OpenHD.hdg;
+                                if (settings.map_orientation === true){
+                                    var orientation = object.heading - OpenHD.hdg;
 
-                                if (orientation < 0) orientation += 360;
-                                if (orientation >= 360) orientation -=360;
-
-                                if (settings.map_orientation === false){
+                                    if (orientation < 0) orientation += 360;
+                                    if (orientation >= 360) orientation -=360;
                                     return -orientation;
                                 }
                                 else {
-                                    return -model.track;
+                                    return -object.heading;
                                 }
                             }
                             width: image.width
@@ -336,13 +339,13 @@ Map {
                                 font.pixelSize: 11
                                 horizontalAlignment: Text.AlignHCenter
                                 text: {
-                                    if (model.callsign === undefined) {
-                                        console.log("UNDEFINED Callsign count=", MarkerModel.rowCount());
+                                    if (object.callsign === undefined) {
+                                        console.log("qml: model callsign undefined")
                                         return "---"
                                     }
                                     else {
-                                        return model.callsign
-                                        //console.log("Map Callsign=",model.callsign);
+                                        return object.callsign
+                                        //console.log("Map Callsign=",object.callsign);
                                     }
                                 }
                             }
@@ -359,13 +362,13 @@ Map {
                                 horizontalAlignment: Text.AlignHCenter
                                 text:  {
                                     // check if traffic is a threat
-                                    if (model.alt - OpenHD.alt_msl < 300 && model.distance < 2){
+                                    if (object.altitude - OpenHD.alt_msl < 300 && model.distance < 2){
                                         //console.log("TRAFFIC WARNING");
                                         image.source="/airplanemarkerwarn.png";
                                         background.border.color = "red";
                                         background.border.width = 5;
                                         background.opacity = 0.5;
-                                    } else if (model.alt - OpenHD.alt_msl < 500 && model.distance < 5){
+                                    } else if (object.altitude - OpenHD.alt_msl < 500 && model.distance < 5){
                                         //console.log("TRAFFIC ALERT");
                                         image.source="/airplanemarkeralert.png";
                                         background.border.color = "yellow";
@@ -373,31 +376,32 @@ Map {
                                         background.opacity = 0.5;
                                     }
 
-                                    if (model.alt === undefined || model.vertical === undefined) {
+                                    if (object.altitude === undefined || object.verticalVel === undefined) {
+                                        //console.log("qml: model alt or vertical undefined")
                                         return "---";
                                     } else {
-                                        if(model.vertical > .2){ //climbing
+                                        if(object.verticalVel > .2){ //climbing
                                             if (settings.enable_imperial === false){
-                                                return Math.floor(model.alt - OpenHD.alt_msl) + "m " + "\ue696"
+                                                return Math.floor(object.altitude - OpenHD.alt_msl) + "m " + "\ue696"
                                             }
                                             else{
-                                                return Math.floor((model.alt - OpenHD.alt_msl) * 3.28084) + "Ft " + "\ue696"
+                                                return Math.floor((object.altitude - OpenHD.alt_msl) * 3.28084) + "Ft " + "\ue696"
                                             }
                                         }
-                                        else if (model.vertical < -.2){//descending
+                                        else if (object.verticalVel < -.2){//descending
                                             if (settings.enable_imperial === false){
-                                                return Math.floor(model.alt - OpenHD.alt_msl) + "m " + "\ue697"
+                                                return Math.floor(object.altitude - OpenHD.alt_msl) + "m " + "\ue697"
                                             }
                                             else{
-                                                return Math.floor((model.alt - OpenHD.alt_msl) * 3.28084) + "Ft " + "\ue697"
+                                                return Math.floor((object.altitude - OpenHD.alt_msl) * 3.28084) + "Ft " + "\ue697"
                                             }
                                         }
                                         else {
                                             if (settings.enable_imperial === false){//level
-                                                return Math.floor(model.alt - OpenHD.alt_msl) + "m " + "\u2501"
+                                                return Math.floor(object.altitude - OpenHD.alt_msl) + "m " + "\u2501"
                                             }
                                             else{
-                                                return Math.floor((model.alt - OpenHD.alt_msl) * 3.28084) + "Ft " + "\u2501"
+                                                return Math.floor((object.altitude - OpenHD.alt_msl) * 3.28084) + "Ft " + "\u2501"
                                             }
                                         }
                                     }
@@ -414,12 +418,12 @@ Map {
                                 font.pixelSize: 11
                                 horizontalAlignment: Text.AlignHCenter
                                 text: {
-                                    if (model.velocity === undefined) {
+                                    if (object.velocity === undefined) {
                                         return "---";
                                     }
                                     else {
-                                        return settings.enable_imperial ? Math.floor(model.velocity * 2.23694) + " mph"
-                                                                        : Math.floor(model.velocity * 3.6) + " kph";
+                                        return settings.enable_imperial ? Math.floor(object.velocity * 2.23694) + " mph"
+                                                                        : Math.floor(object.velocity * 3.6) + " kph";
                                     }
                                 }
                             }
@@ -427,12 +431,13 @@ Map {
                     }
                     //position everything
                     coordinate: {
-                        if (model.lat === undefined || model.lon === undefined) {
+                        if (object.coordinate === undefined) {
+                            console.log("qml: model geo undefined")
                             marker.visible = false;
                             return QtPositioning.coordinate(0.0, 0.0);
                         }
                         else {
-                            return QtPositioning.coordinate(model.lat, model.lon);
+                            return object.coordinate;
                         }
                     }
                 }

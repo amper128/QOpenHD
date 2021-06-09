@@ -169,12 +169,13 @@ protected:
     bool m_loading = false;
     bool m_saving = false;
 
+    bool m_restrict_sysid = true;
+    bool m_restrict_compid = true;
+
 protected:
-    quint8 targetSysID1;
-    quint8 targetSysID2;
-    quint8 targetCompID1;
-    quint8 targetCompID2;
-    quint8 targetCompID3;
+    OpenHDUtil m_util;
+    quint8 targetSysID;
+    quint8 targetCompID;
 
     quint16 localPort = 14550;
 
@@ -211,6 +212,7 @@ protected:
     uint64_t m_command_sent_timestamp = 0;
 
     std::shared_ptr<MavlinkCommand> m_current_command;
+
 };
 
 #endif

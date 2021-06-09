@@ -4,8 +4,6 @@
 #include "openhdtelemetry.h"
 #include "localmessage.h"
 
-#include "opensky.h"
-#include "markermodel.h"
 #include "blackboxmodel.h"
 
 #include <GeographicLib/Geodesic.hpp>
@@ -55,7 +53,9 @@ OpenHD::OpenHD(QObject *parent): QObject(parent) {
     connect(mavlink, &MavlinkTelemetry::last_vfr_changed, this, &OpenHD::set_last_telemetry_vfr);
 
     connect(this, &OpenHD::pauseTelemetry, mavlink, &MavlinkTelemetry::pauseTelemetry);
-
+    connect(this, &OpenHD::requested_Flight_Mode_Changed, mavlink, &MavlinkTelemetry::requested_Flight_Mode_Changed);
+    connect(this, &OpenHD::requested_ArmDisarm_Changed, mavlink, &MavlinkTelemetry::requested_ArmDisarm_Changed);
+    connect(this, &OpenHD::FC_Reboot_Shutdown_Changed, mavlink, &MavlinkTelemetry::FC_Reboot_Shutdown_Changed);
     auto openhd = OpenHDTelemetry::instance();
     connect(openhd, &OpenHDTelemetry::last_heartbeat_changed, this, &OpenHD::set_last_openhd_heartbeat);
 }
@@ -142,14 +142,14 @@ void OpenHD::telemetryMessage(QString message, int level) {
 #if defined(ENABLE_SPEECH)
     QSettings settings;
     auto enable_speech = settings.value("enable_speech", QVariant(0));
-    if (enable_speech == 1 && level >= 3) {
+    if (enable_speech == 1 && level <= 3) {
         OpenHD::instance()->m_speech->say(message);
     }
 #endif
 }
 
 void OpenHD::updateFlightTimer() {
-    if (m_armed && m_pause_blackbox == false) {
+    if (m_armed == true && m_pause_blackbox == false) {
         // check elapsed time since arming and update the UI-visible flight_time property
         int elapsed = flightTimeStart.elapsed() / 1000;
         auto hours = elapsed / 3600;
@@ -172,10 +172,15 @@ void OpenHD::findGcsPosition() {
             //get 20 good gps readings before setting
             if (++gps_quality_count == 20) {
                 set_homelat(m_lat);
-                set_homelon(m_lon);
+                set_homelon(m_lon);                
                 gcs_position_set=true;
-                LocalMessage::instance()->showMessage("Home Position set by OpenHD", 2);
+                LocalMessage::instance()->showMessage("Home Position set by OpenHD", 7);
             }
+        }
+        else if (m_armed==false){ //we are in flight and the app crashed
+            QSettings settings;
+            set_homelat(settings.value("home_saved_lat", QVariant(0)).toDouble());
+            set_homelon(settings.value("home_saved_lon", QVariant(0)).toDouble());
         }
     }
 }
@@ -216,6 +221,40 @@ void OpenHD::updateAppMah() {
     set_app_mah( total_mah );
 }
 
+void OpenHD::updateAppMahKm() {
+    if (!totalTime.isValid()){
+        totalTime.start();
+    }
+    static OpenHDUtil::pt1Filter_t eFilterState;
+    auto currentTimeMs = totalTime.elapsed();
+    auto efficiencyTimeDelta = currentTimeMs - mahKmLastTime;
+
+    if ( (m_gps_fix_type >= GPS_FIX_TYPE_2D_FIX) && (m_speed > 0) ) {
+        set_mah_km((int)OpenHDUtil::pt1FilterApply4(
+                    &eFilterState, ((float)m_battery_current*10 / m_speed), 1, efficiencyTimeDelta * 1e-3f));
+        mahKmLastTime = currentTimeMs;
+    }
+
+}
+
+void OpenHD::set_Requested_Flight_Mode(int mode){
+    //qDebug() << "OpenHD::set_Requested_Flight_Mode="<< mode;
+    m_mode=mode;
+    emit requested_Flight_Mode_Changed(m_mode);
+}
+
+void OpenHD::set_Requested_ArmDisarm(int arm_disarm){
+    qDebug() << "OpenHD::set_Requested_ArmDisarm="<< arm_disarm;
+    m_arm_disarm=arm_disarm;
+    emit requested_ArmDisarm_Changed(m_arm_disarm);
+}
+
+void OpenHD::set_FC_Reboot_Shutdown(int reboot_shutdown){
+    qDebug() << "OpenHD::set_FC_Reboot_Shutdown="<< reboot_shutdown;
+    m_reboot_shutdown=reboot_shutdown;
+    emit FC_Reboot_Shutdown_Changed(m_reboot_shutdown);
+}
+
 void OpenHD::pauseBlackBox(bool pause, int index){
     //qDebug() << "OpenHD::pauseBlackBox";
     m_pause_blackbox=pause;
@@ -224,9 +263,8 @@ void OpenHD::pauseBlackBox(bool pause, int index){
 }
 
 void OpenHD::updateBlackBoxModel() {
-    //qDebug() << "updateBlackBoxModel() ";
-
     if (m_pause_blackbox==false && m_armed == true){
+        //qDebug() << "updateBlackBoxModel() ";
         emit addBlackBoxObject(BlackBox(m_flight_mode,m_flight_time,m_lat,m_lon,m_alt_msl,m_speed,
                                         m_hdg,m_vsi,m_pitch,m_roll,m_throttle, m_control_pitch,m_control_roll,m_control_yaw,
                                         m_control_throttle,m_current_signal_joystick_uplink,m_downlink_rssi,m_lost_packet_cnt_rc,
@@ -325,16 +363,28 @@ void OpenHD::set_flight_mode(QString flight_mode) {
     emit flight_mode_changed(m_flight_mode);
 }
 
+void OpenHD::set_mav_type(QString mav_type) {
+
+    m_mav_type = mav_type;
+
+    emit mav_type_changed(m_mav_type);
+}
+
 void OpenHD::set_homelat(double homelat) {
     m_homelat = homelat;
     gcs_position_set = true;
     emit homelat_changed(m_homelat);
+    QSettings settings;
+    settings.value("home_saved_lat", QVariant(0)) = m_homelat;
+
 }
 
 void OpenHD::set_homelon(double homelon) {
     m_homelon = homelon;
     gcs_position_set = true;
     emit homelon_changed(m_homelon);
+    QSettings settings;
+    settings.value("home_saved_lon", QVariant(0)) = m_homelon;
 }
 
 void OpenHD::calculate_home_distance() {
@@ -418,6 +468,16 @@ void OpenHD::set_battery_percent(int battery_percent) {
     emit battery_percent_changed(m_battery_percent);
 }
 
+void OpenHD::set_ground_battery_percent(int ground_battery_percent) {
+    m_ground_battery_percent = ground_battery_percent;
+    emit ground_battery_percent_changed(m_ground_battery_percent);
+}
+
+void OpenHD::set_fc_battery_percent(int fc_battery_percent) {
+    m_fc_battery_percent = fc_battery_percent;
+    emit fc_battery_percent_changed(m_fc_battery_percent);
+}
+
 void OpenHD::set_battery_voltage(double battery_voltage) {
     m_battery_voltage = battery_voltage;
     emit battery_voltage_changed(m_battery_voltage);
@@ -433,6 +493,16 @@ void OpenHD::set_battery_gauge(QString battery_gauge) {
     emit battery_gauge_changed(m_battery_gauge);
 }
 
+void OpenHD::set_ground_battery_gauge(QString ground_battery_gauge) {
+    m_ground_battery_gauge = ground_battery_gauge;
+    emit ground_battery_gauge_changed(m_ground_battery_gauge);
+}
+
+void OpenHD::set_fc_battery_gauge(QString fc_battery_gauge) {
+    m_fc_battery_gauge = fc_battery_gauge;
+    emit fc_battery_gauge_changed(m_fc_battery_gauge);
+}
+
 void OpenHD::set_satellites_visible(int satellites_visible) {
     m_satellites_visible = satellites_visible;
     emit satellites_visible_changed(m_satellites_visible);
@@ -441,6 +511,11 @@ void OpenHD::set_satellites_visible(int satellites_visible) {
 void OpenHD::set_gps_hdop(double gps_hdop) {
     m_gps_hdop = gps_hdop;
     emit gps_hdop_changed(m_gps_hdop);
+}
+
+void OpenHD::set_gps_fix_type(unsigned int gps_fix_type) {
+    m_gps_fix_type = gps_fix_type;
+    emit gps_fix_type_changed(m_gps_fix_type);
 }
 
 void OpenHD::set_pitch(double pitch) {
@@ -548,9 +623,19 @@ void OpenHD::setRcRssi(int rcRssi) {
     emit rcRssiChanged(m_rcRssi);
 }
 
-void OpenHD::set_fc_temp(int fc_temp) {
-    m_fc_temp = fc_temp;
-    emit fc_temp_changed(m_fc_temp);
+void OpenHD::set_imu_temp(int imu_temp) {
+    m_imu_temp = imu_temp;
+    emit imu_temp_changed(m_imu_temp);
+}
+
+void OpenHD::set_press_temp(int press_temp) {
+    m_press_temp = press_temp;
+    emit press_temp_changed(m_press_temp);
+}
+
+void OpenHD::set_esc_temp(int esc_temp) {
+    m_esc_temp = esc_temp;
+    emit esc_temp_changed(m_esc_temp);
 }
 
 void OpenHD::set_downlink_rssi(int downlink_rssi) {
@@ -666,6 +751,11 @@ void OpenHD::set_flight_mah(double flight_mah) {
 void OpenHD::set_app_mah(double app_mah) {
     m_app_mah = app_mah;
     emit app_mah_changed(m_app_mah);
+}
+
+void OpenHD::set_mah_km(int mah_km) {
+    m_mah_km = mah_km;
+    emit mah_km_changed(m_mah_km);
 }
 
 void OpenHD::set_last_openhd_heartbeat(qint64 last_openhd_heartbeat) {
@@ -784,27 +874,37 @@ void OpenHD::set_air_iout(double air_iout) {
     emit air_iout_changed(m_air_iout);
 }
 
-void OpenHD::updateLateralSpeed(){
+void OpenHD::set_vehicle_vx_angle(double vehicle_vx_angle) {
+    m_vehicle_vx_angle = vehicle_vx_angle;
+    emit vehicle_vx_angle_changed(m_vehicle_vx_angle);
+}
+
+void OpenHD::set_vehicle_vz_angle(double vehicle_vz_angle) {
+    m_vehicle_vz_angle = vehicle_vz_angle;
+    emit vehicle_vz_angle_changed(m_vehicle_vz_angle);
+}
+
+void OpenHD::updateVehicleAngles(){
 
     auto resultant_magnitude = sqrt(m_vx * m_vx + m_vy * m_vy);
 
     //direction of motion vector in radians then converted to degree
-    auto resultant_angle = atan2(m_vy , m_vx)*(180/M_PI);
+    auto resultant_lateral_angle = atan2(m_vy , m_vx)*(180/M_PI);
 
     //converted from degrees to a compass heading
-    if (resultant_angle < 0.0){
-        resultant_angle += 360;
+    if (resultant_lateral_angle < 0.0){
+        resultant_lateral_angle += 360;
     }
 
     //Compare the motion heading to the vehicle heading
-    auto left = m_hdg - resultant_angle;
-    auto right = resultant_angle - m_hdg;
+    auto left = m_hdg - resultant_lateral_angle;
+    auto right = resultant_lateral_angle - m_hdg;
     if (left < 0) left += 360;
     if (right < 0) right += 360;
     auto heading_diff = left < right ? -left : right;
-
+    //qDebug() << "LATERAL ANGLE=" << heading_diff;
+    set_vehicle_vx_angle(heading_diff);
     double vehicle_vx=0.0;
-
 
     if (heading_diff > 0 && heading_diff <= 90){
         //console.log("we are moving forward and or right");
@@ -823,6 +923,15 @@ void OpenHD::updateLateralSpeed(){
         vehicle_vx=(heading_diff/90)*resultant_magnitude;
     }
     set_lateral_speed(vehicle_vx);
+
+    //--------- CALCULATE THE VERTICAL ANGLE OF MOTION
+
+    //direction of motion vector in radians then converted to degree
+    auto resultant_vertical_angle = atan2(resultant_magnitude , m_vz)*(180/M_PI)-90;
+    //qDebug() << "VERTICAL ANGLE1=" << resultant_vertical_angle;
+
+    set_vehicle_vz_angle(resultant_vertical_angle);
+
 }
 
 void OpenHD::updateWind(){

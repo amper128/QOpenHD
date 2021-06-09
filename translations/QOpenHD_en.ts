@@ -38,6 +38,10 @@
         <source>Range</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Source OpenSky / SDR</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>AirBatteryWidgetForm.ui</name>
@@ -67,6 +71,10 @@
     </message>
     <message>
         <source>%L1%</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Use telemetry percentege</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -170,10 +178,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Choose a color</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Glow Color</source>
         <translation type="unfinished"></translation>
     </message>
@@ -231,10 +235,6 @@
     </message>
     <message>
         <source>Show Flight Mode</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Show Flight Controller Temperature</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -405,6 +405,30 @@
         <source>Settings reset</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Log Level</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Text font</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Show IMU Sensor Temperature</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Show Pressure Sensor Temperature</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Show Esc Temperature</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Show Efficiency in mAh/km</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>ArrowWidgetForm</name>
@@ -464,6 +488,17 @@
     </message>
     <message>
         <source>restart telemetry</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>ColorPicker</name>
+    <message>
+        <source>Cancel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Select</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -532,16 +567,13 @@
         <source>N/A</source>
         <translation type="unfinished"></translation>
     </message>
-</context>
-<context>
-    <name>ExampleWidgetForm.ui</name>
     <message>
-        <source>Example widget</source>
+        <source>dBm</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
-    <name>FcTempWidgetForm.ui</name>
+    <name>EscTempWidgetForm.ui</name>
     <message>
         <source>Transparency</source>
         <translation type="unfinished"></translation>
@@ -556,7 +588,25 @@
     </message>
 </context>
 <context>
+    <name>ExampleWidgetForm.ui</name>
+    <message>
+        <source>Example widget</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>FlightDistanceWidgetForm.ui</name>
+    <message>
+        <source>Transparency</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Size</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>FlightMahKmWidgetForm.ui</name>
     <message>
         <source>Transparency</source>
         <translation type="unfinished"></translation>
@@ -870,6 +920,21 @@
     </message>
 </context>
 <context>
+    <name>ImuTempWidgetForm.ui</name>
+    <message>
+        <source>Transparency</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Size</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>N/A</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>MainVideoAndroid</name>
     <message>
         <source>Do not fly with this app! Video is not stable yet!</source>
@@ -906,6 +971,25 @@
     </message>
     <message>
         <source>Show Drone Track</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>OSDCustomizer</name>
+    <message>
+        <source>Shape Color</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Glow Color</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Text Color</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Done</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -995,6 +1079,21 @@
     </message>
 </context>
 <context>
+    <name>PressTempWidgetForm.ui</name>
+    <message>
+        <source>Transparency</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Size</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>N/A</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>RcRSSIWidgetForm.ui</name>
     <message>
         <source>Transparency</source>
@@ -1010,6 +1109,25 @@
     </message>
     <message>
         <source>N/A</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>RestartDialog</name>
+    <message>
+        <source>Restart required</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>You must restart the app for your loaded configuration file to take effect</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Close App</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1321,23 +1439,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Restart required</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>You must restart the app for your loaded configuration file to take effect</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Cancel</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Restart App</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Close App</source>
+        <source>Rapidly tap between widgets to enable/disable stereo</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

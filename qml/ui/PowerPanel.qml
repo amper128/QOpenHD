@@ -19,7 +19,9 @@ PowerPanelForm {
         RebootAir,
         ShutdownAir,
         RebootGround,
-        ShutdownGround
+        ShutdownGround,
+        RebootFC,
+        ShutdownFC
     }
 
     Card {
@@ -55,8 +57,11 @@ PowerPanelForm {
 
         cardName: qsTr("Confirm Power Change")
         cardBody: Column {
+            height: powerDialog.height
+            width: powerDialog.width
+
             Text {
-                text: qsTr("If your drone is in the air, rebooting or shutting down the ground or air pi may cause a crash or make it enter failsafe mode!")
+                text: qsTr("If your drone is in the air, rebooting or shutting down may cause a crash or make it enter failsafe mode!")
                 width: parent.width
                 leftPadding: 12
                 rightPadding: 12
@@ -110,6 +115,12 @@ PowerPanelForm {
                     if (powerAction == PowerPanel.PowerAction.ShutdownAir) {
                         return qsTr("Shutdown Air")
                     }
+                    if (powerAction == PowerPanel.PowerAction.RebootFC) {
+                        return qsTr("Reboot Flight Controller")
+                    }
+                    if (powerAction == PowerPanel.PowerAction.ShutdownFC) {
+                        return qsTr("Shutdown Flight Controller")
+                    }
                     return qsTr("Yes")
                 }
 
@@ -117,20 +128,28 @@ PowerPanelForm {
 
                 onPressed: {
                     if (powerAction == PowerPanel.PowerAction.RebootGround) {
-                        localMessage("Rebooting ground station", 3);
+                        localMessage("Rebooting ground station", 6);
                         GroundPowerMicroservice.onReboot();
                     }
                     if (powerAction == PowerPanel.PowerAction.ShutdownGround) {
-                        localMessage("Shutting down ground station", 3);
+                        localMessage("Shutting down ground station", 6);
                         GroundPowerMicroservice.onShutdown();
                     }
                     if (powerAction == PowerPanel.PowerAction.RebootAir) {
-                        localMessage("Rebooting air pi", 3);
+                        localMessage("Rebooting air pi", 6);
                         AirPowerMicroservice.onReboot();
                     }
                     if (powerAction == PowerPanel.PowerAction.ShutdownAir) {
-                        localMessage("Shutting down air pi", 3);
+                        localMessage("Shutting down air pi", 6);
                         AirPowerMicroservice.onShutdown();
+                    }
+                    if (powerAction == PowerPanel.PowerAction.ShutdownFC) { //button commented out
+                        localMessage("Shutting down Flight Controller", 6);
+                        OpenHD.set_FC_Reboot_Shutdown(2);
+                    }
+                    if (powerAction == PowerPanel.PowerAction.RebootFC) {
+                        localMessage("Rebooting Flight Controller", 6);
+                        OpenHD.set_FC_Reboot_Shutdown(1);
                     }
                     powerDialog.visible = false
                     settings_panel.visible = false;

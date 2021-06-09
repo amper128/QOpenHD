@@ -25,6 +25,12 @@ public:
     Q_INVOKABLE void pauseBlackBox(bool pause, int index);
     void updateBlackBoxModel();
 
+    Q_INVOKABLE void set_Requested_Flight_Mode(int mode);
+
+    Q_INVOKABLE void set_Requested_ArmDisarm(int mode);
+
+    Q_INVOKABLE void set_FC_Reboot_Shutdown(int reboot_shutdown);
+
     void setWifiAdapter0(uint32_t received_packet_cnt, int8_t current_signal_dbm, int8_t signal_good);
     void setWifiAdapter1(uint32_t received_packet_cnt, int8_t current_signal_dbm, int8_t signal_good);
     void setWifiAdapter2(uint32_t received_packet_cnt, int8_t current_signal_dbm, int8_t signal_good);
@@ -53,7 +59,8 @@ public:
     void findGcsPosition();
     void updateFlightDistance();
     void updateAppMah();
-    void updateLateralSpeed();
+    void updateAppMahKm();
+    void updateVehicleAngles();
     void updateWind();
 
     Q_PROPERTY(QString gstreamer_version READ get_gstreamer_version NOTIFY gstreamer_version_changed)
@@ -105,6 +112,9 @@ public:
     Q_PROPERTY(QString flight_mode MEMBER m_flight_mode WRITE set_flight_mode NOTIFY flight_mode_changed)
     void set_flight_mode(QString flight_mode);
 
+    Q_PROPERTY(QString mav_type MEMBER m_mav_type WRITE set_mav_type NOTIFY mav_type_changed)
+    void set_mav_type(QString mav_type);
+
     Q_PROPERTY(double homelat MEMBER m_homelat WRITE set_homelat NOTIFY homelat_changed)
     void set_homelat(double homelat);
 
@@ -139,8 +149,17 @@ public:
     Q_PROPERTY(double gps_hdop MEMBER m_gps_hdop WRITE set_gps_hdop NOTIFY gps_hdop_changed)
     void set_gps_hdop(double gps_hdop);
 
+    Q_PROPERTY(unsigned int gps_fix_type MEMBER m_gps_fix_type WRITE set_gps_fix_type NOTIFY gps_fix_type_changed)
+    void set_gps_fix_type(unsigned int gps_fix_type);
+
     Q_PROPERTY(int battery_percent MEMBER m_battery_percent WRITE set_battery_percent NOTIFY battery_percent_changed)
     void set_battery_percent(int battery_percent);
+
+    Q_PROPERTY(int ground_battery_percent MEMBER m_ground_battery_percent WRITE set_ground_battery_percent NOTIFY ground_battery_percent_changed)
+    void set_ground_battery_percent(int ground_battery_percent);
+
+    Q_PROPERTY(int fc_battery_percent MEMBER m_fc_battery_percent WRITE set_fc_battery_percent NOTIFY fc_battery_percent_changed)
+    void set_fc_battery_percent(int fc_battery_percent);
 
     Q_PROPERTY(double battery_voltage MEMBER m_battery_voltage WRITE set_battery_voltage NOTIFY battery_voltage_changed)
     void set_battery_voltage(double battery_voltage);
@@ -150,6 +169,12 @@ public:
 
     Q_PROPERTY(QString battery_gauge MEMBER m_battery_gauge WRITE set_battery_gauge NOTIFY battery_gauge_changed)
     void set_battery_gauge(QString battery_gauge);
+
+    Q_PROPERTY(QString ground_battery_gauge MEMBER m_ground_battery_gauge WRITE set_ground_battery_gauge NOTIFY ground_battery_gauge_changed)
+    void set_ground_battery_gauge(QString ground_battery_gauge);
+
+    Q_PROPERTY(QString fc_battery_gauge MEMBER m_fc_battery_gauge WRITE set_fc_battery_gauge NOTIFY fc_battery_gauge_changed)
+    void set_fc_battery_gauge(QString fc_battery_gauge);
 
     Q_PROPERTY(double pitch MEMBER m_pitch WRITE set_pitch NOTIFY pitch_changed)
     void set_pitch(double pitch);
@@ -214,8 +239,14 @@ public:
     Q_PROPERTY(int rcRssi MEMBER m_rcRssi WRITE setRcRssi NOTIFY rcRssiChanged)
     void setRcRssi(int rcRssi);
 
-    Q_PROPERTY(int fc_temp MEMBER m_fc_temp WRITE set_fc_temp NOTIFY fc_temp_changed)
-    void set_fc_temp(int fc_temp);
+    Q_PROPERTY(int imu_temp MEMBER m_imu_temp WRITE set_imu_temp NOTIFY imu_temp_changed)
+    void set_imu_temp(int imu_temp);
+
+    Q_PROPERTY(int press_temp MEMBER m_press_temp WRITE set_press_temp NOTIFY press_temp_changed)
+    void set_press_temp(int press_temp);
+
+    Q_PROPERTY(int esc_temp MEMBER m_esc_temp WRITE set_esc_temp NOTIFY esc_temp_changed)
+    void set_esc_temp(int esc_temp);
 
 
     // openhd
@@ -295,6 +326,9 @@ public:
     Q_PROPERTY(double app_mah MEMBER m_app_mah WRITE set_app_mah NOTIFY app_mah_changed)
     void set_app_mah(double app_mah);
 
+    Q_PROPERTY(int mah_km MEMBER m_mah_km WRITE set_mah_km NOTIFY mah_km_changed)
+    void set_mah_km(int mah_km);
+
     Q_PROPERTY(qint64 last_openhd_heartbeat MEMBER m_last_openhd_heartbeat WRITE set_last_openhd_heartbeat NOTIFY last_openhd_heartbeat_changed)
     void set_last_openhd_heartbeat(qint64 last_openhd_heartbeat);
 
@@ -370,6 +404,12 @@ public:
     Q_PROPERTY(double air_iout MEMBER m_air_iout WRITE set_air_iout NOTIFY air_iout_changed)
     void set_air_iout(double air_iout);
 
+    Q_PROPERTY(double vehicle_vx_angle MEMBER m_vehicle_vx_angle WRITE set_vehicle_vx_angle NOTIFY vehicle_vx_angle_changed)
+    void set_vehicle_vx_angle(double vehicle_vx_angle);
+
+    Q_PROPERTY(double vehicle_vz_angle MEMBER m_vehicle_vz_angle WRITE set_vehicle_vz_angle NOTIFY vehicle_vz_angle_changed)
+    void set_vehicle_vz_angle(double vehicle_vz_angle);
+
 
     Q_PROPERTY(int rcChannel1 MEMBER mRCChannel1 WRITE setRCChannel1 NOTIFY rcChannel1Changed)
     void setRCChannel1(int rcChannel1);
@@ -426,6 +466,7 @@ signals:
     void airspeed_changed(double airspeed);
     void armed_changed(bool armed);
     void flight_mode_changed(QString flight_mode);
+    void mav_type_changed(QString mav_type);
     void homelat_changed(double homelat);
     void homelon_changed(double homelon);
     void lat_changed(double lat);
@@ -434,11 +475,16 @@ signals:
     void home_course_changed(int home_course);
     void home_heading_changed(int home_heading);
     void battery_percent_changed(int battery_percent);
+    void ground_battery_percent_changed(int ground_battery_percent);
+    void fc_battery_percent_changed(int fc_battery_percent);
     void battery_voltage_changed(double battery_voltage);
     void battery_current_changed(double battery_current);
     void battery_gauge_changed(QString battery_gauge);
+    void ground_battery_gauge_changed(QString ground_battery_gauge);
+    void fc_battery_gauge_changed(QString fc_battery_gauge);
     void satellites_visible_changed(int satellites_visible);
     void gps_hdop_changed(double gps_hdop);
+    void gps_fix_type_changed(unsigned int gps_fix_type);
     void pitch_changed(double pitch);
     void roll_changed(double roll);
     void yaw_changed(double yaw);
@@ -471,7 +517,9 @@ signals:
 
     void rcRssiChanged(int rcRssi);
 
-    void fc_temp_changed (int fc_temp);
+    void imu_temp_changed (int imu_temp);
+    void press_temp_changed (int press_temp);
+    void esc_temp_changed (int esc_temp);
 
     // openhd
     void downlink_rssi_changed(int downlink_rssi);
@@ -502,6 +550,7 @@ signals:
 
     void flight_mah_changed(int flight_mah);
     void app_mah_changed(int app_mah);
+    void mah_km_changed(int mah_km);
 
     void last_openhd_heartbeat_changed(qint64 last_openhd_heartbeat);
 
@@ -535,6 +584,9 @@ signals:
     void air_vout_changed(double air_vout);
     void air_iout_changed(double air_iout);
 
+    void vehicle_vx_angle_changed(double vehicle_vx_angle);
+    void vehicle_vz_angle_changed(double vehicle_vz_angle);
+
     void rcChannel1Changed(int rcChanne1);
     void rcChannel2Changed(int rcChanne2);
     void rcChannel3Changed(int rcChanne3);
@@ -546,6 +598,9 @@ signals:
 
     void addBlackBoxObject(const BlackBox &blackbox);
     void pauseTelemetry(bool pause);
+    void requested_Flight_Mode_Changed(int mode);
+    void requested_ArmDisarm_Changed(int arm_disarm);
+    void FC_Reboot_Shutdown_Changed(int reboot_shutdown);
     void playBlackBoxObject(int index);
 
 private:
@@ -572,6 +627,7 @@ public:
 
     bool m_armed = false;
     QString m_flight_mode = "------";
+    QString m_mav_type = "UNKOWN";
 
     double m_homelat = 0.0;
     double m_homelon = 0.0;
@@ -585,12 +641,17 @@ public:
     int m_home_course = 0; //this is the relative course from nose
 
     int m_battery_percent = 0;
+    int m_ground_battery_percent = 0;
+    int m_fc_battery_percent = 0;
     double m_battery_current = 0.0;
     double m_battery_voltage = 0.0;
     QString m_battery_gauge = "\uf091";
+    QString m_ground_battery_gauge = "\uf091";
+    QString m_fc_battery_gauge = "\uf091";
 
     int m_satellites_visible = 0;
     double m_gps_hdop = 99.00;
+    unsigned int m_gps_fix_type = (unsigned int)GPS_FIX_TYPE_NO_GPS;
 
     double m_roll = 0.0;
     double m_yaw = 0.0;
@@ -638,7 +699,9 @@ public:
     double m_kbitrate_measured = 0.0;
     double m_kbitrate_set = 0.0;
 
-    int m_fc_temp = 0;
+    int m_imu_temp = 0;
+    int m_press_temp = 0;
+    int m_esc_temp = 0;
 
     int m_cpuload_gnd = 0;
 
@@ -667,7 +730,9 @@ public:
 
     int m_flight_mah = 0;
     int m_app_mah = 0;
+    int m_mah_km = 0;
     qint64 mahLastTime= 0;
+    qint64 mahKmLastTime= 0;
     double total_mah= 0;
 
     qint64 m_last_openhd_heartbeat = -1;
@@ -704,6 +769,9 @@ public:
     double m_air_vout = -1;
     double m_air_iout = -1;
 
+    double m_vehicle_vx_angle = 0.0;
+    double m_vehicle_vz_angle = 0.0;
+
     int mRCChannel1 = 0;
     int mRCChannel2 = 0;
     int mRCChannel3 = 0;
@@ -718,6 +786,12 @@ public:
     QTranslator m_translator;
 
     QQmlApplicationEngine *m_engine = nullptr;
+
+    int m_mode = 0;
+
+    int m_arm_disarm = 99;
+
+    int m_reboot_shutdown=99;
 };
 
 

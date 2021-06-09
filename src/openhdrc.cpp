@@ -59,7 +59,7 @@ void OpenHDRC::setGroundIP(QString address) {
 
 
 void OpenHDRC::channelTrigger() {
-    emit channelUpdate(m_rc1, m_rc2, m_rc3, m_rc4);
+    emit channelUpdate(m_rc1, m_rc2, m_rc3, m_rc4, m_rc5, m_rc6, m_rc7, m_rc8, m_rc9, m_rc10);
 #if defined(ENABLE_RC)
     QSettings settings;
     auto enable_rc = settings.value("enable_rc", false).toBool();
@@ -221,6 +221,36 @@ void OpenHDRC::set_rc4(uint rc4) {
     emit rc4_changed(m_rc4);
 }
 
+void OpenHDRC::set_rc5(uint rc5) {
+    m_rc5 = rc5;
+    emit rc5_changed(m_rc5);
+}
+
+void OpenHDRC::set_rc6(uint rc6) {
+    m_rc6 = rc6;
+    emit rc6_changed(m_rc6);
+}
+
+void OpenHDRC::set_rc7(uint rc7) {
+    m_rc7 = rc7;
+    emit rc7_changed(m_rc7);
+}
+
+void OpenHDRC::set_rc8(uint rc8) {
+    m_rc8 = rc8;
+    emit rc8_changed(m_rc8);
+}
+
+void OpenHDRC::set_rc9(uint rc9) {
+    m_rc9 = rc9;
+    emit rc9_changed(m_rc9);
+}
+
+void OpenHDRC::set_rc10(uint rc10) {
+    m_rc10 = rc10;
+    emit rc10_changed(m_rc10);
+}
+
 void OpenHDRC::buttonChanged(const int js, const int button, const bool pressed)
 {
 	Q_UNUSED(js)
@@ -246,19 +276,43 @@ void OpenHDRC::axisChanged(const int js, const int axis, const qreal value) {
     qDebug() << "OpenHDRC::axisChanged()";
     switch (axis) {
 	case 0:
-	set_rc1(map(value, -1, 1, 1000, 2000));
+	set_rc1(m_util.map(value, -1, 1, 1000, 2000));
 	break;
 
 	case 1:
-	set_rc2(map(value, -1, 1, 1000, 2000));
+	set_rc2(m_util.map(value, -1, 1, 1000, 2000));
 	break;
 
 	case 2:
-	set_rc3(map(value, -1, 1, 1000, 2000));
+	set_rc3(m_util.map(value, -1, 1, 1000, 2000));
 	break;
 
 	case 3:
-	set_rc4(map(value, -1, 1, 1000, 2000));
+	set_rc4(m_util.map(value, -1, 1, 1000, 2000));
+	break;
+
+	case 4:
+	set_rc5(m_util.map(value, -1, 1, 1000, 2000));
+	break;
+
+	case 5:
+	set_rc6(m_util.map(value, -1, 1, 1000, 2000));
+	break;
+
+	case 6:
+	set_rc7(m_util.map(value, -1, 1, 1000, 2000));
+	break;
+
+	case 7:
+	set_rc8(m_util.map(value, -1, 1, 1000, 2000));
+	break;
+
+	case 8:
+	set_rc9(m_util.map(value, -1, 1, 1000, 2000));
+	break;
+
+	case 9:
+	set_rc10(m_util.map(value, -1, 1, 1000, 2000));
 	break;
 
 	default:
@@ -286,19 +340,19 @@ void OpenHDRC::connectedChanged(bool value) {
 /* RC channel slots arranged in channel order */
 
 void OpenHDRC::axisLeftXChanged(double value) {
-    set_rc4(map(value, -1, 1, 1000, 2000));
+    set_rc4(m_util.map(value, -1, 1, 1000, 2000));
 }
 
 void OpenHDRC::axisLeftYChanged(double value) {
-    set_rc3(map(value, -1, 1, 1000, 2000));
+    set_rc3(m_util.map(value, -1, 1, 1000, 2000));
 }
 
 void OpenHDRC::axisRightYChanged(double value) {
-    set_rc2(map(value, -1, 1, 1000, 2000));
+    set_rc2(m_util.map(value, -1, 1, 1000, 2000));
 }
 
 void OpenHDRC::axisRightXChanged(double value) {
-    set_rc1(map(value, -1, 1, 1000, 2000));
+    set_rc1(m_util.map(value, -1, 1, 1000, 2000));
 }
 
 void OpenHDRC::buttonAChanged(bool value) {

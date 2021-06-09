@@ -40,16 +40,20 @@ const QVector<QString> permissions({"android.permission.INTERNET",
 #include "statuslogmodel.h"
 
 #if defined(ENABLE_ADSB)
-#include "opensky.h"
+#include "ADSBVehicleManager.h"
+#include "ADSBVehicle.h"
 #endif
 
-#include "markermodel.h"
+#include "QmlObjectListModel.h"
 
 #include "blackboxmodel.h"
 
 #include "speedladder.h"
 #include "altitudeladder.h"
 #include "headingladder.h"
+#include "horizonladder.h"
+#include "flightpathvector.h"
+#include "vroverlay.h"
 
 #include "managesettings.h"
 
@@ -100,6 +104,11 @@ int main(int argc, char *argv[]) {
     QCoreApplication::setOrganizationDomain("open.hd");
     QCoreApplication::setApplicationName("Open.HD");
 
+    auto manageSettings = new ManageSettings();
+    #if defined(__rasp_pi__)
+    manageSettings->loadPiSettings();
+    #endif
+
     QSettings settings;
 
     double global_scale = settings.value("global_scale", 1.0).toDouble();
@@ -112,6 +121,8 @@ int main(int argc, char *argv[]) {
 
     Migration::instance()->run();
 
+    auto util = new OpenHDUtil;
+
 
 #if defined(__ios__)
     auto applePlatform = ApplePlatform::instance();
@@ -121,7 +132,7 @@ int main(int argc, char *argv[]) {
 
 
 #if defined(__android__)
-    keep_screen_on(true);
+    util->keep_screen_on(true);
 
     for(const QString &permission : permissions) {
         auto result = QtAndroid::checkPermission(permission);
@@ -224,11 +235,7 @@ int main(int argc, char *argv[]) {
 
     qmlRegisterType<QOpenHDLink>("OpenHD", 1,0, "QOpenHDLink");
 
-    #if defined(ENABLE_ADSB)
-    qmlRegisterType<OpenSky>("OpenHD", 1, 0, "OpenSky");
-    #endif
-
-    qmlRegisterType<MarkerModel>("OpenHD", 1, 0, "MarkerModel");
+    qmlRegisterUncreatableType<QmlObjectListModel>("OpenHD", 1, 0, "QmlObjectListModel", "Reference only");
 
     qmlRegisterType<BlackBoxModel>("OpenHD", 1, 0, "BlackBoxModel");
 
@@ -237,6 +244,12 @@ int main(int argc, char *argv[]) {
     qmlRegisterType<AltitudeLadder>("OpenHD", 1, 0, "AltitudeLadder");
 
     qmlRegisterType<HeadingLadder>("OpenHD", 1, 0, "HeadingLadder");
+
+    qmlRegisterType<HorizonLadder>("OpenHD", 1, 0, "HorizonLadder");
+
+    qmlRegisterType<FlightPathVector>("OpenHD", 1, 0, "FlightPathVector");
+
+    qmlRegisterType<VROverlay>("OpenHD", 1, 0, "VROverlay");
 
 #if defined(ENABLE_VIDEO_RENDER)
 #if defined(__android__)
@@ -338,12 +351,7 @@ OpenHDAppleVideo *pipVideo = new OpenHDAppleVideo(OpenHDStreamTypePiP);
 
 #endif
 
-    auto manageSettings = new ManageSettings();
     engine.rootContext()->setContextProperty("ManageSettings", manageSettings);
-
-    #if defined(__rasp_pi__)
-    manageSettings->loadPiSettings();
-    #endif
 
 
     auto openHDSettings = new OpenHDSettings();
@@ -425,11 +433,6 @@ OpenHDAppleVideo *pipVideo = new OpenHDAppleVideo(OpenHDStreamTypePiP);
     auto statusLogModel = StatusLogModel::instance();
     engine.rootContext()->setContextProperty("StatusLogModel", statusLogModel);
 
-    auto markerModel = MarkerModel::instance();
-    engine.rootContext()->setContextProperty("MarkerModel", markerModel);
-    markerModel->initMarkerModel();
-
-
     #if defined(ENABLE_EXAMPLE_WIDGET)
     engine.rootContext()->setContextProperty("EnableExampleWidget", QVariant(true));
     #else
@@ -449,10 +452,14 @@ OpenHDAppleVideo *pipVideo = new OpenHDAppleVideo(OpenHDStreamTypePiP);
 
 
     #if defined(ENABLE_ADSB)
-    auto openSky = OpenSky::instance();
-    engine.rootContext()->setContextProperty("OpenSky", openSky);
-    openSky->onStarted();
+    auto adsbVehicleManager = ADSBVehicleManager::instance();
+    engine.rootContext()->setContextProperty("AdsbVehicleManager", adsbVehicleManager);
+    QObject::connect(openHDSettings, &OpenHDSettings::groundStationIPUpdated, adsbVehicleManager, &ADSBVehicleManager::setGroundIP, Qt::QueuedConnection);
+    adsbVehicleManager->onStarted();
     #endif
+
+    engine.rootContext()->setContextProperty("OpenHDUtil", util);
+
 
     engine.rootContext()->setContextProperty("OpenHD", openhd);
 

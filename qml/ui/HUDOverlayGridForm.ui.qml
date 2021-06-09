@@ -12,7 +12,7 @@ import "./widgets"
 
 Item {
     property alias messageHUD: messageHUD
-    signal settingsButtonClicked();
+    signal settingsButtonClicked
 
     Image {
         id: settingsButton
@@ -32,7 +32,7 @@ Item {
             anchors.fill: parent
 
             onClicked: {
-                hudOverlayGrid.settingsButtonClicked();
+                hudOverlayGrid.settingsButtonClicked()
             }
         }
     }
@@ -40,6 +40,10 @@ Item {
     // + 0% cpu
     MessageHUD {
         id: messageHUD
+    }
+
+    GroundPowerWidget {
+        id: groundPowerWidget
     }
 
     // + 0% cpu
@@ -73,13 +77,18 @@ Item {
 
     // + 0% cpu
     FlightDistanceWidget {
-            id: flight_distance
-        }
+        id: flight_distance
+    }
 
     // + 0% cpu
     FlightMahWidget {
-            id: flight_mah
-        }
+        id: flight_mah
+    }
+
+    // + 0% cpu
+    FlightMahKmWidget {
+        id: flight_mah_km
+    }
 
     // + 0% cpu
     BitrateWidget {
@@ -87,8 +96,18 @@ Item {
     }
 
     // + 0% cpu
-    FcTempWidget {
-        id: fc_temp
+    ImuTempWidget {
+        id: imu_temp
+    }
+
+    // + 0% cpu
+    PressTempWidget {
+        id: press_temp
+    }
+
+    // + 0% cpu
+    EscTempWidget {
+        id: esc_temp
     }
 
     // + 0% cpu
@@ -136,7 +155,6 @@ Item {
         id: altitudesecondWidget
     }
 
-
     // + 17% cpu
     SpeedWidget {
         id: speedWidget
@@ -146,12 +164,10 @@ Item {
         id: speedSecondWidget
     }
 
-
     // +3% cpu
     HeadingWidget {
         id: headingWidget
     }
-
 
     // + 0% cpu
     ArrowWidget {
@@ -167,7 +183,7 @@ Item {
     // + 0% cpu
     ControlWidget {
         id: controlWidget
-     //   scale: 0.7
+        //   scale: 0.7
     }
 
     // + 3% cpu
@@ -215,14 +231,15 @@ Item {
         id: adsbWidget
     }
 
+    // UNTESTED CPU USAGE!!
+    VROverlayWidget {
+        id: vrOverlayWidget
+    }
+
     ExampleWidget {
         id: exampleWidget
     }
 }
 
-/*##^##
-Designer {
-    D{i:0;autoSize:true;height:480;width:640}
-}
-##^##*/
+
 
